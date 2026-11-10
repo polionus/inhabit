@@ -145,7 +145,7 @@ The old \`h\` is replaced by \`h : P 3 → Q 3\`. The first line is written for 
         { text: 'The second part must prove `witness + 2 = 5`. For a closed numeral sum, `rfl` suffices.' },
       ],
       outro: `\`∃ n, P n\` is an inductive type with one constructor, \`Exists.intro\`, taking a witness \`w\` and a proof of \`P w\`. This is a **dependent pair**: the *type* of the second component, \`P w\`, depends on the *value* of the first.`,
-      unlocks: { codex: ['exists-sym', 'dependent-pair', 'anon-ctor'] },
+      unlocks: { codex: ['exists-sym', 'dependent-pair', 'exists-pair'] },
     },
     {
       id: 'quant-06',
@@ -414,10 +414,10 @@ Also \`∃ x : Nat, …\` and \`∃ x ∈ s, …\`.`,
       example: `example : ∃ n : Nat, n + 1 = 3 := Exists.intro 2 rfl`,
     },
     {
-      id: 'anon-ctor',
+      id: 'exists-pair',
       kind: 'term',
       name: '⟨w, h⟩',
-      summary: 'Anonymous constructor: builds a structure or inductive value from its pieces.',
+      summary: 'A witness and a proof about it, packed with the anonymous constructor: the term that proves an `∃`.',
       body: `Angle brackets build a value of an inductive type with one constructor, with Lean inferring which one from the expected type. \`⟨a, b⟩ : A ∧ B\`, \`⟨w, hw⟩ : ∃ x, P x\`. Nested: \`⟨a, b, c⟩\` means \`⟨a, ⟨b, c⟩⟩\`.
 
 Type the brackets as \\<  and \\>.`,
