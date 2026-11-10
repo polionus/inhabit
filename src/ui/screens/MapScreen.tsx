@@ -6,7 +6,7 @@ import { dueIds } from '../../state/leitner.ts';
 import { href } from '../router.ts';
 
 const ROW = 150;
-const NODE_H = 96;
+const NODE_H = 108;
 
 export function MapScreen() {
   const levels = useGame((s) => s.save.levels);

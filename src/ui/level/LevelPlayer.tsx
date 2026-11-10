@@ -142,9 +142,9 @@ export function LevelPlayer(props: LevelPlayerProps) {
           <span className="tag">{KIND_LABEL[level.kind]}{level.boss ? ' · boss' : ''}{level.optional ? ' · side-quest' : ''}</span>
           <h1>{level.title}</h1>
         </div>
-        {englishOf(level) && level.kind !== 'choice' && <p className="english">{englishOf(level)}</p>}
+        {englishOf(level) && level.kind !== 'choice' && <Markdown className="english" text={englishOf(level)!} />}
         <Markdown text={level.intro} />
-        {level.kind === 'choice' && <p className="english">{level.question}</p>}
+        {level.kind === 'choice' && <Markdown className="english" text={level.question} />}
         <div className="toolbar">
           <button className="btn" onClick={() => setInventory(true)}>Inventory</button>
           {sol && !showSolution && !outcome && (

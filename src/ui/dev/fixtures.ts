@@ -140,7 +140,7 @@ export const fxWorlds: World[] = [
         outro: 'Swapping is just reading a pair backwards.',
         header: swapHeader, starter: '  obtain ⟨hp, hq⟩ := h\n  sorry', solutions: ['  obtain ⟨hp, hq⟩ := h\n  exact ⟨hq, hp⟩'],
         hints: [{ text: 'Look at the goal: it is a pair.' }, { text: 'Build a pair with `⟨_, _⟩`.' }, { text: 'Use\n\n```lean\nexact ⟨hq, hp⟩\n```' }],
-        unlocks: { tactics: ['intro'], codex: ['intro'] },
+        unlocks: { tactics: ['intro', 'apply'], codex: ['intro'] },
       },
       {
         id: 'basics-06', kind: 'parsons', title: 'Put it in order',

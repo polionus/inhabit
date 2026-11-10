@@ -13,17 +13,22 @@ const md = new Marked({
     html: ({ text }) => esc(text),
     code: ({ text }) => `<pre class="code"><code>${highlightHtml(text.replace(/\n$/, ''))}</code></pre>`,
     codespan: ({ text }) => `<code class="inline">${highlightHtml(text.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"'))}</code>`,
-    link: ({ href, text }) => (/^(https?:|#)/.test(href) ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${text}</a>` : text),
+    link(this: any, { href, tokens, text }: { href: string; tokens?: unknown[]; text: string }): string {
+      const inner: string = (tokens ? this.parser.parseInline(tokens) : '') || text;
+      if (href.startsWith('codex:')) {
+        const id = decodeURIComponent(href.slice(6));
+        return `<a href="#/codex/${encodeURIComponent(id)}" class="codex-link" data-codex="${esc(id)}">${inner}</a>`;
+      }
+      return /^https?:/.test(href) ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer">${inner}</a>` : inner;
+    },
   },
 });
 
 export function renderMarkdown(src: string): string {
   const withLinks = src.replace(/\[\[([^\]\s]+)\]\]/g, (_m, id: string) => {
     const e = getCodex(id);
-    const label = e ? e.name : id;
-    return e
-      ? `<a href="#/codex/${encodeURIComponent(id)}" class="codex-link" data-codex="${esc(id)}">${esc(label)}</a>`
-      : esc(label);
+    const label = (e ? e.name : id).replace(/[\[\]`]/g, '');
+    return e ? `[${label}](codex:${encodeURIComponent(id)})` : label;
   });
   try {
     return md.parse(withLinks, { async: false }) as string;
