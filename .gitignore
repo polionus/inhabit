@@ -1,0 +1,10 @@
+node_modules
+dist
+.DS_Store
+*.log
+lean-verify/.lake
+lean-verify/Game/Generated
+.vite
+coverage
+test-results
+playwright-report
