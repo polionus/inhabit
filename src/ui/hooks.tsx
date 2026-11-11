@@ -60,7 +60,7 @@ export class ErrorBoundary extends Component<{ children: ReactNode; resetKey?: s
           <p>This screen hit an unexpected error. Your progress is saved. You can go back to the map and carry on.</p>
           <pre className="raw">{String(this.state.error.message)}</pre>
           <p>
-            <a className="btn" href="#/">Back to the map</a>
+            <a className="btn" href="#/map">Back to the map</a>
           </p>
         </div>
       );

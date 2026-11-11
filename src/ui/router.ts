@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 
 export type Route =
+  | { name: 'home' }
+  | { name: 'about' }
   | { name: 'map' }
   | { name: 'world'; id: string }
   | { name: 'level'; id: string }
@@ -18,7 +20,10 @@ export function parseHash(hash: string): Route {
   switch (a) {
     case '':
     case undefined:
-      return { name: 'map' };
+      return { name: 'home' };
+    case 'map':
+    case 'about':
+      return { name: a };
     case 'world':
       return b ? { name: 'world', id: b } : { name: 'map' };
     case 'level':
@@ -37,7 +42,9 @@ export function parseHash(hash: string): Route {
 }
 
 export const href = {
-  map: () => '#/',
+  home: () => '#/',
+  map: () => '#/map',
+  about: () => '#/about',
   world: (id: string) => `#/world/${encodeURIComponent(id)}`,
   level: (id: string) => `#/level/${encodeURIComponent(id)}`,
   codex: (id?: string) => (id ? `#/codex/${encodeURIComponent(id)}` : '#/codex'),

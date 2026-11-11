@@ -5,7 +5,7 @@ import { openInLeanUrl, wrapForRealLean } from './openInLean.ts';
 import { ALL_CODES, explain } from './explain.ts';
 import { hintRevealsSolution } from './hints.ts';
 import { highlightHtml, tokenize } from './highlight.ts';
-import { parseHash } from '../router.ts';
+import { href, parseHash } from '../router.ts';
 import type { Level } from '../../content/types.ts';
 
 const T = { to: '→', and: '∧', le: '≤', leq: '≤', lambda: 'λ', '<>': '⟨$CURSOR⟩', langle: '⟨', alpha: 'α', a: 'α' };
@@ -87,7 +87,16 @@ describe('misc', () => {
     expect(highlightHtml('a < b')).toContain('&lt;');
   });
   it('routes', () => {
-    expect(parseHash('#/')).toEqual({ name: 'map' });
+    expect(parseHash('#/')).toEqual({ name: 'home' });
+    expect(parseHash('')).toEqual({ name: 'home' });
+    expect(parseHash('#')).toEqual({ name: 'home' });
+    expect(parseHash('#/map')).toEqual({ name: 'map' });
+    expect(parseHash('#/about')).toEqual({ name: 'about' });
+    expect(parseHash('#/about/')).toEqual({ name: 'about' });
+    expect(parseHash('#/world')).toEqual({ name: 'map' });
+    expect(href.map()).toBe('#/map');
+    expect(href.about()).toBe('#/about');
+    expect(href.home()).toBe('#/');
     expect(parseHash('#/level/nat-03')).toEqual({ name: 'level', id: 'nat-03' });
     expect(parseHash('#/codex/intro')).toEqual({ name: 'codex', id: 'intro' });
     expect(parseHash('#/bogus').name).toBe('notfound');

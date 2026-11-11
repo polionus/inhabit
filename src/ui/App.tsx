@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import { useRoute, href } from './router.ts';
+import { useRoute, href, type Route } from './router.ts';
 import { ErrorBoundary } from './hooks.tsx';
 import { game, useGame } from './game.ts';
-import { data } from './data.ts';
+import { data, getCodex } from './data.ts';
 import { dueIds } from '../state/leitner.ts';
 import { rankFor } from '../state/game.ts';
 import { Toasts } from './components/Toasts.tsx';
@@ -15,7 +15,25 @@ import { SandboxScreen } from './screens/SandboxScreen.tsx';
 import { WorkshopScreen } from './screens/WorkshopScreen.tsx';
 import { GraduateScreen } from './screens/GraduateScreen.tsx';
 import { ProfileScreen } from './screens/ProfileScreen.tsx';
-import { Welcome } from './screens/Welcome.tsx';
+import { HomeScreen } from './screens/Home.tsx';
+import { AboutScreen } from './screens/About.tsx';
+
+const SITE = 'Inhabit';
+const HOME_TITLE = 'Inhabit — learn Lean 4, the theorem prover, by playing';
+const PAGE_TITLES: Record<string, string> = {
+  map: 'Map', about: 'About', review: 'Review', codex: 'Codex', sandbox: 'Sandbox', workshop: 'Workshop', graduate: 'Graduate', profile: 'Profile',
+};
+
+function titleFor(route: Route): string {
+  switch (route.name) {
+    case 'home': return HOME_TITLE;
+    case 'level': return `${data.findLevel(route.id)?.level.title ?? 'Level'} · ${SITE}`;
+    case 'world': return `${data.worlds.find((w) => w.id === route.id)?.title ?? 'Region'} · ${SITE}`;
+    case 'codex': return `${route.id ? (getCodex(route.id)?.name ?? 'Codex') : 'Codex'} · ${SITE}`;
+    case 'notfound': return `Not found · ${SITE}`;
+    default: return `${PAGE_TITLES[route.name]} · ${SITE}`;
+  }
+}
 
 function useSettingsEffect() {
   const s = useGame((x) => x.save.settings);
@@ -29,12 +47,13 @@ function useSettingsEffect() {
 }
 
 const NAV: { name: string; label: string; to: string }[] = [
-  { name: 'map', label: 'Map', to: '#/' },
+  { name: 'map', label: 'Map', to: '#/map' },
   { name: 'review', label: 'Review', to: '#/review' },
   { name: 'codex', label: 'Codex', to: '#/codex' },
   { name: 'sandbox', label: 'Sandbox', to: '#/sandbox' },
   { name: 'workshop', label: 'Workshop', to: '#/workshop' },
   { name: 'graduate', label: 'Graduate', to: '#/graduate' },
+  { name: 'about', label: 'About', to: '#/about' },
 ];
 
 function TopBar({ active }: { active: string }) {
@@ -42,10 +61,10 @@ function TopBar({ active }: { active: string }) {
   const xp = useGame((s) => s.save.xp);
   const due = dueIds(deck, Date.now()).length;
   const rank = rankFor(xp);
-  const act = active === 'world' || active === 'level' ? 'map' : active;
+  const act = active === 'home' ? '' : active === 'world' || active === 'level' ? 'map' : active;
   return (
     <header className="topbar">
-      <a className="brand" href="#/" aria-label="Inhabit, home">Inhabit</a>
+      <a className="brand" href={href.home()} aria-label="Inhabit, home">Inhabit</a>
       <nav aria-label="Main">
         {NAV.map((n) => (
           <a key={n.name} href={n.to} className={act === n.name ? 'active' : ''} aria-current={act === n.name ? 'page' : undefined}>
@@ -63,8 +82,6 @@ function TopBar({ active }: { active: string }) {
 
 export function App() {
   const route = useRoute();
-  const welcomed = useGame((s) => s.save.welcomed);
-  const hasProgress = useGame((s) => Object.keys(s.save.levels).length > 0);
   const storageError = useGame((s) => s.storageError);
   useSettingsEffect();
   useEffect(() => {
@@ -75,10 +92,14 @@ export function App() {
   }, [route]);
 
   const key = JSON.stringify(route);
+  useEffect(() => {
+    document.title = titleFor(route);
+  }, [route]);
   let screen;
-  if (!welcomed && !hasProgress && route.name === 'map') screen = <Welcome />;
-  else
+  {
     switch (route.name) {
+      case 'home': screen = <HomeScreen />; break;
+      case 'about': screen = <AboutScreen />; break;
       case 'map': screen = <MapScreen />; break;
       case 'world': screen = <WorldScreen id={route.id} />; break;
       case 'level': screen = <LevelScreen id={route.id} />; break;
@@ -93,6 +114,7 @@ export function App() {
           <div className="page narrow"><h1>Nothing here</h1><p>That page does not exist. <a href={href.map()}>Back to the map</a>.</p></div>
         );
     }
+  }
   return (
     <>
       <a className="skip" href="#main" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus(); }}>Skip to content</a>
