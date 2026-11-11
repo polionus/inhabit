@@ -22,6 +22,13 @@ interface Flags {
   readonly lp: boolean;
 }
 
+interface BinderFields {
+  readonly name: string;
+  readonly bi: BinderInfo;
+  readonly type: Expr;
+  readonly body: Expr;
+}
+
 export type Expr =
   | (Flags & { readonly k: 'bvar'; readonly idx: number })
   | (Flags & { readonly k: 'fvar'; readonly id: number })
@@ -29,13 +36,8 @@ export type Expr =
   | (Flags & { readonly k: 'sort'; readonly level: Level })
   | (Flags & { readonly k: 'const'; readonly name: string; readonly levels: readonly Level[] })
   | (Flags & { readonly k: 'app'; readonly fn: Expr; readonly arg: Expr })
-  | (Flags & {
-      readonly k: 'lam' | 'pi';
-      readonly name: string;
-      readonly bi: BinderInfo;
-      readonly type: Expr;
-      readonly body: Expr;
-    })
+  | (Flags & BinderFields & { readonly k: 'lam' })
+  | (Flags & BinderFields & { readonly k: 'pi' })
   | (Flags & {
       readonly k: 'let';
       readonly name: string;
@@ -103,7 +105,7 @@ function binder(k: 'lam' | 'pi', name: string, bi: BinderInfo, type: Expr, body:
     mv: type.mv || body.mv,
     lmv: type.lmv || body.lmv,
     lp: type.lp || body.lp,
-  };
+  } as Expr;
 }
 export const mkLam = (name: string, type: Expr, body: Expr, bi: BinderInfo = 'default'): Expr =>
   binder('lam', name, bi, type, body);
@@ -266,15 +268,39 @@ export function lowerLooseBVars(e: Expr, start: number, d: number): Expr {
 export function instantiateRev(e: Expr, subst: readonly Expr[]): Expr {
   if (e.lb === 0 || subst.length === 0) return e;
   const n = subst.length;
-  return replace(e, (x, off) => {
+  const go = (x: Expr, off: number): Expr | undefined => {
     if (x.lb <= off) return x;
     if (x.k === 'bvar') {
       const i = x.idx - off;
       if (i < n) return liftLooseBVars(subst[n - 1 - i], 0, off);
       return mkBVar(x.idx - n);
     }
+    if (x.k === 'app') {
+      // like Lean's `instantiateBetaRevRange`: β-reduce when a λ lands in head position
+      const h = getAppFn(x);
+      if (h.k === 'bvar' && h.idx - off < n && h.idx >= off) {
+        const v = subst[n - 1 - (h.idx - off)];
+        if (v.k === 'lam') {
+          const args = getAppArgs(x).map((a) => replace(a, go, off));
+          return betaN(liftLooseBVars(v, 0, off), args);
+        }
+      }
+    }
     return undefined;
-  });
+  };
+  return replace(e, go);
+}
+
+/** β-reduce `f a₁ … aₙ` where `f` is a λ (as many binders as there are arguments). */
+export function betaN(f: Expr, args: readonly Expr[]): Expr {
+  let i = 0;
+  let b = f;
+  while (b.k === 'lam' && i < args.length) {
+    b = b.body;
+    i++;
+  }
+  const res = instantiateRev(b, args.slice(0, i));
+  return mkAppN(res, args.slice(i));
 }
 
 /** Instantiate the outermost loose bvar (index 0) with `v`. */

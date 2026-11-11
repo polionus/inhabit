@@ -53,6 +53,11 @@ const NAT_BIN: Record<string, (a: bigint, b: bigint) => bigint> = {
   'Nat.pow': (a, b) => a ** b,
 };
 
+const NAT_BOOL: Record<string, (a: bigint, b: bigint) => boolean> = {
+  'Nat.beq': (a, b) => a === b,
+  'Nat.ble': (a, b) => a <= b,
+};
+
 export function canUnfold(d: ConstDecl, t: Transparency): boolean {
   if (d.value === undefined && d.matchDef === undefined) return false;
   if (d.kind !== 'def') return false;
@@ -199,16 +204,20 @@ export class Reducer {
     const f = getAppFn(e);
     if (f.k !== 'const') return null;
     const d = this.env.get(f.name);
-    if (!d || !canUnfold(d, this.transparency)) return null;
+    if (!d) return null;
     const args = getAppArgs(e);
+    // ground Nat arithmetic is evaluated at any transparency (like Lean's `Nat.reduceBinOp`)
     const nat = NAT_BIN[f.name];
-    if (nat && args.length === 2) {
-      const a = this.whnf(args[0]);
-      const b = this.whnf(args[1]);
-      if (a.k === 'lit' && b.k === 'lit' && typeof a.value === 'bigint' && typeof b.value === 'bigint') {
-        return mkNatLit(nat(a.value, b.value));
+    const natb = NAT_BOOL[f.name];
+    if ((nat || natb) && args.length === 2) {
+      const a = this.natLitOf(args[0]);
+      const b = a === null ? null : this.natLitOf(args[1]);
+      if (a !== null && b !== null) {
+        if (nat) return mkNatLit(nat(a, b));
+        return mkConst(natb!(a, b) ? 'Bool.true' : 'Bool.false');
       }
     }
+    if (!canUnfold(d, this.transparency)) return null;
     if (d.matchDef) return this.unfoldMatch(d, f, args);
     const v = instantiateExprLevelParams(d.value!, d.levelParams, f.levels);
     return headBeta(mkAppN(v, args));
@@ -267,6 +276,18 @@ export class Reducer {
         return 'ok';
       }
     }
+  }
+
+  /** Evaluate a ground Nat term to a literal (numerals, `Nat.succ`, `Nat.zero`, arithmetic). */
+  natLitOf(e: Expr): bigint | null {
+    const w = this.whnf(e);
+    if (w.k === 'lit' && typeof w.value === 'bigint') return w.value;
+    if (w.k === 'const' && w.name === 'Nat.zero') return 0n;
+    if (w.k === 'app' && w.fn.k === 'const' && w.fn.name === 'Nat.succ') {
+      const p = this.natLitOf(w.arg);
+      return p === null ? null : p + 1n;
+    }
+    return null;
   }
 
   whnf(e: Expr): Expr {
