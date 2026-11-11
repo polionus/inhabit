@@ -85,5 +85,32 @@ export function checkBody(
     { setup: level.setup, header: level.header, after: level.kind === 'proof' ? level.after : undefined },
     body,
   );
-  return { result: engine.check(session.env, assembled.source, session.options), assembled };
+  const result = engine.check(session.env, assembled.source, session.options);
+  return { result: forbidAxioms(result, assembled.bodyOffset, assembled.bodyOffset + body.length), assembled };
+}
+
+/**
+ * Inside a level the learner may not declare axioms: `axiom` assumes a statement without proof,
+ * so it would "solve" any level. (Real Lean allows it, and so do the Sandbox and Workshop.)
+ */
+function forbidAxioms(result: CheckResult, from: number, to: number): CheckResult {
+  const axioms = result.decls.filter((d) => d.kind === 'axiom' && d.from >= from && d.from < to);
+  if (axioms.length === 0) return result;
+  return {
+    ...result,
+    ok: false,
+    complete: false,
+    diagnostics: [
+      ...result.diagnostics,
+      ...axioms.map((d) => ({
+        severity: 'error' as const,
+        code: 'name-locked' as const,
+        message:
+          '`axiom` is not available in a level: an axiom assumes its statement without proof. Prove it instead.',
+        from: d.from,
+        to: d.to,
+        data: { name: 'axiom' },
+      })),
+    ],
+  };
 }

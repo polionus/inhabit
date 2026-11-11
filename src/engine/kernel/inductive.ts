@@ -20,7 +20,7 @@ import {
 } from './expr.ts';
 import type { BinderInfo } from './expr.ts';
 import type { Level } from './level.ts';
-import { lparam, lzero } from './level.ts';
+import { levelLeq, lparam, lzero } from './level.ts';
 import type { ConstDecl, Environment, RecRule } from './env.ts';
 import { Fuel } from './reduce.ts';
 import { KernelError, TypeChecker, freshFVarId } from './typecheck.ts';
@@ -160,6 +160,16 @@ export function addInductive(env0: Environment, spec: InductiveSpec, fuel = new 
     const recInfo: CtorShape['rec'] = [];
     for (const f of fields) {
       const ft = B.typeOf(f);
+      // Universe check: a data type may not store something from a larger universe than its own
+      // (e.g. `inductive U : Type | mk : Type → U`). Without it the theory is inconsistent.
+      if (!isProp) {
+        const fieldLevel = tc.ensureSort(tc.infer(ft), ft);
+        if (!levelLeq(fieldLevel, resSort.level)) {
+          throw new KernelError(
+            `(kernel) universe level of type_of(arg #${fields.indexOf(f) + 1}) of '${c.name}' is too big for the corresponding inductive datatype`,
+          );
+        }
+      }
       if (!mentionsInd(ft)) {
         recInfo.push(null);
         continue;
