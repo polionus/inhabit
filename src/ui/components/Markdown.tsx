@@ -24,14 +24,14 @@ const md = new Marked({
   },
 });
 
-export function renderMarkdown(src: string): string {
+export function renderMarkdown(src: string, inline = false): string {
   const withLinks = src.replace(/\[\[([^\]\s]+)\]\]/g, (_m, id: string) => {
     const e = getCodex(id);
     const label = (e ? e.name : id).replace(/[\[\]`]/g, '');
     return e ? `[${label}](codex:${encodeURIComponent(id)})` : label;
   });
   try {
-    return md.parse(withLinks, { async: false }) as string;
+    return (inline ? md.parseInline(withLinks, { async: false }) : md.parse(withLinks, { async: false })) as string;
   } catch {
     return `<p>${esc(src)}</p>`;
   }
@@ -56,6 +56,12 @@ export function Markdown({ text, className = '' }: { text: string; className?: s
       {open && <CodexModal id={open} onClose={() => setOpen(null)} />}
     </>
   );
+}
+
+/** Inline markdown (backticks, emphasis) as a span, for one-line summaries. */
+export function InlineMd({ text, className = '' }: { text: string; className?: string }) {
+  const html = useMemo(() => renderMarkdown(text, true), [text]);
+  return <span className={`md-inline ${className}`} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
 export function Lean({ code, className = '' }: { code: string; className?: string }) {

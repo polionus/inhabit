@@ -86,3 +86,35 @@ export function dueLabel(item: DeckItem, now: number): string {
   const days = Math.round(d);
   return days === 1 ? 'tomorrow' : `in ${days} days`;
 }
+
+/** Up to `n` random items from `ids`, interleaved round-robin across worlds (for "practice anyway"). */
+export function pickPractice(
+  ids: string[],
+  worldOf: (levelId: string) => string | undefined,
+  n = 5,
+  rng: () => number = Math.random,
+): string[] {
+  const shuffle = <T,>(xs: T[]): T[] => {
+    const a = xs.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.min(i, Math.floor(rng() * (i + 1)));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  };
+  const groups = new Map<string, string[]>();
+  for (const id of ids) {
+    const w = worldOf(id);
+    if (w === undefined) continue;
+    if (!groups.has(w)) groups.set(w, []);
+    groups.get(w)!.push(id);
+  }
+  const queues = shuffle([...groups.values()].map(shuffle));
+  const out: string[] = [];
+  while (out.length < n && queues.some((q) => q.length)) {
+    for (const q of queues) {
+      if (q.length && out.length < n) out.push(q.shift()!);
+    }
+  }
+  return out;
+}

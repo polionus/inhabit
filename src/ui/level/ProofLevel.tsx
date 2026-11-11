@@ -87,6 +87,7 @@ export function ProofLevelView({ run, level }: { run: Run; level: ProofLevel }) 
         diagnostics={info.diags}
         complete={!!result?.complete && !pending}
         pending={pending}
+        friendlySorry
         onInsert={(n) => editor.current?.insert(n)}
         emptyHint={level.mode === 'term' ? 'Write a term after the := sign. Errors and types show up here.' : undefined}
       />

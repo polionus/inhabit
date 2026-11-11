@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DAY, INTERVALS, afterReview, dueIds, newItem, pickSession, retune } from './leitner.ts';
+import { DAY, INTERVALS, afterReview, dueIds, newItem, pickPractice, pickSession, retune } from './leitner.ts';
 import {
   applyTestOut, bossIndex, canTestOut, layoutWorlds, levelPlayable, levelState, nextAfter, worldComplete, worldUnlocked,
   type Progress, type WorldLike,
@@ -167,5 +167,18 @@ describe('save data', () => {
     bad.getState().completeLevel('a1', { studied: false, clean: true });
     expect(bad.getState().storageError).toBe(true);
     expect(bad.getState().save.levels.a1.status).toBe('solved');
+  });
+});
+
+describe('practice sessions', () => {
+  it('picks at most n distinct items, interleaved across worlds', () => {
+    const ids = ['a1', 'a2', 'a3', 'b1', 'b2', 'c1'];
+    const worldOf = (id: string) => id[0];
+    const out = pickPractice(ids, worldOf, 5, () => 0.3);
+    expect(out).toHaveLength(5);
+    expect(new Set(out).size).toBe(5);
+    expect(new Set(out.slice(0, 3).map(worldOf)).size).toBe(3);
+    expect(pickPractice(ids, worldOf, 10)).toHaveLength(6);
+    expect(pickPractice([], worldOf, 5)).toEqual([]);
   });
 });

@@ -4,8 +4,8 @@ import { game, useGame } from '../game.ts';
 import { useCheck } from '../hooks.tsx';
 import { Editor, toEditorDiags, type EditorHandle } from '../lean/Editor.tsx';
 import { mapDiagnostics } from '../lean/offsets.ts';
-import { openInRealLean } from '../lean/openInLean.ts';
-import { Infoview } from '../components/Infoview.tsx';
+import { OpenInLean } from '../components/OpenInLean.tsx';
+import { CommandOutputs, Infoview } from '../components/Infoview.tsx';
 import { SymbolBar } from '../components/SymbolBar.tsx';
 import { useInfo } from '../level/ProofLevel.tsx';
 
@@ -32,7 +32,7 @@ export function SandboxScreen() {
           <p className="muted">Everything is unlocked. Try <code className="inline">#check</code>, <code className="inline">#eval</code>, any tactic.</p>
         </div>
         <div className="actions">
-          <button className="btn" onClick={() => openInRealLean(text)}>Open in real Lean</button>
+          <OpenInLean source={text} />
           <button className="btn ghost" onClick={() => setText('')}>Clear</button>
         </div>
       </div>
@@ -42,12 +42,7 @@ export function SandboxScreen() {
           <Editor ref={editor} value={text} onChange={setText} onCursor={setCursor} diagnostics={toEditorDiags(mapDiagnostics(result?.diagnostics ?? [], 0, text.length))} fontSize={fontSize} ariaLabel="Sandbox editor" cursor={0} />
         </div>
         <div className="sandbox-side">
-          {outputs.length > 0 && (
-            <section className="outputs" aria-label="Command output">
-              <div className="label">Output</div>
-              {outputs.map((o, i) => <pre key={i} className="raw out">{o.message}</pre>)}
-            </section>
-          )}
+          <CommandOutputs outputs={outputs} label="Output" />
           <Infoview goals={info.goals} fallbackGoals={info.fallback} diagnostics={diags} complete={false} pending={pending} onInsert={(n) => editor.current?.insert(n)} emptyHint="Put the cursor inside a proof to see its goals." />
         </div>
       </div>

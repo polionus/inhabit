@@ -1,19 +1,23 @@
 import { useState } from 'react';
 import { data } from '../data.ts';
 import { game, store, useGame } from '../game.ts';
-import { dueLabel, pickSession, dueIds } from '../../state/leitner.ts';
+import { dueLabel, pickSession, pickPractice, dueIds } from '../../state/leitner.ts';
 import { LevelPlayer } from '../level/LevelPlayer.tsx';
 import { href } from '../router.ts';
 
 export function ReviewScreen() {
   const deck = useGame((s) => s.save.deck);
+  const levels = useGame((s) => s.save.levels);
   const [session, setSession] = useState<string[] | null>(null);
+  const [practice, setPractice] = useState(false);
   const [i, setI] = useState(0);
   const [results, setResults] = useState<Record<string, boolean>>({});
 
   const worldOf = (id: string) => data.findLevel(id)?.world.id;
   const now = Date.now();
   const dueCount = dueIds(deck, now).length;
+
+  const completedIds = Object.entries(levels).filter(([id, p]) => (p.status === 'solved' || p.status === 'studied') && data.findLevel(id)).map(([id]) => id);
 
   if (!session) {
     const upcoming = Object.entries(deck).filter(([, d]) => d.due > now).sort((a, b) => a[1].due - b[1].due).slice(0, 5);
@@ -34,6 +38,7 @@ export function ReviewScreen() {
             disabled={dueCount === 0}
             onClick={() => {
               const s = pickSession(store.getState().save.deck, worldOf, Date.now(), 8);
+              setPractice(false);
               setSession(s);
               setI(0);
               setResults({});
@@ -41,7 +46,21 @@ export function ReviewScreen() {
           >
             Start a session
           </button>
+          {completedIds.length > 0 && (
+            <button
+              className="btn"
+              onClick={() => {
+                setPractice(true);
+                setSession(pickPractice(completedIds, worldOf, 5));
+                setI(0);
+                setResults({});
+              }}
+            >
+              Practice anyway
+            </button>
+          )}
         </div>
+        {completedIds.length > 0 && <p className="muted practice-note">Practice anyway picks up to 5 finished levels at random. It does not change your review schedule.</p>}
         {upcoming.length > 0 && (
           <>
             <h2>Coming up</h2>
@@ -62,9 +81,10 @@ export function ReviewScreen() {
       <div className="page narrow">
         <h1>Session done</h1>
         <p className="lede">{passed} of {session.length} came back cleanly.</p>
+        {practice && <p className="muted practice-note">Practice only: your review schedule was not changed by the ones you got right.</p>}
         <ul className="plain">
           {session.map((id) => (
-            <li key={id}>{results[id] ? '✓' : '·'} {data.findLevel(id)?.level.title ?? id} <span className="muted">{deck[id] ? `· box ${deck[id].box}, ${dueLabel(deck[id], Date.now())}` : ''}</span></li>
+            <li key={id}>{results[id] ? '✓' : '·'} {data.findLevel(id)?.level.title ?? id} <span className="muted">{!practice && deck[id] ? `· box ${deck[id].box}, ${dueLabel(deck[id], Date.now())}` : ''}</span></li>
           ))}
         </ul>
         <div className="actions">
@@ -78,7 +98,7 @@ export function ReviewScreen() {
   const id = session[i];
   return (
     <>
-      <div className="review-bar" role="status">Review {i + 1} of {session.length}
+      <div className="review-bar" role="status">{practice ? 'Practice' : 'Review'} {i + 1} of {session.length}
         <button className="btn ghost small" onClick={() => setSession(null)}>End session</button>
       </div>
       <LevelPlayer
@@ -86,7 +106,8 @@ export function ReviewScreen() {
         levelId={id}
         mode="review"
         onReviewDone={(passed) => {
-          game().reviewResult(id, passed);
+          // Practice never promotes boxes; a miss may still reset an item already in the deck.
+          if (!practice || (!passed && store.getState().save.deck[id])) game().reviewResult(id, passed);
           setResults((r) => ({ ...r, [id]: passed }));
         }}
         onNext={() => setI(i + 1)}

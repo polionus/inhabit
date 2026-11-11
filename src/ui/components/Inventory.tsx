@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { LevelContext } from '../../content/index.ts';
 import { getCodex } from '../data.ts';
 import { CodexCard } from './CodexCard.tsx';
-import { Lean } from './Markdown.tsx';
+import { InlineMd, Lean, Markdown } from './Markdown.tsx';
 
 export function Inventory({ ctx, onInsert, onClose }: { ctx: LevelContext; onInsert?: (s: string) => void; onClose: () => void }) {
   const [open, setOpen] = useState<string | null>(null);
@@ -19,7 +19,7 @@ export function Inventory({ ctx, onInsert, onClose }: { ctx: LevelContext; onIns
     <li className="inv-row">
       <button className="inv-name" aria-expanded={open === id} onClick={() => setOpen(open === id ? null : id)}>
         <span className="lean-name">{name}</span>
-        {summary && <span className="muted small"> {summary}</span>}
+        {summary && <span className="muted small"> <InlineMd text={summary} /></span>}
       </button>
       {onInsert && insert && (
         <button className="btn small" title={`Insert ${insert} at the cursor`} onClick={() => onInsert(insert)}>insert</button>
@@ -29,7 +29,7 @@ export function Inventory({ ctx, onInsert, onClose }: { ctx: LevelContext; onIns
           {id.startsWith('lemma:') ? (
             (() => {
               const l = ctx.lemmas.find((x) => 'lemma:' + x.name === id);
-              return l ? <><p>{l.doc}</p><Lean code={l.source.split(':=')[0].trim()} /></> : null;
+              return l ? <><Markdown text={l.doc} /><Lean code={l.source.split(':=')[0].trim()} /></> : null;
             })()
           ) : (
             (() => {

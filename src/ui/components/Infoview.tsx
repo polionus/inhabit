@@ -42,10 +42,41 @@ export function Goals({ goals, onInsert, label }: { goals: Goal[]; onInsert?: (n
   );
 }
 
-export function DiagnosticItem({ d, defaultOpen = false }: { d: BodyDiagnostic | (import('../../engine/types.ts').Diagnostic); defaultOpen?: boolean }) {
+/** Lean's own output for `#check` / `#eval` / `#print` commands. */
+export function CommandOutputs({ outputs, label = "Lean's output" }: { outputs: { message: string }[]; label?: string }) {
+  if (!outputs.length) return null;
+  return (
+    <section className="outputs" aria-label="Command output">
+      <div className="label">{label}</div>
+      {outputs.map((o, i) => <pre key={i} className="raw out">{o.message}</pre>)}
+    </section>
+  );
+}
+
+export function DiagnosticItem({ d, defaultOpen = false, friendlySorry = false }: { d: BodyDiagnostic | (import('../../engine/types.ts').Diagnostic); defaultOpen?: boolean; friendlySorry?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
   const ex = useMemo(() => explain(d), [d]);
-  const where = 'inBody' in d && !d.inBody ? ' (in the statement)' : '';
+  const where = 'inBody' in d && !d.inBody && d.code !== 'unsolved-goals' && d.code !== 'sorry' ? ' (in the statement)' : '';
+  if (friendlySorry && d.code === 'sorry') {
+    return (
+      <li className="diag diag-todo">
+        <div className="diag-head"><span className="sev">To do</span></div>
+        <p>Not finished yet. This still contains <code className="inline">sorry</code>, Lean's placeholder for "to be done".</p>
+        <pre className="raw small">{d.message}</pre>
+        <button className="linkish" aria-expanded={open} onClick={() => setOpen(!open)}>
+          {open ? 'Hide explanation' : 'What does this mean?'}
+        </button>
+        {open && (
+          <div className="explain">
+            <div className="label">What this means</div>
+            <p>{ex.what}</p>
+            <div className="label">What to try</div>
+            <ul>{ex.tryThis.map((t, i) => <li key={i} dangerouslySetInnerHTML={{ __html: t.replace(/`([^`]+)`/g, '<code class="inline">$1</code>') }} />)}</ul>
+          </div>
+        )}
+      </li>
+    );
+  }
   return (
     <li className={`diag diag-${d.severity}`}>
       <div className="diag-head">
@@ -82,9 +113,13 @@ export interface InfoviewProps {
   /** Label for the complete state. */
   completeText?: string;
   emptyHint?: string;
+  /** Command output (#check etc.) relevant to the cursor, shown labelled as Lean's output. */
+  outputs?: { message: string }[];
+  /** Render the `sorry` warning as a calm "to do" note (level play). */
+  friendlySorry?: boolean;
 }
 
-export function Infoview({ goals, fallbackGoals, diagnostics, complete, pending, onInsert, completeText = 'No goals. The proof is complete.', emptyHint = 'Click inside the proof to see the goals at that point.' }: InfoviewProps) {
+export function Infoview({ goals, fallbackGoals, diagnostics, complete, pending, onInsert, completeText = 'No goals. The proof is complete.', emptyHint = 'Click inside the proof to see the goals at that point.', outputs = [], friendlySorry = false }: InfoviewProps) {
   const errors = diagnostics.filter((d) => d.severity === 'error');
   const shown = goals && goals.length ? goals : null;
   const fb = !shown && fallbackGoals?.length ? fallbackGoals : null;
@@ -108,12 +143,13 @@ export function Infoview({ goals, fallbackGoals, diagnostics, complete, pending,
         ) : fb ? (
           <Goals goals={fb} label="Still to prove" />
         ) : (
-          !diagnostics.length && <p className="muted">{emptyHint}</p>
+          !diagnostics.length && !outputs.length && <p className="muted">{emptyHint}</p>
         )}
+        <CommandOutputs outputs={outputs} />
         {diagnostics.length > 0 && (
           <ul className="diags" aria-label="Messages">
             {diagnostics.map((d, i) => (
-              <DiagnosticItem key={`${d.code}-${d.from}-${i}`} d={d} defaultOpen={false} />
+              <DiagnosticItem key={`${d.code}-${d.from}-${i}`} d={d} defaultOpen={false} friendlySorry={friendlySorry} />
             ))}
           </ul>
         )}

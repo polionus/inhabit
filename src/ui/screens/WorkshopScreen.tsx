@@ -5,9 +5,9 @@ import { game, useGame } from '../game.ts';
 import { useCheck, useDebounced } from '../hooks.tsx';
 import { Editor, toEditorDiags, type EditorHandle } from '../lean/Editor.tsx';
 import { mapDiagnostics } from '../lean/offsets.ts';
-import { openInRealLean } from '../lean/openInLean.ts';
-import { DiagnosticItem, Infoview } from '../components/Infoview.tsx';
-import { Lean, LeanInline } from '../components/Markdown.tsx';
+import { OpenInLean } from '../components/OpenInLean.tsx';
+import { CommandOutputs, DiagnosticItem, Infoview } from '../components/Infoview.tsx';
+import { Lean, InlineMd, LeanInline } from '../components/Markdown.tsx';
 import { SymbolBar } from '../components/SymbolBar.tsx';
 import { useInfo } from '../level/ProofLevel.tsx';
 import type { SavedTheorem, WorkshopDraft } from '../../state/game.ts';
@@ -26,8 +26,8 @@ export function theoremHeader(w: Pick<WorkshopDraft, 'name' | 'binders' | 'state
   return `theorem ${name}${w.binders.trim() ? ' ' + w.binders.trim() : ''} : ${w.statement.trim()} := by`;
 }
 
-export const fullSource = (w: Pick<WorkshopDraft, 'name' | 'binders' | 'statement' | 'defs' | 'proof'>): string =>
-  [w.defs.trim(), theoremHeader(w) + '\n' + w.proof.replace(/\s+$/, '')].filter(Boolean).join('\n\n');
+export const fullSource = (w: Pick<WorkshopDraft, 'name' | 'binders' | 'statement' | 'defs' | 'proof'> & { source?: string }): string =>
+  w.source !== undefined ? w.source.replace(/\s+$/, '') : [w.defs.trim(), theoremHeader(w) + '\n' + w.proof.replace(/\s+$/, '')].filter(Boolean).join('\n\n');
 
 function GraduateNote() {
   return <p className="notice">That needs something the game’s Lean does not have (real numbers, finite sets, and so on). You can still do it in real Lean with Mathlib: see <a href="#/graduate">Graduate</a>.</p>;
@@ -45,9 +45,11 @@ function Wizard() {
   const dDefs = useDebounced(w.defs, 200);
   const dStmt = useDebounced(w.statement, 200);
 
-  const binderRes = useMemo(() => (dBinders.trim() ? engine.elab(baseEnv, 'True', dBinders) : null), [baseEnv, dBinders]);
   const defsRes = useMemo(() => (dDefs.trim() ? engine.extend(baseEnv, dDefs) : null), [baseEnv, dDefs]);
   const env2 = defsRes && defsRes.result.ok ? defsRes.env : baseEnv;
+  // Binders may mention your own definitions, so they are checked with the definitions in scope.
+  const binderRes = useMemo(() => (dBinders.trim() ? engine.elab(env2, 'True', dBinders) : null), [env2, dBinders]);
+  const binderNeedsDef = !!binderRes && !binderRes.ok && binderRes.diagnostics.some((d) => d.code === 'unknown-identifier');
   const stmtRes = useMemo(() => (dStmt.trim() ? engine.elab(env2, dStmt, dBinders) : null), [env2, dStmt, dBinders]);
   const stmtIsProp = !!stmtRes?.ok && (stmtRes.type ?? 'Prop').trim() === 'Prop';
 
@@ -59,7 +61,7 @@ function Wizard() {
   const unsupported = UNSUPPORTED.test(w.binders + w.defs + w.statement + w.english);
 
   const q = quantifierCounts(w.english);
-  const canNext = [w.english.trim().length > 3, !w.binders.trim() || !!binderRes?.ok, !w.defs.trim() || !!defsRes?.result.ok, stmtIsProp, true][w.step - 1];
+  const canNext = [w.english.trim().length > 3, !w.binders.trim() || !!binderRes?.ok || binderNeedsDef, !w.defs.trim() || !!defsRes?.result.ok, stmtIsProp, true][w.step - 1];
   const complete = !!proofRes?.complete && !pending && stmtIsProp;
 
   const save = () => {
@@ -92,6 +94,7 @@ function Wizard() {
           <input className="wide" value={w.binders} onChange={(e) => set({ binders: e.target.value })} aria-label="Binders" placeholder="(n : Nat) (A B : Set Nat)" spellCheck={false} />
           {binderRes?.ok && <p className="ok-line">✓ Lean accepts these types.</p>}
           {binderRes && !binderRes.ok && <ul className="diags">{binderRes.diagnostics.map((d, i) => <DiagnosticItem key={i} d={d} />)}</ul>}
+          {binderNeedsDef && <p className="tip">Using a name of your own, like a predicate you are about to define? Go on to step 3, define it there, and these types will check once it exists.</p>}
           {unsupported && <GraduateNote />}
         </section>
       )}
@@ -140,7 +143,7 @@ function Wizard() {
           <Infoview goals={info.goals} fallbackGoals={info.fallback} diagnostics={info.diags} complete={complete} pending={pending} onInsert={(n) => editor.current?.insert(n)} />
           <div className="actions">
             <button className="btn primary" onClick={save}>{complete ? 'Save to My theorems' : 'Save work in progress'}</button>
-            <button className="btn" onClick={() => openInRealLean(fullSource(w))}>Open in real Lean</button>
+            <OpenInLean source={fullSource(w)} />
             <button className="btn ghost" onClick={() => { game().resetWorkshop(); setSaved(false); }}>Start a new one</button>
           </div>
           {saved && <p role="status" className="ok-line">Saved. See it under My theorems.</p>}
@@ -155,10 +158,11 @@ function Wizard() {
   );
 }
 
-function Gallery() {
+function Gallery({ onEditFree }: { onEditFree: (t: SavedTheorem) => void }) {
   const list = useGame((s) => s.save.theorems);
   if (!list.length) return <p className="notice">Nothing here yet. Prove something in the Build tab and save it.</p>;
   const edit = (t: SavedTheorem) => {
+    if (t.source !== undefined) return onEditFree(t);
     game().setWorkshop({ step: 5, english: t.english, binders: t.binders, defs: t.defs, statement: t.statement, proof: t.proof, name: t.name });
     window.location.hash = '#/workshop';
   };
@@ -170,7 +174,7 @@ function Gallery() {
           {t.english && <p>{t.english}</p>}
           <Lean code={fullSource(t)} />
           <div className="actions">
-            <button className="btn" onClick={() => openInRealLean(fullSource(t))}>Open in real Lean</button>
+            <OpenInLean source={fullSource(t)} />
             <button className="btn" onClick={() => navigator.clipboard?.writeText(fullSource(t))}>Copy</button>
             <button className="btn" onClick={() => edit(t)}>Edit</button>
             <button className="btn ghost" onClick={() => game().deleteTheorem(t.id)}>Delete</button>
@@ -181,7 +185,12 @@ function Gallery() {
   );
 }
 
-function Ideas({ onUse }: { onUse: (i: TheoremIdea) => void }) {
+export interface Started { idea: TheoremIdea; statementShown: boolean }
+
+/** The declaration an idea starts from: definitions + header + `sorry`. */
+export const ideaStart = (i: TheoremIdea): string => [i.definitions?.trim(), i.statement.trim() + '\n  sorry'].filter(Boolean).join('\n\n');
+
+function Ideas({ onWork }: { onWork: (s: Started) => void }) {
   const ideas = data.ideas;
   const [open, setOpen] = useState<string | null>(null);
   const [shown, setShown] = useState<Record<string, boolean>>({});
@@ -196,15 +205,33 @@ function Ideas({ onUse }: { onUse: (i: TheoremIdea) => void }) {
           </button>
           {open === i.id && (
             <div className="idea-body">
-              <p>{i.english}</p>
-              {(['statement', 'strategy', 'proof'] as const).map((k) => (
-                <div key={k}>
-                  {shown[i.id + k] ? (k === 'strategy' ? <p><span className="label">Strategy</span> {i.strategy}</p> : <><div className="label">{k === 'proof' ? 'Reference proof' : 'One way to state it'}</div><Lean code={k === 'statement' ? (i.definitions ? i.definitions + '\n\n' : '') + i.statement : i.proof} /></>) : (
-                    <button className="btn small" onClick={() => show(i.id + k)}>Show {k === 'proof' ? 'a proof (try first!)' : k}</button>
-                  )}
+              <p className="english-line">{i.english}</p>
+              <p className="muted small">Try it yourself first. Open the help below only as you need it.</p>
+              {shown[i.id + 'strategy'] ? (
+                <p><span className="label">Strategy</span> <InlineMd text={i.strategy} /></p>
+              ) : (
+                <div><button className="btn small" onClick={() => show(i.id + 'strategy')}>Show a strategy hint</button></div>
+              )}
+              {shown[i.id + 'statement'] ? (
+                <div>
+                  <div className="label">One way to state it</div>
+                  {i.definitions && <Lean code={i.definitions} />}
+                  <div className="stmt-hl"><Lean code={i.statement} /></div>
                 </div>
-              ))}
-              <div className="actions"><button className="btn primary" onClick={() => onUse(i)}>Use this as my starting point</button></div>
+              ) : (
+                <div><button className="btn small" onClick={() => show(i.id + 'statement')}>Show one way to state it</button></div>
+              )}
+              {shown[i.id + 'proof'] ? (
+                <div>
+                  <div className="label">A full proof</div>
+                  <Lean code={[i.definitions?.trim(), i.statement.trim() + '\n' + i.proof.replace(/\s+$/, '')].filter(Boolean).join('\n\n')} />
+                </div>
+              ) : (
+                <div><button className="btn small" onClick={() => show(i.id + 'proof')}>Show a full proof</button></div>
+              )}
+              <div className="actions">
+                <button className="btn primary" onClick={() => onWork({ idea: i, statementShown: !!shown[i.id + 'statement'] })}>Work on this</button>
+              </div>
             </div>
           )}
         </li>
@@ -213,9 +240,55 @@ function Ideas({ onUse }: { onUse: (i: TheoremIdea) => void }) {
   );
 }
 
+/** Free-form proving of a whole declaration (definitions + theorem), checked like the Sandbox. */
+function FreeProver({ initial, english, onClose }: { initial: string; english: string; onClose: () => void }) {
+  const fontSize = useGame((s) => s.save.settings.fontSize);
+  const [text, setText] = useState(initial);
+  const startAt = Math.max(0, initial.lastIndexOf('sorry'));
+  const [cursor, setCursor] = useState(startAt);
+  const [saved, setSaved] = useState(false);
+  const editor = useRef<EditorHandle>(null);
+  const env = useMemo(() => data.fullEnv(), []);
+  const { result, pending } = useCheck(text, () => engine.check(env, text));
+  const info = useInfo(result, 0, text.length, cursor);
+  const outputs = (result?.diagnostics ?? []).filter((d) => d.code === 'command-output');
+  const diags = info.diags.filter((d) => d.code !== 'command-output');
+  const complete = !!result?.complete && !pending;
+  const name = /theorem\s+(\S+)/.exec(text)?.[1] ?? 'my_theorem';
+  const save = () => {
+    game().saveTheorem({ name, english, binders: '', defs: '', statement: '', proof: '', complete, source: text });
+    setSaved(true);
+  };
+  return (
+    <div className="free-prover">
+      <h2>Prove it your way</h2>
+      {english && <blockquote>{english}</blockquote>}
+      <p className="muted">Everything is unlocked here, exactly like the Sandbox. Replace <code className="inline">sorry</code> with a proof.</p>
+      <SymbolBar onInsert={(s) => editor.current?.insert(s)} />
+      <Editor ref={editor} value={text} onChange={(v) => { setText(v); setSaved(false); }} onCursor={setCursor} fontSize={fontSize} ariaLabel="Free-form proof editor" cursor={startAt} className="proof-editor" diagnostics={toEditorDiags(mapDiagnostics(result?.diagnostics ?? [], 0, text.length))} />
+      <CommandOutputs outputs={outputs} label="Output" />
+      <Infoview goals={info.goals} fallbackGoals={info.fallback} diagnostics={diags} complete={complete} pending={pending} friendlySorry onInsert={(n) => editor.current?.insert(n)} emptyHint="Put the cursor inside the proof to see its goals." />
+      <div className="actions">
+        <button className="btn primary" onClick={save}>{complete ? 'Save to My theorems' : 'Save work in progress'}</button>
+        <OpenInLean source={text} />
+        <button className="btn ghost" onClick={onClose}>Close</button>
+      </div>
+      {saved && <p role="status" className="ok-line">Saved. See it under My theorems.</p>}
+    </div>
+  );
+}
+
 export function WorkshopScreen() {
   const [tab, setTab] = useState<'build' | 'ideas' | 'mine'>('build');
+  const [started, setStarted] = useState<Started | null>(null);
+  const [free, setFree] = useState<{ text: string; english: string } | null>(null);
   const n = useGame((s) => s.save.theorems.length);
+  const work = (s: Started) => {
+    game().setWorkshop({ step: 1, english: s.idea.english, binders: '', defs: '', statement: '', proof: '  sorry', name: '', checks: [false, false, false, false] });
+    setStarted(s);
+    setFree(null);
+    setTab('build');
+  };
   return (
     <div className="page narrow workshop">
       <h1>Workshop</h1>
@@ -225,9 +298,25 @@ export function WorkshopScreen() {
           <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>
         ))}
       </div>
-      {tab === 'build' && <Wizard />}
-      {tab === 'ideas' && <Ideas onUse={(i) => { game().setWorkshop({ step: 1, english: i.english, binders: '', defs: '', statement: '', proof: '  sorry', name: '', checks: [false, false, false, false] }); setTab('build'); }} />}
-      {tab === 'mine' && <Gallery />}
+      {tab === 'build' && free && <FreeProver key={free.text.length + free.english} initial={free.text} english={free.english} onClose={() => setFree(null)} />}
+      {tab === 'build' && !free && (
+        <>
+          {started && (
+            <div className="notice idea-banner">
+              <strong>Working on: {started.idea.title}.</strong> The English is in step 1.
+              {started.statementShown ? (
+                <> You looked at one way to state it. <button className="btn small" onClick={() => setFree({ text: ideaStart(started.idea), english: started.idea.english })}>Use this statement</button> to prove it in a free editor.</>
+              ) : (
+                <> Or open the Ideas tab and reveal one way to state it to skip ahead.</>
+              )}
+              {' '}<button className="linkish" onClick={() => setStarted(null)}>Dismiss</button>
+            </div>
+          )}
+          <Wizard />
+        </>
+      )}
+      {tab === 'ideas' && <Ideas onWork={work} />}
+      {tab === 'mine' && <Gallery onEditFree={(t) => { setFree({ text: t.source ?? '', english: t.english }); setTab('build'); }} />}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { CodexEntry } from '../../content/types.ts';
 import { getCodex } from '../data.ts';
-import { Lean, Markdown } from './Markdown.tsx';
+import { InlineMd, Lean, Markdown } from './Markdown.tsx';
 
 export function CodexCard({ entry, headingLevel = 3 }: { entry: CodexEntry; headingLevel?: 2 | 3 | 4 }) {
   const H = `h${headingLevel}` as 'h2' | 'h3' | 'h4';
@@ -10,7 +10,7 @@ export function CodexCard({ entry, headingLevel = 3 }: { entry: CodexEntry; head
       <H>
         <span className="tag">{entry.kind}</span> <span className="lean-name">{entry.name}</span>
       </H>
-      <p className="summary">{entry.summary}</p>
+      <p className="summary"><InlineMd text={entry.summary} /></p>
       <Markdown text={entry.body} />
       {entry.example && (
         <>

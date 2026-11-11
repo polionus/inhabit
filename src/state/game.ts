@@ -34,6 +34,8 @@ export interface SavedTheorem {
   proof: string;
   complete: boolean;
   createdAt: number;
+  /** Free-form theorems (started from an idea): the whole source, used instead of the fields above. */
+  source?: string;
 }
 
 export interface WorkshopDraft {
@@ -162,6 +164,7 @@ export function migrate(raw: unknown): SaveData {
       proof: str(t.proof, ''),
       complete: t.complete === true,
       createdAt: num(t.createdAt, 0),
+      ...(typeof t.source === 'string' ? { source: t.source } : {}),
     }));
   }
   out.welcomed = raw.welcomed === true;

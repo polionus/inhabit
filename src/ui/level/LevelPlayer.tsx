@@ -174,7 +174,7 @@ export function LevelPlayer(props: LevelPlayerProps) {
             note={level.kind === 'formalize' && outcome.selfAssessed ? 'You judged this one yourself.' : undefined}
             actions={
               <>
-                <button className="btn primary" autoFocus onClick={props.onNext}>{props.nextLabel ?? 'Next'}</button>
+                <button className="btn primary" onClick={props.onNext}>{props.nextLabel ?? 'Next'}</button>
                 {props.extraActions}
               </>
             }
