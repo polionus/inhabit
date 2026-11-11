@@ -86,7 +86,41 @@ export function checkBody(
     body,
   );
   const result = engine.check(session.env, assembled.source, session.options);
-  return { result: forbidAxioms(result, assembled.bodyOffset, assembled.bodyOffset + body.length), assembled };
+  const checked = forbidAxioms(result, assembled.bodyOffset, assembled.bodyOffset + body.length);
+  return { result: explainAutomation(checked), assembled };
+}
+
+/** Real Lean/Mathlib automation that the game deliberately leaves out. */
+const AUTOMATION = new Set([
+  'simp', 'simp_all', 'dsimp', 'omega', 'decide', 'ring', 'ring_nf', 'linarith', 'nlinarith',
+  'norm_num', 'aesop', 'grind', 'tauto', 'exact?', 'apply?', 'rw?', 'positivity', 'push_neg',
+  'field_simp', 'norm_cast', 'gcongr', 'bound', 'itauto', 'cc', 'abel', 'group',
+]);
+
+/**
+ * "Not available in this level yet" is misleading for automation: it never unlocks. Say why.
+ */
+function explainAutomation(result: CheckResult): CheckResult {
+  const isAutomation = (d: CheckResult['diagnostics'][number]) =>
+    (d.code === 'tactic-locked' || d.code === 'unknown-tactic') &&
+    !!d.data?.tactic &&
+    AUTOMATION.has(d.data.tactic);
+  if (!result.diagnostics.some(isAutomation)) return result;
+  return {
+    ...result,
+    diagnostics: result.diagnostics.map((d) =>
+      isAutomation(d)
+        ? {
+            ...d,
+            code: 'tactic-locked' as const,
+            message:
+              `\`${d.data!.tactic}\` is real Lean automation, and Inhabit leaves it out on purpose: ` +
+              'here you build each proof by hand so you can see how it works. ' +
+              'The Graduate guide shows where automation fits once you move to real Lean.',
+          }
+        : d,
+    ),
+  };
 }
 
 /**
