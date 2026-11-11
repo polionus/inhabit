@@ -252,3 +252,84 @@ export interface PhrasebookRow {
   mathlib: string;
   note?: string;
 }
+
+// ───────────────────────── Site copy (Home and About pages) ─────────────────────────
+// Markdown fields support **bold**, *italic*, `inline lean`, links, and [[codex-id]] links.
+
+/** A short titled blurb (card). `body` is markdown, 1–3 sentences. */
+export interface Blurb {
+  title: string;
+  body: string;
+}
+
+/**
+ * The live proof shown on the home page: a complete, real Lean theorem the visitor steps
+ * through, watching the goal change. It is checked by the engine at runtime, so the goal
+ * states shown are computed, not written by hand.
+ */
+export interface HomeDemo {
+  heading: string;
+  /** Markdown, ≤ 40 words: what the visitor is looking at. */
+  intro: string;
+  /** The statement in plain English, shown above the Lean. */
+  english: string;
+  /** A complete declaration (header + tactic proof). Must check in both engines. */
+  code: string;
+  /**
+   * One note per tactic line, in order: what that line does, in plain words, ≤ 22 words.
+   * `line` is 1-based within `code`.
+   */
+  steps: { line: number; note: string }[];
+  /** Markdown, ≤ 30 words, shown when the last step is reached ("that was a proof…"). */
+  closing: string;
+}
+
+export interface HomeCopy {
+  hero: {
+    /** Small label above the headline. Must make clear this is about Lean. */
+    eyebrow: string;
+    /** ≤ 9 words. */
+    headline: string;
+    /** Markdown, ≤ 45 words: what this is and what you leave with. */
+    lede: string;
+    /** Primary button for a first-time visitor. */
+    startLabel: string;
+    /** Primary button for a returning player; the UI appends the level title. */
+    continueLabel: string;
+    /** Secondary link to the About page. */
+    aboutLabel: string;
+    /** Three or four very short reassurances shown under the buttons (e.g. "No install"). */
+    reassurances: string[];
+  };
+  demo: HomeDemo;
+  /** "What is Lean?" for someone who has never heard of it. Markdown, ≤ 90 words. */
+  whatIsLean: { heading: string; body: string };
+  /** What the player will be able to do afterwards. 3–4 blurbs. */
+  outcomes: { heading: string; items: Blurb[] };
+  /** Introduces the strip of ten worlds (the worlds themselves come from the content registry). */
+  journey: { heading: string; intro: string };
+  /** How the game teaches, as felt by the player. 3–4 blurbs. */
+  method: { heading: string; items: Blurb[] };
+  /** Who it is for and what you need to know beforehand. Markdown, ≤ 70 words. */
+  audience: { heading: string; body: string };
+  /** Final call to action at the bottom of the page. */
+  closing: { heading: string; body: string; cta: string };
+}
+
+export interface AboutSection {
+  /** Stable anchor id, kebab-case. */
+  id: string;
+  title: string;
+  /** Markdown, ≤ 170 words. May contain fenced ```lean blocks. */
+  body: string;
+}
+
+export interface AboutCopy {
+  title: string;
+  /** Markdown, ≤ 50 words. */
+  lede: string;
+  sections: AboutSection[];
+  faq: { q: string; a: string }[];
+  /** Markdown: credits, licence, source link. */
+  credits: string;
+}
