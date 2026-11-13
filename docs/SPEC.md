@@ -392,7 +392,8 @@ browser, so a seed in a URL *is* a shared puzzle. No `Math.random`, no `Date`. E
 proof puzzle carries a reference solution that the mini-engine accepts under the puzzle's
 `allowedTactics`; `scripts/verify-arena.ts` samples the generator and compiles the samples in
 real Lean. Families: `prop`, `inhabit`, `quant`, `set`, `quick` (see the contract). Puzzles are
-rated 400–2400 by an estimate of proof difficulty.
+rated 400–2400 by an estimate of proof difficulty. `src/arena/plan.ts` (frozen) turns seeds
+and dates into the sets each mode plays: `dailySet`, `rushSlot`, `duelSet`, `sequence`, `nth`.
 
 ### 10.2 Modes
 - **Daily Proof** — one fixed set per calendar day (UTC), the same for everyone: three puzzles
@@ -400,8 +401,8 @@ rated 400–2400 by an estimate of proof difficulty.
   (date, per-puzzle marks, time, link). A daily streak is counted.
 - **Rated puzzles** — endless, one at a time, near the player's rating. Solving raises the
   player's Arena rating, failing or skipping lowers it (Elo-style, starting at 800).
-- **Proof Rush** — timed (3 or 5 minutes) or Survival (three strikes): mostly `quick` items with
-  short proofs mixed in, rating rising as you go. Personal bests.
+- **Proof Rush** — timed (3 or 5 minutes) or Survival (three strikes): `quick` items only,
+  rating rising as you go. Personal bests.
 - **Duel** — two players race the same seeded set.
   - *Bot*: an always-available ladder of named bots with ratings; a bot finishes each puzzle at
     a random time drawn from its rating versus the puzzle's. Always labelled as a bot.
