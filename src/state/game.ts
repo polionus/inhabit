@@ -22,6 +22,10 @@ export interface Settings {
   fontSize: number;
   strictInventory: boolean;
   motion: 'system' | 'reduce' | 'full';
+  /** Sound effects (synthesised, quiet). */
+  sound: boolean;
+  /** Lessons start expanded in the level task panel. */
+  lessonsOpen: boolean;
 }
 
 export interface SavedTheorem {
@@ -63,6 +67,8 @@ export interface SaveData {
   reviewsPassed: number;
   workshop: WorkshopDraft;
   sandbox: string;
+  /** Things seen once (screen intros, primers, guide articles): key → timestamp. */
+  seen: Record<string, number>;
 }
 
 export const defaultSettings = (): Settings => ({
@@ -70,6 +76,8 @@ export const defaultSettings = (): Settings => ({
   fontSize: 15,
   strictInventory: true,
   motion: 'system',
+  sound: true,
+  lessonsOpen: true,
 });
 
 export const emptyWorkshop = (): WorkshopDraft => ({
@@ -104,6 +112,7 @@ export const defaultSave = (): SaveData => ({
   reviewsPassed: 0,
   workshop: emptyWorkshop(),
   sandbox: defaultSandbox,
+  seen: {},
 });
 
 const isObj = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null && !Array.isArray(x);
@@ -151,6 +160,8 @@ export function migrate(raw: unknown): SaveData {
       fontSize: Math.max(11, Math.min(24, num(s.fontSize, 15))),
       strictInventory: typeof s.strictInventory === 'boolean' ? s.strictInventory : true,
       motion: s.motion === 'reduce' || s.motion === 'full' ? s.motion : 'system',
+      sound: typeof s.sound === 'boolean' ? s.sound : true,
+      lessonsOpen: typeof s.lessonsOpen === 'boolean' ? s.lessonsOpen : true,
     };
   }
   if (Array.isArray(raw.theorems)) {
@@ -185,6 +196,7 @@ export function migrate(raw: unknown): SaveData {
     };
   }
   out.sandbox = str(raw.sandbox, d.sandbox);
+  if (isObj(raw.seen)) for (const [k, v] of Object.entries(raw.seen)) if (typeof v === 'number') out.seen[k] = v;
   out.version = SAVE_VERSION;
   return out;
 }
@@ -254,6 +266,8 @@ export interface BadgeCtx {
 
 export interface BadgeDef {
   id: string;
+  /** For grouping on the profile page. */
+  group?: 'path' | 'craft' | 'memory' | 'arena' | 'reading';
   title: string;
   desc: string;
   test: (c: BadgeCtx) => boolean;

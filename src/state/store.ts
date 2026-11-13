@@ -18,6 +18,7 @@ import {
 } from './game.ts';
 import { emptyProgress, type Rating, type WorldLike } from './progress.ts';
 import type { EventResult, GameEvent } from './events.ts';
+import { exportSections, importSections, resetSections } from './sections.ts';
 
 export interface StorageLike {
   getItem(k: string): string | null;
@@ -45,6 +46,8 @@ export interface GameState {
   reviewResult(id: string, passed: boolean): void;
   /** Report something that happened outside the level flow (Arena, Guide). See events.ts. */
   recordEvent(e: GameEvent): EventResult;
+  /** Remember that something was seen (screen intro, primer, article). Idempotent. */
+  markSeen(key: string): void;
   setDraft(id: string, text: string): void;
   welcome(): void;
   setSettings(s: Partial<Settings>): void;
@@ -147,6 +150,11 @@ export function createGameStore(deps: StoreDeps): StoreApi<GameState> {
         if (days !== s.activeDays) commit({ ...s, activeDays: days });
         return { xp: 0 };
       },
+      markSeen(key) {
+        const s = get().save;
+        if (s.seen[key]) return;
+        commit({ ...s, seen: { ...s.seen, [key]: now() } });
+      },
       setDraft(id, text) {
         const s = get().save;
         if (s.drafts[id] === text) return;
@@ -182,7 +190,7 @@ export function createGameStore(deps: StoreDeps): StoreApi<GameState> {
         commit({ ...s, sandbox: text });
       },
       exportJson() {
-        return JSON.stringify({ app: 'inhabit', ...get().save }, null, 2);
+        return JSON.stringify({ app: 'inhabit', ...get().save, sections: exportSections() }, null, 2);
       },
       importJson(text) {
         try {
@@ -191,6 +199,7 @@ export function createGameStore(deps: StoreDeps): StoreApi<GameState> {
             return { ok: false, error: 'This does not look like an Inhabit save file.' };
           }
           commit(migrate(raw));
+          importSections((raw as Record<string, unknown>).sections);
           return { ok: true };
         } catch {
           return { ok: false, error: 'Could not read that file as JSON.' };
@@ -202,6 +211,7 @@ export function createGameStore(deps: StoreDeps): StoreApi<GameState> {
         } catch {
           /* ignore */
         }
+        resetSections();
         set({ save: defaultSave(), toasts: [] });
       },
       dismissToast(id) {
