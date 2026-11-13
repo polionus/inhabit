@@ -8,6 +8,7 @@ import { OpenInLean } from '../components/OpenInLean.tsx';
 import { CommandOutputs, Infoview } from '../components/Infoview.tsx';
 import { SymbolBar } from '../components/SymbolBar.tsx';
 import { useInfo } from '../level/ProofLevel.tsx';
+import { Icon, ScreenHeader } from '../components/kit.tsx';
 
 export function SandboxScreen() {
   const saved = useGame((s) => s.save.sandbox);
@@ -26,20 +27,21 @@ export function SandboxScreen() {
   const diags = info.diags.filter((d) => d.code !== 'command-output');
   return (
     <div className="page wide sandbox">
-      <div className="page-head">
-        <div>
-          <h1>Sandbox</h1>
-          <p className="muted">Everything is unlocked. Try <code className="inline">#check</code>, <code className="inline">#eval</code>, any tactic.</p>
-        </div>
-        <div className="actions">
-          <OpenInLean source={text} />
-          <button className="btn ghost" onClick={() => setText('')}>Clear</button>
-        </div>
-      </div>
+      <ScreenHeader
+        id="sandbox"
+        title="Sandbox"
+        icon="sandbox"
+        actions={
+          <>
+            <OpenInLean source={text} className="btn outline" />
+            <button className="btn ghost" onClick={() => setText('')}><Icon name="close" size={16} /> Clear</button>
+          </>
+        }
+      />
       <div className="sandbox-grid">
         <div className="editor-panel">
           <SymbolBar onInsert={(s) => editor.current?.insert(s)} />
-          <Editor ref={editor} value={text} onChange={setText} onCursor={setCursor} diagnostics={toEditorDiags(mapDiagnostics(result?.diagnostics ?? [], 0, text.length))} fontSize={fontSize} ariaLabel="Sandbox editor" cursor={0} />
+          <div className="sandbox-editor"><Editor ref={editor} value={text} onChange={setText} onCursor={setCursor} diagnostics={toEditorDiags(mapDiagnostics(result?.diagnostics ?? [], 0, text.length))} fontSize={fontSize} ariaLabel="Sandbox editor" cursor={0} /></div>
         </div>
         <div className="sandbox-side">
           <CommandOutputs outputs={outputs} label="Output" />

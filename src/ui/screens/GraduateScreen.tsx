@@ -1,26 +1,33 @@
 import { data } from '../data.ts';
 import { Markdown } from '../components/Markdown.tsx';
 import { openInRealLean } from '../lean/openInLean.ts';
+import { EmptyState, Icon, ScreenHeader } from '../components/kit.tsx';
 
 export function GraduateScreen() {
   const { graduate, phrasebook } = data;
   return (
-    <div className="page narrow">
-      <h1>Graduate</h1>
-      <p className="lede">The game’s engine is a small, faithful slice of Lean. This is how to take what you know into the real thing, with Mathlib.</p>
-      <div className="actions">
-        <button className="btn primary" onClick={() => openInRealLean('example : 2 + 2 = 4 := rfl')}>Open the real Lean editor</button>
-      </div>
-      {graduate.length === 0 && <p className="notice">The guide is still being written.</p>}
-      {graduate.map((s) => (
-        <section key={s.id} className="grad-section">
-          <h2>{s.title}</h2>
-          <Markdown text={s.body} />
+    <div className="page narrow graduate-page">
+      <ScreenHeader
+        id="graduate"
+        title="Graduate"
+        icon="graduate"
+        actions={<button className="btn primary" onClick={() => openInRealLean('example : 2 + 2 = 4 := rfl')}><Icon name="external" size={18} /> Open the real Lean editor</button>}
+      />
+      {graduate.length === 0 && <EmptyState icon="graduate" title="This page is still being written" />}
+      {graduate.length > 1 && (
+        <nav className="grad-toc" aria-label="Sections">
+          <ol>{graduate.map((s) => <li key={s.id}><a href="#/graduate" onClick={(e) => { e.preventDefault(); document.getElementById(`grad-${s.id}`)?.scrollIntoView({ block: 'start' }); }}>{s.title}</a></li>)}</ol>
+        </nav>
+      )}
+      {graduate.map((s, i) => (
+        <section key={s.id} className="grad-section" id={`grad-${s.id}`} aria-labelledby={`grad-h-${s.id}`}>
+          <h2 id={`grad-h-${s.id}`}><span className="grad-n tnum" aria-hidden="true">{i + 1}</span>{s.title}</h2>
+          <Markdown text={s.body} className="prose" />
         </section>
       ))}
       {phrasebook.length > 0 && (
         <section>
-          <h2>Phrasebook</h2>
+          <h2 className="section-title"><Icon name="translate" size={20} /> Phrasebook</h2>
           <p className="muted">From the names used in the game to what you will write in Mathlib.</p>
           <div className="table-wrap">
             <table className="phrasebook">

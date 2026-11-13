@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
 import type { CodexEntry } from '../../content/types.ts';
 import { getCodex } from '../data.ts';
 import { InlineMd, Lean, Markdown } from './Markdown.tsx';
+import { Modal } from './kit.tsx';
 
 export function CodexCard({ entry, headingLevel = 3 }: { entry: CodexEntry; headingLevel?: 2 | 3 | 4 }) {
   const H = `h${headingLevel}` as 'h2' | 'h3' | 'h4';
@@ -37,25 +37,11 @@ export function CodexCard({ entry, headingLevel = 3 }: { entry: CodexEntry; head
 /** Accessible modal dialog showing one codex entry. */
 export function CodexModal({ id, onClose }: { id: string; onClose: () => void }) {
   const entry = getCodex(id);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const prev = document.activeElement as HTMLElement | null;
-    ref.current?.focus();
-    const k = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-    window.addEventListener('keydown', k);
-    return () => {
-      window.removeEventListener('keydown', k);
-      prev?.focus?.();
-    };
-  }, [onClose]);
   if (!entry) return null;
   return (
-    <div className="modal-back" onClick={onClose}>
-      <div className="modal" role="dialog" aria-modal="true" aria-label={entry.name} tabIndex={-1} ref={ref} onClick={(e) => e.stopPropagation()}>
-        <button className="btn ghost close" onClick={onClose} aria-label="Close">×</button>
-        <CodexCard entry={entry} headingLevel={2} />
-        <p className="meta"><a href={`#/codex/${encodeURIComponent(entry.id)}`} onClick={onClose}>Open in the Codex</a></p>
-      </div>
-    </div>
+    <Modal open onClose={onClose} title={entry.name} hideTitle className="codex-modal">
+      <CodexCard entry={entry} headingLevel={2} />
+      <p className="meta"><a href={`#/codex/${encodeURIComponent(entry.id)}`} onClick={onClose}>Open in the Codex</a></p>
+    </Modal>
   );
 }

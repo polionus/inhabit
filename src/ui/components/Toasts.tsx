@@ -26,6 +26,7 @@ export function Toasts() {
   useEffect(() => {
     const live = new Set(visible.map((t) => t.id));
     let delay = 0;
+    let burst = false;
     for (const t of visible) {
       if (!timers.current.has(t.id)) {
         timers.current.set(t.id, setTimeout(() => {
@@ -39,9 +40,11 @@ export function Toasts() {
         // Let a level's own celebration sound first; stagger the rest.
         const d = 650 + delay;
         delay += 450;
+        const withBurst = k !== 'info' && !burst;
+        if (withBurst) burst = true;
         setTimeout(() => {
           sfx.play(k === 'badge' ? 'badge' : k === 'quest' ? 'quest' : 'tap');
-          if (k !== 'info') celebrate('quest', { x: window.innerWidth - 180, y: 70 });
+          if (withBurst) celebrate('star', { x: window.innerWidth - 180, y: 60 });
         }, d);
       }
     }

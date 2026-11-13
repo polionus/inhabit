@@ -5,8 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inhabit — learn Lean 4, the theorem prover, by playing</title>
     <meta name="description" content="Inhabit is a free browser game that teaches Lean 4, the theorem prover: you write real proofs, one small goal at a time, with nothing to install." />
-    <meta name="theme-color" content="#f6f2e8" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#16140f" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f2f3f8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f111a" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="dark light" />
+    <script>
+      // Apply the saved theme before first paint (no white flash). Mirrors App's settings effect.
+      try {
+        var s = JSON.parse(localStorage.getItem('inhabit.save') || 'null');
+        var t = s && s.settings && s.settings.theme;
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+        var m = s && s.settings && s.settings.motion;
+        if (m === 'reduce' || m === 'full') document.documentElement.setAttribute('data-motion', m);
+      } catch (e) {}
+    </script>
+    <style>
+      /* Splash: matches the app background until the stylesheet loads. */
+      html { background: #0f111a; color: #eceef8; }
+      @media (prefers-color-scheme: light) { html:not([data-theme='dark']) { background: #f2f3f8; color: #151726; } }
+      html[data-theme='light'] { background: #f2f3f8; color: #151726; }
+      html[data-theme='dark'] { background: #0f111a; color: #eceef8; }
+    </style>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Inhabit" />

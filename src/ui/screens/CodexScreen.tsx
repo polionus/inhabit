@@ -3,6 +3,7 @@ import type { CodexEntry } from '../../content/types.ts';
 import { data } from '../data.ts';
 import { useGame } from '../game.ts';
 import { CodexCard } from '../components/CodexCard.tsx';
+import { EmptyState, Icon, ProgressBar, ScreenHeader } from '../components/kit.tsx';
 
 const KINDS: { k: CodexEntry['kind']; label: string }[] = [
   { k: 'concept', label: 'Concepts' },
@@ -41,24 +42,32 @@ export function CodexScreen({ focus }: { focus?: string }) {
   const match = (e: CodexEntry) => !query || (e.name + ' ' + e.summary + ' ' + e.body).toLowerCase().includes(query);
   const unlockedCount = entries.filter((e) => unlocked.has(e.id)).length;
   return (
-    <div className="page">
-      <div className="page-head">
-        <div>
-          <h1>Codex</h1>
-          <p className="muted">{unlockedCount} of {entries.length} entries found. Your own reference, filled in as you play.</p>
+    <div className="page codex-page">
+      <ScreenHeader
+        id="codex"
+        title="Codex"
+        icon="codex"
+        actions={
+          <label className="search">
+            <Icon name="search" size={18} />
+            <span className="sr-only">Search the codex</span>
+            <input type="search" placeholder="Search the codex" value={q} onChange={(e) => setQ(e.target.value)} />
+          </label>
+        }
+      >
+        <div className="codex-count">
+          <span className="tnum"><strong>{unlockedCount}</strong> of {entries.length} found</span>
+          <ProgressBar value={entries.length ? unlockedCount / entries.length : 0} size="sm" tone="gold" label={`${unlockedCount} of ${entries.length} entries found`} />
         </div>
-        <label className="search">
-          <span className="sr-only">Search the codex</span>
-          <input type="search" placeholder="Search…" value={q} onChange={(e) => setQ(e.target.value)} />
-        </label>
-      </div>
-      {entries.length === 0 && <p className="notice">The codex is empty so far.</p>}
+      </ScreenHeader>
+      {entries.length === 0 && <EmptyState icon="codex" title="The codex is empty so far" />}
+      {query && entries.length > 0 && !entries.some(match) && <EmptyState icon="search" title="No matches">Nothing in the codex mentions “{q.trim()}”.</EmptyState>}
       {KINDS.map(({ k, label }) => {
         const es = entries.filter((e) => e.kind === k && match(e));
         if (!es.length) return null;
         return (
           <section key={k} className="codex-group">
-            <h2>{label}</h2>
+            <h2 className="section-title">{label}<span className="count tnum">{es.filter((e) => unlocked.has(e.id)).length}/{es.length}</span></h2>
             <div className="codex-grid">
               {es.map((e) =>
                 unlocked.has(e.id) ? (
@@ -67,7 +76,8 @@ export function CodexScreen({ focus }: { focus?: string }) {
                   </div>
                 ) : (
                   <article key={e.id} className="codex-card locked" aria-label="Locked entry">
-                    <h3><span className="tag">{e.kind}</span> <span className="silhouette" aria-hidden="true">{'▒'.repeat(Math.min(8, Math.max(3, e.name.length)))}</span></h3>
+                    <span className="codex-lock" aria-hidden="true"><Icon name="lock" size={18} /></span>
+                    <h3><span className="tag">{e.kind}</span> <span className="silhouette" aria-hidden="true">{'?'.repeat(Math.min(8, Math.max(3, e.name.length)))}</span></h3>
                     <p className="muted small">Unlocks in {whereUnlocked(e.id) ?? 'a later level'}.</p>
                   </article>
                 ),

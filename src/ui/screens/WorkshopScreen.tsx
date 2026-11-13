@@ -11,6 +11,7 @@ import { Lean, InlineMd, LeanInline } from '../components/Markdown.tsx';
 import { SymbolBar } from '../components/SymbolBar.tsx';
 import { useInfo } from '../level/ProofLevel.tsx';
 import type { SavedTheorem, WorkshopDraft } from '../../state/game.ts';
+import { EmptyState, Icon, ScreenHeader, Tabs, celebrate, sfx } from '../components/kit.tsx';
 
 const STEPS = ['Say it', 'Type it', 'Define it', 'State it', 'Prove it'];
 const UNSUPPORTED = /ℝ|\bReal\b|ℚ|\bRat\b|ℂ|\bComplex\b|\bFinset\b|\bMatrix\b|\bPolynomial\b|\bMeasure|\bFilter\b|\bTopologicalSpace\b|\bDeriv/;
@@ -67,6 +68,10 @@ function Wizard() {
   const save = () => {
     game().saveTheorem({ name: (w.name || 'my_theorem').trim().replace(/\s+/g, '_'), english: w.english, binders: w.binders, defs: w.defs, statement: w.statement, proof: w.proof, complete });
     setSaved(true);
+    if (complete) {
+      sfx.play('win');
+      celebrate('win');
+    }
   };
 
   return (
@@ -74,7 +79,7 @@ function Wizard() {
       <ol className="steps" aria-label="Steps">
         {STEPS.map((s, i) => (
           <li key={s} className={w.step === i + 1 ? 'cur' : w.step > i + 1 ? 'past' : ''}>
-            <button onClick={() => set({ step: i + 1 })} aria-current={w.step === i + 1 ? 'step' : undefined}><span className="n">{i + 1}</span> {s}</button>
+            <button onClick={() => set({ step: i + 1 })} aria-current={w.step === i + 1 ? 'step' : undefined}><span className="n">{w.step > i + 1 ? <Icon name="check" size={14} strokeWidth={3} /> : i + 1}</span> {s}</button>
           </li>
         ))}
       </ol>
@@ -160,7 +165,7 @@ function Wizard() {
 
 function Gallery({ onEditFree }: { onEditFree: (t: SavedTheorem) => void }) {
   const list = useGame((s) => s.save.theorems);
-  if (!list.length) return <p className="notice">Nothing here yet. Prove something in the Build tab and save it.</p>;
+  if (!list.length) return <EmptyState icon="trophy" title="No theorems yet">Prove something in the Build tab and save it here.</EmptyState>;
   const edit = (t: SavedTheorem) => {
     if (t.source !== undefined) return onEditFree(t);
     game().setWorkshop({ step: 5, english: t.english, binders: t.binders, defs: t.defs, statement: t.statement, proof: t.proof, name: t.name });
@@ -258,6 +263,10 @@ function FreeProver({ initial, english, onClose }: { initial: string; english: s
   const save = () => {
     game().saveTheorem({ name, english, binders: '', defs: '', statement: '', proof: '', complete, source: text });
     setSaved(true);
+    if (complete) {
+      sfx.play('win');
+      celebrate('win');
+    }
   };
   return (
     <div className="free-prover">
@@ -291,13 +300,19 @@ export function WorkshopScreen() {
   };
   return (
     <div className="page narrow workshop">
-      <h1>Workshop</h1>
-      <p className="lede">Take a statement of your own from English to a proved Lean theorem.</p>
-      <div className="tabs" role="tablist">
-        {([['build', 'Build'], ['ideas', 'Ideas'], ['mine', `My theorems (${n})`]] as const).map(([k, l]) => (
-          <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>
-        ))}
-      </div>
+      <ScreenHeader id="workshop" title="Workshop" icon="workshop" />
+      <Tabs
+        label="Workshop"
+        idBase="ws"
+        value={tab}
+        onChange={setTab}
+        tabs={[
+          { id: 'build', label: 'Build', icon: 'workshop' },
+          { id: 'ideas', label: 'Ideas', icon: 'bulb' },
+          { id: 'mine', label: 'My theorems', icon: 'trophy', badge: n },
+        ]}
+      />
+      <div role="tabpanel" id={`ws-panel-${tab}`} aria-labelledby={`ws-tab-${tab}`}>
       {tab === 'build' && free && <FreeProver key={free.text.length + free.english} initial={free.text} english={free.english} onClose={() => setFree(null)} />}
       {tab === 'build' && !free && (
         <>
@@ -317,6 +332,7 @@ export function WorkshopScreen() {
       )}
       {tab === 'ideas' && <Ideas onWork={work} />}
       {tab === 'mine' && <Gallery onEditFree={(t) => { setFree({ text: t.source ?? '', english: t.english }); setTab('build'); }} />}
+      </div>
     </div>
   );
 }
