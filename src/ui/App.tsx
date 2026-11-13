@@ -3,9 +3,9 @@ import { useRoute, href, type Route } from './router.ts';
 import { ErrorBoundary } from './hooks.tsx';
 import { game, useGame } from './game.ts';
 import { data, getCodex } from './data.ts';
-import { dueIds } from '../state/leitner.ts';
-import { rankFor } from '../state/game.ts';
 import { Toasts } from './components/Toasts.tsx';
+import { Shell } from './shell/Shell.tsx';
+import { EmptyState } from './components/kit.tsx';
 import { MapScreen } from './screens/MapScreen.tsx';
 import { WorldScreen } from './screens/WorldScreen.tsx';
 import { LevelScreen } from './screens/LevelScreen.tsx';
@@ -49,42 +49,6 @@ function useSettingsEffect() {
   }, [s.theme, s.motion, s.fontSize]);
 }
 
-const NAV: { name: string; label: string; to: string }[] = [
-  { name: 'map', label: 'Map', to: '#/map' },
-  { name: 'arena', label: 'Arena', to: '#/arena' },
-  { name: 'guide', label: 'Guide', to: '#/guide' },
-  { name: 'review', label: 'Review', to: '#/review' },
-  { name: 'codex', label: 'Codex', to: '#/codex' },
-  { name: 'sandbox', label: 'Sandbox', to: '#/sandbox' },
-  { name: 'workshop', label: 'Workshop', to: '#/workshop' },
-  { name: 'graduate', label: 'Graduate', to: '#/graduate' },
-  { name: 'about', label: 'About', to: '#/about' },
-];
-
-function TopBar({ active }: { active: string }) {
-  const deck = useGame((s) => s.save.deck);
-  const xp = useGame((s) => s.save.xp);
-  const due = dueIds(deck, Date.now()).length;
-  const rank = rankFor(xp);
-  const act = active === 'home' ? '' : active === 'world' || active === 'level' ? 'map' : active;
-  return (
-    <header className="topbar">
-      <a className="brand" href={href.home()} aria-label="Inhabit, home">Inhabit</a>
-      <nav aria-label="Main">
-        {NAV.map((n) => (
-          <a key={n.name} href={n.to} className={act === n.name ? 'active' : ''} aria-current={act === n.name ? 'page' : undefined}>
-            {n.label}
-            {n.name === 'review' && due > 0 && <span className="count" aria-label={`${due} due`}>{due}</span>}
-          </a>
-        ))}
-      </nav>
-      <a className={`rank ${act === 'profile' ? 'active' : ''}`} href="#/profile" title="Profile and settings">
-        <span>{rank.title}</span> <span className="xp-pill">{xp} XP</span>
-      </a>
-    </header>
-  );
-}
-
 export function App() {
   const route = useRoute();
   const storageError = useGame((s) => s.storageError);
@@ -119,19 +83,24 @@ export function App() {
       case 'arena': screen = <ArenaScreen sub={route.sub} arg={route.arg} />; break;
       default:
         screen = (
-          <div className="page narrow"><h1>Nothing here</h1><p>That page does not exist. <a href={href.map()}>Back to the map</a>.</p></div>
+          <div className="page narrow"><EmptyState glyph="?" title="Nothing here" action={<a className="btn primary" href={href.map()}>Back to the map</a>}>That page does not exist.</EmptyState></div>
         );
     }
   }
+  const banners = (
+    <>
+      {data.fixtures && <div className="fixture-banner">Fixture mode: fake engine and sample levels. <a href="?fixtures=0#/">Switch to real content</a></div>}
+      {storageError && <div className="fixture-banner warn">Your browser is not letting Inhabit save progress. Export your save from Profile to keep it.</div>}
+    </>
+  );
   return (
     <>
       <a className="skip" href="#main" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus(); }}>Skip to content</a>
-      <TopBar active={route.name} />
-      {data.fixtures && <div className="fixture-banner">Fixture mode: fake engine and sample levels. <a href="?fixtures=0#/">Switch to real content</a></div>}
-      {storageError && <div className="fixture-banner warn">Your browser is not letting Inhabit save progress. Export your save from Profile to keep it.</div>}
-      <main id="main" tabIndex={-1}>
-        <ErrorBoundary resetKey={key}>{screen}</ErrorBoundary>
-      </main>
+      <Shell route={route} banners={banners}>
+        <main id="main" tabIndex={-1}>
+          <ErrorBoundary resetKey={key}>{screen}</ErrorBoundary>
+        </main>
+      </Shell>
       <Toasts />
     </>
   );

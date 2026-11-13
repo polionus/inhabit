@@ -165,7 +165,7 @@ export function PredictLevelView({ run, level }: { run: Run; level: PredictLevel
     <>
       <div className="editor-panel predict">
         <Editor value={level.code} readOnly markLine={level.line} fontSize={run.fontSize} cursor={lo.indent} ariaLabel="Code (read-only). The marked line is the one to predict." />
-        <p className="question">{level.question ?? 'What will the goal be after this line runs?'}</p>
+        <Markdown className="question" text={level.question ?? 'What will the goal be after this line runs?'} />
         <OptionList options={level.options} order={order} picked={picked} selected={sel} locked={done} onPick={(i) => !done && setSel(i)} />
         {!done && (
           <div className="actions">

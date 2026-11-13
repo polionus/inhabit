@@ -6,12 +6,21 @@ import { CodexModal } from './CodexCard.tsx';
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+/** Fence convention (content/types.ts): lean, lean-real, lean-mathlib, text. */
+function renderFence(code: string, lang: string): string {
+  if (lang === 'text') return `<div class="codeblock text"><pre class="code"><code>${esc(code)}</code></pre></div>`;
+  const pre = `<pre class="code"><code>${highlightHtml(code)}</code></pre>`;
+  if (lang === 'lean-real') return `<div class="codeblock real"><span class="code-label">Real Lean only</span>${pre}</div>`;
+  if (lang === 'lean-mathlib') return `<div class="codeblock mathlib"><span class="code-label">Needs Mathlib</span>${pre}</div>`;
+  return pre;
+}
+
 const md = new Marked({
   gfm: true,
   breaks: false,
   renderer: {
     html: ({ text }) => esc(text),
-    code: ({ text }) => `<pre class="code"><code>${highlightHtml(text.replace(/\n$/, ''))}</code></pre>`,
+    code: ({ text, lang }: { text: string; lang?: string }) => renderFence(text.replace(/\n$/, ''), (lang ?? '').trim().split(/\s+/)[0]),
     codespan: ({ text }) => `<code class="inline">${highlightHtml(text.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"'))}</code>`,
     link(this: any, { href, tokens, text }: { href: string; tokens?: unknown[]; text: string }): string {
       const inner: string = (tokens ? this.parser.parseInline(tokens) : '') || text;

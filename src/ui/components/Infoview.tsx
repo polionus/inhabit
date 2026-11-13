@@ -3,6 +3,7 @@ import type { Goal } from '../../engine/types.ts';
 import type { BodyDiagnostic } from '../lean/offsets.ts';
 import { explain } from '../lean/explain.ts';
 import { Lean, LeanInline } from './Markdown.tsx';
+import { Icon } from './icons.tsx';
 
 function GoalView({ goal, index, total, onInsert }: { goal: Goal; index: number; total: number; onInsert?: (name: string) => void }) {
   return (
@@ -132,10 +133,14 @@ export function Infoview({ goals, fallbackGoals, diagnostics, complete, pending,
         : 'No goal at the cursor';
   return (
     <section className="infoview" aria-label="Infoview" aria-busy={pending}>
+      <div className="info-head">
+        <span className="eyebrow"><span className="turnstile" aria-hidden="true">⊢</span> Goals</span>
+        <span className={`pill info-status ${complete ? 'pill-ok' : errors.length ? 'pill-err' : shown ? 'pill-primary' : ''} ${pending ? 'pending' : ''}`} aria-hidden="true">{summary}</span>
+      </div>
       <div className="sr-only" role="status" aria-live="polite">{summary}</div>
       <div className="info-body">
         {complete ? (
-          <div className="done-state"><span className="check" aria-hidden="true">✓</span> {completeText}</div>
+          <div className="done-state"><span className="check" aria-hidden="true"><Icon name="check" size={16} strokeWidth={3.5} /></span> {completeText}</div>
         ) : shown ? (
           <Goals goals={shown} onInsert={onInsert} />
         ) : goals && goals.length === 0 && !errors.length ? (

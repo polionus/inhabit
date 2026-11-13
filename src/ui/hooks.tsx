@@ -33,6 +33,31 @@ export function useCheck<R>(input: unknown, run: () => R, ms = 150): { result: R
   return { result, pending: debounced !== input };
 }
 
+/** True while the media query matches. */
+export function useMedia(query: string): boolean {
+  const get = () => {
+    try {
+      return window.matchMedia(query).matches;
+    } catch {
+      return false;
+    }
+  };
+  const [m, setM] = useState(get);
+  useEffect(() => {
+    let mq: MediaQueryList;
+    try {
+      mq = window.matchMedia(query);
+    } catch {
+      return;
+    }
+    const f = () => setM(mq.matches);
+    f();
+    mq.addEventListener?.('change', f);
+    return () => mq.removeEventListener?.('change', f);
+  }, [query]);
+  return m;
+}
+
 export const emptyResult: CheckResult = { diagnostics: [], steps: [], decls: [], ok: true, complete: false };
 
 export function safe<T>(f: () => T, fallback: T): T {
