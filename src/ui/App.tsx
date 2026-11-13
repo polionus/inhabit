@@ -17,11 +17,14 @@ import { GraduateScreen } from './screens/GraduateScreen.tsx';
 import { ProfileScreen } from './screens/ProfileScreen.tsx';
 import { HomeScreen } from './screens/Home.tsx';
 import { AboutScreen } from './screens/About.tsx';
+import { GuideScreen } from './screens/GuideScreen.tsx';
+import { ArenaScreen } from './arena/ArenaScreen.tsx';
+import { ShareScreen } from './arena/ShareScreen.tsx';
 
 const SITE = 'Inhabit';
 const HOME_TITLE = 'Inhabit — learn Lean 4, the theorem prover, by playing';
 const PAGE_TITLES: Record<string, string> = {
-  map: 'Map', about: 'About', review: 'Review', codex: 'Codex', sandbox: 'Sandbox', workshop: 'Workshop', graduate: 'Graduate', profile: 'Profile',
+  map: 'Map', about: 'About', review: 'Review', codex: 'Codex', sandbox: 'Sandbox', workshop: 'Workshop', graduate: 'Graduate', profile: 'Profile', guide: 'Guide', arena: 'Arena', share: 'Shared proof',
 };
 
 function titleFor(route: Route): string {
@@ -48,6 +51,8 @@ function useSettingsEffect() {
 
 const NAV: { name: string; label: string; to: string }[] = [
   { name: 'map', label: 'Map', to: '#/map' },
+  { name: 'arena', label: 'Arena', to: '#/arena' },
+  { name: 'guide', label: 'Guide', to: '#/guide' },
   { name: 'review', label: 'Review', to: '#/review' },
   { name: 'codex', label: 'Codex', to: '#/codex' },
   { name: 'sandbox', label: 'Sandbox', to: '#/sandbox' },
@@ -109,6 +114,9 @@ export function App() {
       case 'workshop': screen = <WorkshopScreen />; break;
       case 'graduate': screen = <GraduateScreen />; break;
       case 'profile': screen = <ProfileScreen />; break;
+      case 'guide': screen = <GuideScreen id={route.id} />; break;
+      case 'share': screen = <ShareScreen code={route.code} />; break;
+      case 'arena': screen = <ArenaScreen sub={route.sub} arg={route.arg} />; break;
       default:
         screen = (
           <div className="page narrow"><h1>Nothing here</h1><p>That page does not exist. <a href={href.map()}>Back to the map</a>.</p></div>

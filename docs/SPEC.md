@@ -32,6 +32,13 @@ src/content/     pure data
   index.ts         registry + levelContext() (orchestrator-owned)
   worlds/<id>.ts   one file per world: levels, codex entries, lemma bank  (CONTENT agents)
   ideas.ts, graduate.ts   capstone material                               (forge author)
+  lessons/<id>.ts  long-form prose per world: primer, recap, one lesson per level (§9)
+  guide.ts, screens.ts   Guide articles and per-screen explanatory copy (§9)
+src/arena/       generated puzzles and competitive play (§10)
+  types.ts         generator contract (frozen)
+  gen/             the puzzle generator: pure, deterministic, Node-safe
+  state/, net/     ratings, modes, bots, share codes, peer-to-peer transport
+src/ui/arena/    Arena screens
 src/ui/, src/state/, src/main.tsx   the React app                         (UI agent)
 scripts/verify-lean.ts   compiles all content in real Lean
 lean-verify/Game/Core.lean   real-Lean mirror of the engine's base library (reference; frozen)
@@ -212,6 +219,8 @@ The design applies specific findings from learning science. Each rule names the 
    one tactic *or* one concept *or* one piece of syntax. Never two.
 2. **Intro ≤ 120 words, outro ≤ 80** (coherence principle: no seductive details, no history
    lessons, no jokes that cost attention). Lead with the idea in plain words, then the Lean.
+   The intro stays short because it is the *task*. The full explanation lives in the level's
+   **lesson** (§9), which the learner can read at their own pace beside the task.
 3. **Signal the type-theory insight in the outro**, not the intro (the learner has just produced
    the evidence — explanation after generation sticks better).
 4. **Hint ladder of 2–4 rungs** (scaffolding + desirable difficulty): (1) redirect attention
@@ -259,8 +268,12 @@ vs constructive core. Each is a `concept` codex entry, unlocked at the level tha
   request, "test out" of a world by beating its boss, a toggle to lift the tactic inventory lock.
 - **Purpose**: the Codex fills up as a personal reference; the Workshop turns skills into the
   learner's *own* theorem.
-- No dark patterns: no streak-loss punishment, no timers, no lives. Using hints never blocks
-  progress; revealing the full solution marks the level "studied" and schedules it for re-solving.
+- No dark patterns: no streak-loss punishment, no lives, no guilt messaging, nothing that blocks
+  learning. **The curriculum (map, levels, review) has no timers.** Timers exist only in the
+  Arena (§10), which is opt-in play on generated puzzles. Using hints never blocks progress;
+  revealing the full solution marks the level "studied" and schedules it for re-solving.
+- The game layer was extended in v2 (stars, player level, daily quests, celebrations, sound,
+  the Arena): see §11.
 - **Spaced retrieval**: completed levels enter a Leitner deck (boxes 1–5; intervals 1, 3, 7, 16,
   35 days). Review sessions interleave items across worlds; proof levels are re-solved from a
   blank starter (successive relearning). A post-solve self-rating (easy / right / hard) tunes the
@@ -300,9 +313,11 @@ automation tactics), with a phrasebook from game names to Mathlib names.
 
 ## 7. UI
 
-Screens (hash routes): Map `#/`, World `#/world/:id`, Level `#/level/:id`, Review `#/review`,
-Codex `#/codex`, Sandbox `#/sandbox`, Workshop `#/workshop`, Graduate `#/graduate`,
-Profile/Settings `#/profile`.
+Screens (hash routes): Home `#/`, Map `#/map`, World `#/world/:id`, Level `#/level/:id`,
+Review `#/review`, Codex `#/codex`, Sandbox `#/sandbox`, Workshop `#/workshop`, Graduate
+`#/graduate`, Profile/Settings `#/profile`, About `#/about`, Guide `#/guide` and
+`#/guide/:id` (§9), Arena `#/arena`, `#/arena/:sub`, `#/arena/:sub/:arg` (§10), shared proof
+card `#/share/:code` (§10.5).
 
 - **Level screen** (the core loop; avoid split attention — task, editor and goal state visible
   together without scrolling on a laptop): task panel (title, English statement, intro markdown);
@@ -324,9 +339,9 @@ Profile/Settings `#/profile`.
 - Persistence: `localStorage`, versioned key, export/import save as JSON, reset.
 - Quality bar: keyboard accessible, responsive down to phone width (symbol bar matters there),
   light + dark themes, reduced-motion respected, no layout shift on check, fast.
-- Visual direction: calm and focused — a cartographer's notebook. Restrained palette with one
-  accent, generous whitespace, a monospaced font with solid math-symbol coverage for Lean
-  (verify glyphs like `⊢ ∀ ∃ ⟨ ⟩ ᶜ ⁻¹ ⦃ ⦄ ∣ ✝` render). Celebration is brief and proportional.
+- Visual direction (v2, replaces the earlier "cartographer's notebook"): see §11. A monospaced
+  font with solid math-symbol coverage for Lean is still required (verify glyphs like
+  `⊢ ∀ ∃ ⟨ ⟩ ᶜ ⁻¹ ⦃ ⦄ ∣ ✝` render).
 
 ## 8. Definition of done (whole project)
 
@@ -335,3 +350,116 @@ Profile/Settings `#/profile`.
    Lean; every starter fails; every Parsons distractor-only ordering fails.
 3. A new learner can play from first level to the Workshop with no dead ends.
 4. Published: public GitHub repo + GitHub Pages.
+
+---
+
+## 9. Prose layers (v2)
+
+The game explains itself in four layers, from shortest to longest. Schema and the fence
+convention for code blocks are in `src/content/types.ts` ("Prose layers").
+
+| Layer | Where | Length | Job |
+|---|---|---|---|
+| Level `intro` / `outro` | task panel | ≤ 120 / ≤ 80 words | the task; the insight just earned |
+| **Lesson** (`LevelLesson`) | task panel, under the intro, collapsible, open by default on an unsolved level | 130–280 words (+ optional pitfall, real-Lean note) | explain the idea properly, with a worked example that is not the task |
+| **Primer** / recap (`WorldLessons`) | world page | 400–700 / 80–160 words | the chapter: the question this world answers, its notions in order |
+| **Guide** (`GuideArticle`) | `#/guide` | 500–1000 words each | Lean itself: what it is, what it can do, how it works, its ecosystem |
+
+Plus `ScreenIntro` copy (`src/content/screens.ts`): every screen says what it is for and how to
+use it.
+
+Rules for all prose:
+- Written for a curious adult with school mathematics and no Lean. Define every term at first
+  use. Prefer a concrete example to an abstract description. Say *why* Lean does it this way.
+- Second person, warm, precise, plain. No hype, no exclamation marks, no filler openings, no
+  rhetorical questions as headings. American spelling. Unicode symbols in Lean (`→ ∧ ∀ ∈`).
+- A lesson never contains its level's solution, and uses only what has been taught by then
+  (the checker enforces this for ```lean blocks: they run under the level's inventory).
+- Every ```lean block is a complete declaration and is compiled by both engines; fragments and
+  goal states go in ```text. Run `node scripts/verify-mini.ts <world>` and
+  `node scripts/verify-lean.ts <world>` (`--guide` for the Guide); both enforce word limits.
+- Claims about real Lean, Mathlib and their ecosystem must be true as of writing and hedged
+  where they date quickly (version numbers, sizes, URLs). No invented names, quotes or numbers.
+
+## 10. Arena (v2): generated puzzles, ratings, and play with other people
+
+The curriculum is finite; the Arena is not. It gives a reason to come back every day and
+something to send to a friend. Everything runs on static hosting.
+
+### 10.1 Generator (`src/arena/gen`, contract `src/arena/types.ts`)
+Pure and deterministic: the same `(seed, family, target)` yields the same puzzle in every
+browser, so a seed in a URL *is* a shared puzzle. No `Math.random`, no `Date`. Every generated
+proof puzzle carries a reference solution that the mini-engine accepts under the puzzle's
+`allowedTactics`; `scripts/verify-arena.ts` samples the generator and compiles the samples in
+real Lean. Families: `prop`, `inhabit`, `quant`, `set`, `quick` (see the contract). Puzzles are
+rated 400–2400 by an estimate of proof difficulty.
+
+### 10.2 Modes
+- **Daily Proof** — one fixed set per calendar day (UTC), the same for everyone: three puzzles
+  of rising rating. A clock counts up; nothing times out. Result is shareable as text
+  (date, per-puzzle marks, time, link). A daily streak is counted.
+- **Rated puzzles** — endless, one at a time, near the player's rating. Solving raises the
+  player's Arena rating, failing or skipping lowers it (Elo-style, starting at 800).
+- **Proof Rush** — timed (3 or 5 minutes) or Survival (three strikes): mostly `quick` items with
+  short proofs mixed in, rating rising as you go. Personal bests.
+- **Duel** — two players race the same seeded set.
+  - *Bot*: an always-available ladder of named bots with ratings; a bot finishes each puzzle at
+    a random time drawn from its rating versus the puzzle's. Always labelled as a bot.
+  - *Friend, live*: peer-to-peer over WebRTC. The host shares a room link; signalling goes
+    through a public broker; game data flows directly between the two browsers. If no
+    connection forms, the UI offers the challenge link instead.
+  - *Friend, challenge link*: the link carries the seed and the sender's result; the receiver
+    plays the same set whenever they like and can send a link back.
+- Friend games are unrated. There is no public matchmaking (it would need a server).
+
+### 10.3 State
+Arena state (rating, history, bests, daily results, display name) lives in its own store under
+its own `localStorage` key and is included in the save export. The Arena reports to the main
+game store through `game().recordEvent(e)` (`src/state/events.ts`), which awards XP and advances
+daily quests and badges.
+
+### 10.4 Fair play and honesty
+No accounts and no server means results are on the honour system; say so where it matters.
+The live duel connects two browsers directly, so each side's IP address is visible to the
+other and to the signalling broker; the UI says this before connecting. No analytics, no
+tracking, no third-party requests outside a live duel.
+
+### 10.5 Proof cards
+`#/share/<code>` renders a shared theorem and proof (from a level, the Workshop, the Sandbox or
+an Arena puzzle). The recipient's own browser re-checks the proof with the engine and shows the
+verdict; the proof is hidden until they choose to see it, with an invitation to try first.
+
+## 11. Game layer and visual design (v2)
+
+### 11.1 Direction
+Energetic, tactile, dark-first: the feeling of a well-made game site for a strategy game —
+bold type, deep background, one vivid primary colour used for the action you want next, chunky
+buttons with a pressed state, clear ranks and numbers, motion that rewards. It must remain
+Inhabit's own: do not reproduce another product's palette values, logo, piece art or typeface.
+Inhabit's motifs are the turnstile `⊢`, `λ`, and the connective glyphs (`→ ∧ ∨ ¬ ∀ ∃ = ∈`),
+which serve as world emblems the way pieces do on a chess site.
+
+- Layout: persistent left sidebar on desktop (brand, primary nav with icons, player card with
+  level, XP bar, streak, Arena rating); icon rail at medium widths; bottom tab bar on phones.
+- Tokens on `:root` for both themes; dark is the designed default, light stays first-class.
+- The level screen keeps §7's rule: task, editor and goal state visible together.
+- Reading surfaces (lessons, primers, Guide) are set for long reading: comfortable measure,
+  larger line-height, clear heading hierarchy.
+- Accessibility bar unchanged: keyboard, focus rings, contrast AA, reduced motion respected,
+  phone width without horizontal scroll. Sound is on by default, quiet, synthesised (no audio
+  files), with an obvious mute toggle that is remembered.
+
+### 11.2 Mechanics
+- **Stars** (0–3 per level): 1 = passed; 2 = solved cleanly (no hints, solution not shown);
+  3 = clean and later re-solved in Review at least once (retention). World pages and the map
+  total them. Stars are derived from existing save data.
+- **Player level** from total XP (a smooth curve), shown with a progress bar; rank titles stay.
+- **Daily quests**: three per day, chosen deterministically from the date and the player's
+  state (e.g. solve 2 levels, clear your review queue, finish the Daily Proof, read a Guide
+  article). Completing gives XP. Unfinished quests simply expire; nothing is lost.
+- **Streak**: consecutive active days, with one automatic rest day per week forgiven. Shown
+  with a flame; a broken streak is never announced as a loss.
+- **Achievements**: the badge list grows to cover stars, quests, the Arena and reading.
+- **Celebration** proportional to the event: a tick and a sound for a level, a burst for a
+  boss, a full celebration with the world recap for a world.
+- XP is still tied to learning or play events only; nothing can be bought or lost.

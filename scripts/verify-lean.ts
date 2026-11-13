@@ -3,6 +3,7 @@
  *
  *   node scripts/verify-lean.ts            # all worlds
  *   node scripts/verify-lean.ts logic nat  # only these worlds
+ *   node scripts/verify-lean.ts --guide    # only the Guide articles
  *
  * For each world it writes one self-contained file lean-verify/Game/Generated/<id>.lean
  * (importing only Game.Core) and runs `lake env lean` on it. Safe to run in parallel
@@ -15,6 +16,9 @@ import { fileURLToPath } from 'node:url';
 import { worlds, prerequisiteWorlds } from '../src/content/index.ts';
 import type { World } from '../src/content/types.ts';
 import { ideas } from '../src/content/ideas.ts';
+import { worldLessons } from '../src/content/lessons/index.ts';
+import { guide } from '../src/content/guide.ts';
+import { guideBlocks, lessonBlocks, nsOf, worldProseBlocks } from './prose-blocks.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const leanDir = join(root, 'lean-verify');
@@ -82,6 +86,12 @@ function generate(world: World): { text: string; labels: { line: number; label: 
       }
     }
   }
+  const lessons = worldLessons(world.id);
+  for (const b of worldProseBlocks(lessons)) if (b.lang === 'lean') block(b.label, nsOf(b.label), b.code);
+  for (const level of world.levels) {
+    const setup = level.setup ? level.setup + '\n' : '';
+    for (const b of lessonBlocks(lessons, level.id)) if (b.lang === 'lean') block(b.label, nsOf(b.label), setup + b.code);
+  }
   if (world.id === 'forge') {
     for (const idea of ideas) {
       block(
@@ -94,8 +104,36 @@ function generate(world: World): { text: string; labels: { line: number; label: 
   return { text: lines.join('\n'), labels };
 }
 
-const wanted = process.argv.slice(2);
-const targets = wanted.length ? worlds.filter((w) => wanted.includes(w.id)) : worlds;
+/** Guide ```lean blocks: against the whole game library. */
+function generateGuide(): { text: string; labels: { line: number; label: string }[] } {
+  const lines: string[] = [];
+  const labels: { line: number; label: string }[] = [];
+  const emit = (label: string, code: string) => {
+    labels.push({ line: lines.length + 1, label });
+    lines.push(...code.split('\n'), '');
+  };
+  emit('preamble', 'import Game.Core\nset_option linter.unusedVariables false\nopen Function');
+  for (const l of worlds.flatMap((w) => w.lemmas).filter((l) => l.origin === 'game')) emit(`lemma ${l.name}`, l.source);
+  for (const b of guideBlocks(guide)) if (b.lang === 'lean') emit(b.label, `namespace ${nsOf(b.label)}\n${b.code}\nend ${nsOf(b.label)}`);
+  return { text: lines.join('\n'), labels };
+}
+
+/** Guide ```lean-real blocks: plain Lean 4 core, no imports at all. */
+function generateGuideReal(): { text: string; labels: { line: number; label: string }[] } {
+  const lines: string[] = [];
+  const labels: { line: number; label: string }[] = [];
+  for (const b of guideBlocks(guide)) {
+    if (b.lang !== 'lean-real') continue;
+    labels.push({ line: lines.length + 1, label: b.label });
+    lines.push(...`namespace ${nsOf(b.label)}\n${b.code}\nend ${nsOf(b.label)}`.split('\n'), '');
+  }
+  return { text: lines.join('\n'), labels };
+}
+
+const argv = process.argv.slice(2);
+const wanted = argv.filter((a) => !a.startsWith('-'));
+const guideOnlyRun = argv.includes('--guide') && !wanted.length;
+const targets = guideOnlyRun ? [] : wanted.length ? worlds.filter((w) => wanted.includes(w.id)) : worlds;
 mkdirSync(genDir, { recursive: true });
 
 const build = spawnSync('lake', ['build', 'Game'], { cwd: leanDir, encoding: 'utf8' });
@@ -105,9 +143,18 @@ if (build.status !== 0) {
 }
 
 let failed = 0;
-for (const world of targets) {
-  const { text, labels } = generate(world);
-  const file = join(genDir, `${world.id}.lean`);
+const jobs: { name: string; ok: string; gen: () => { text: string; labels: { line: number; label: string }[] } }[] = targets.map((world) => ({
+  name: world.id,
+  ok: `${world.levels.length} levels, ${world.lemmas.length} lemmas OK in real Lean`,
+  gen: () => generate(world),
+}));
+if (!wanted.length || argv.includes('--guide')) {
+  jobs.push({ name: 'guide', ok: 'checked blocks OK in real Lean (with the game library)', gen: generateGuide });
+  jobs.push({ name: 'guide_real', ok: 'lean-real blocks OK in plain Lean 4', gen: generateGuideReal });
+}
+for (const job of jobs) {
+  const { text, labels } = job.gen();
+  const file = join(genDir, `${job.name}.lean`);
   writeFileSync(file, text);
   const run = spawnSync('lake', ['env', 'lean', file], { cwd: leanDir, encoding: 'utf8' });
   const out = (run.stdout + run.stderr).trim();
@@ -124,11 +171,11 @@ for (const world of targets) {
   };
   if (run.status !== 0 || errors.length || warnsSorry.length) {
     failed++;
-    console.log(`✖ ${world.id}: ${errors.length} error(s), ${warnsSorry.length} sorry warning(s)`);
+    console.log(`✖ ${job.name}: ${errors.length} error(s), ${warnsSorry.length} sorry warning(s)`);
     // Print full output with labels so multi-line messages stay readable.
     for (const l of out.split('\n')) console.log(/:(\d+):(\d+): (error|warning)/.test(l) ? report(l) : `      ${l}`);
   } else {
-    console.log(`✔ ${world.id}: ${world.levels.length} levels, ${world.lemmas.length} lemmas OK in real Lean`);
+    console.log(`✔ ${job.name}: ${job.ok}`);
   }
 }
 process.exit(failed ? 1 : 0);

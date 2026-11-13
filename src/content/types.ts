@@ -333,3 +333,82 @@ export interface AboutCopy {
   /** Markdown: credits, licence, source link. */
   credits: string;
 }
+
+// ───────────────────────── Prose layers (lessons, primers, guide, screen intros) ─────────────────────────
+// Fenced code in these fields follows one convention, enforced by the verify scripts:
+//   ```lean          complete declarations, checked by BOTH engines (mini-engine and real Lean 4)
+//   ```lean-real     complete declarations for real Lean 4 core only (features the game leaves out);
+//                    compiled standalone, with no imports. Guide articles only.
+//   ```lean-mathlib  needs Mathlib; displayed, never compiled. Guide articles only; keep these rare.
+//   ```text          anything else (goal states, fragments, pseudo-code); never compiled.
+// Inline `code` is never compiled.
+
+/**
+ * The long-form teaching text for one level, shown in the task panel under the short `intro`.
+ * The intro says what to do; the lesson explains the idea properly. It must never contain the
+ * level's solution: teach with a *different* example.
+ */
+export interface LevelLesson {
+  /**
+   * Markdown, 130–280 words. Explain the idea this level teaches as you would to a curious
+   * newcomer: what the construct means, why Lean works this way, how to read the notation, and
+   * one worked example that is NOT this level's task. ```lean blocks are checked under this
+   * level's inventory (its tactics and lemmas), so they cannot use anything not yet taught.
+   */
+  body: string;
+  /** Markdown, ≤ 60 words: the most common mistake here and how to recognise it. */
+  pitfall?: string;
+  /** Markdown, ≤ 70 words: how this looks or is used in real Lean and Mathlib. */
+  realLean?: string;
+}
+
+/** Everything long-form for one world. Lives in `src/content/lessons/<worldId>.ts`. */
+export interface WorldLessons {
+  worldId: string;
+  /**
+   * The chapter that opens the world page. Markdown, 400–700 words, with `##` subheadings.
+   * Tells the story of the world's big idea: the question it answers, the key notions in order,
+   * a worked example, and how it connects to what came before. ```lean blocks are checked with
+   * every tactic and lemma available by the END of this world.
+   */
+  primer: string;
+  /** Shown when the world is complete. Markdown, 80–160 words: what you can now do, and what it was really about. */
+  recap: string;
+  /** Keyed by level id. Every level of the world should have one. */
+  levels: Record<string, LevelLesson>;
+}
+
+export type GuideSection = 'lean' | 'theory' | 'practice' | 'ecosystem';
+
+/** One article of the Guide: long-form reading about Lean itself, independent of any level. */
+export interface GuideArticle {
+  /** Stable kebab-case id, used in the URL `#/guide/<id>`. */
+  id: string;
+  section: GuideSection;
+  title: string;
+  /** One sentence for the index card. */
+  summary: string;
+  /** Honest reading time in minutes. */
+  minutes: number;
+  /** Markdown, 500–1000 words, with `##` subheadings. See the fence convention above. */
+  body: string;
+  /** World ids this article supports (the UI links both ways). */
+  worlds?: string[];
+  /** Ids of articles to read next. */
+  next?: string[];
+}
+
+export type ScreenId =
+  | 'map' | 'review' | 'codex' | 'sandbox' | 'workshop' | 'graduate' | 'profile' | 'guide'
+  | 'arena' | 'arena-daily' | 'arena-puzzles' | 'arena-rush' | 'arena-duel';
+
+/** The explanatory header of a screen: what this place is and how to use it. */
+export interface ScreenIntro {
+  title: string;
+  /** Markdown, ≤ 45 words: what this screen is for. */
+  lede: string;
+  /** Markdown, 60–160 words: how it works and why it is built this way. Shown expanded on first visit. */
+  about: string;
+  /** 2–4 short practical tips, each ≤ 25 words. */
+  tips?: string[];
+}

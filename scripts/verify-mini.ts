@@ -4,6 +4,7 @@
  *   node scripts/verify-mini.ts            # all worlds (+ static checks, bank, ideas)
  *   node scripts/verify-mini.ts logic nat  # only these worlds
  *   node scripts/verify-mini.ts -v …       # also print passing details
+ *   node scripts/verify-mini.ts --guide    # only the Guide articles (add world ids for more)
  *
  * For each level:
  *   proof      every solution is `complete` under the level's options; the starter is not
@@ -22,11 +23,15 @@ import { allLemmas, levelContext, worlds } from '../src/content/index.ts';
 import type { Level, World } from '../src/content/types.ts';
 import { ideas } from '../src/content/ideas.ts';
 import { assemble, checkBody, envWithLemmas, fullEnv, levelSession } from '../src/game/env.ts';
+import { worldLessons } from '../src/content/lessons/index.ts';
+import { guide } from '../src/content/guide.ts';
+import { KNOWN_LANGS, guideBlocks, lessonBlocks, nsOf, words, worldProseBlocks, type ProseBlock } from './prose-blocks.ts';
 
 const args = process.argv.slice(2);
 const verbose = args.includes('-v');
 const wanted = args.filter((a) => !a.startsWith('-'));
-const targets = wanted.length ? worlds.filter((w) => wanted.includes(w.id)) : worlds;
+const guideOnlyRun = args.includes('--guide') && !wanted.length;
+const targets = guideOnlyRun ? [] : wanted.length ? worlds.filter((w) => wanted.includes(w.id)) : worlds;
 for (const w of wanted) if (!worlds.some((x) => x.id === w)) console.log(`(unknown world id: ${w})`);
 
 let failures = 0;
@@ -237,10 +242,87 @@ function ideaChecks(): void {
   }
 }
 
+/* ---------------- prose: lessons, primers, guide ---------------- */
+
+/** Check one fenced block. Only ```lean blocks are run here; other known fences are skipped. */
+function proseBlock(b: ProseBlock, env: Env, allowedTactics: string[] | undefined, guideOnly: boolean): void {
+  const o: Outcome = { ok: true, details: [] };
+  checks++;
+  if (!KNOWN_LANGS.has(b.lang)) fail(o, `unknown fence \`\`\`${b.lang || '(none)'}: use lean, lean-real, lean-mathlib or text`);
+  else if (!guideOnly && (b.lang === 'lean-real' || b.lang === 'lean-mathlib')) fail(o, `\`\`\`${b.lang} is only allowed in Guide articles`);
+  else if (b.lang === 'lean') {
+    const src = `namespace ${nsOf(b.label)}\n${b.code}\nend ${nsOf(b.label)}`;
+    const r = engine.check(env, src, allowedTactics ? { allowedTactics } : undefined);
+    const bad = r.diagnostics.filter((d) => d.severity === 'error' || d.code === 'sorry');
+    if (bad.length || r.decls.length === 0) {
+      fail(o, `${showSource(src)}\n${showDiags(src, bad)}${r.decls.length === 0 ? '\n      (no declaration: use ```text for fragments)' : ''}${allowedTactics ? `\n      allowed tactics: ${allowedTactics.join(', ') || '(none: term mode only)'}` : ''}`);
+    }
+  }
+  if (!o.ok || verbose) report(b.label, o);
+}
+
+const limit = (o: Outcome, what: string, text: string | undefined, min: number, max: number) => {
+  const n = words(text);
+  if (n > max || n < min) fail(o, `${what}: ${n} words (allowed ${min}–${max})`);
+};
+
+function proseChecks(world: World): void {
+  const lessons = worldLessons(world.id);
+  if (!lessons) return;
+  const lemmas = allLemmas.filter((l) => {
+    const owner = worlds.find((w) => w.lemmas.includes(l));
+    return owner !== undefined && worlds.indexOf(owner) <= worlds.findIndex((w) => w.id === world.id);
+  });
+  const worldEnv = envWithLemmas(lemmas);
+  for (const b of worldProseBlocks(lessons)) proseBlock(b, worldEnv, undefined, false);
+  const o: Outcome = { ok: true, details: [] };
+  checks++;
+  if (lessons.primer) limit(o, 'primer', lessons.primer, 400, 700);
+  if (lessons.recap) limit(o, 'recap', lessons.recap, 80, 160);
+  const ids = new Set(world.levels.map((l) => l.id));
+  for (const id of Object.keys(lessons.levels)) if (!ids.has(id)) fail(o, `lesson for unknown level id '${id}'`);
+  let have = 0;
+  for (const level of world.levels) {
+    const l = lessons.levels[level.id];
+    if (!l) continue;
+    have++;
+    limit(o, `${level.id} lesson body`, l.body, 130, 280);
+    if (l.pitfall) limit(o, `${level.id} pitfall`, l.pitfall, 1, 60);
+    if (l.realLean) limit(o, `${level.id} realLean`, l.realLean, 1, 70);
+    const session = levelSession(level.id);
+    let env = session.env;
+    if (level.setup) env = engine.extend(env, level.setup).env;
+    for (const b of lessonBlocks(lessons, level.id)) proseBlock(b, env, session.ctx.allowedTactics, false);
+  }
+  if (!lessons.primer) o.details.push('note: no primer yet');
+  if (have < world.levels.length) o.details.push(`note: ${have} of ${world.levels.length} levels have a lesson`);
+  if (!o.ok) report(`prose ${world.id} (word limits, ids)`, o);
+  else console.log(`  ${o.details.length ? '·' : '✔'} prose ${world.id}: ${have}/${world.levels.length} lessons${lessons.primer ? ', primer' : ''}${lessons.recap ? ', recap' : ''}`);
+}
+
+function guideChecks(): void {
+  console.log(`guide (${guide.length} articles)`);
+  const env = fullEnv();
+  for (const b of guideBlocks(guide)) proseBlock(b, env, undefined, true);
+  const o: Outcome = { ok: true, details: [] };
+  checks++;
+  const ids = new Set<string>();
+  for (const a of guide) {
+    if (ids.has(a.id)) fail(o, `duplicate article id ${a.id}`);
+    ids.add(a.id);
+    limit(o, `guide ${a.id}`, a.body, 500, 1000);
+  }
+  for (const a of guide) {
+    for (const n of a.next ?? []) if (!ids.has(n)) fail(o, `guide ${a.id}: next '${n}' is not an article`);
+    for (const w of a.worlds ?? []) if (!worlds.some((x) => x.id === w)) fail(o, `guide ${a.id}: unknown world '${w}'`);
+  }
+  report('guide word limits and references', o);
+}
+
 /* ---------------- main ---------------- */
 
 const t0 = Date.now();
-if (!wanted.length) {
+if (!wanted.length && !guideOnlyRun) {
   staticChecks();
   bankChecks();
 }
@@ -258,8 +340,10 @@ for (const world of targets) {
     report(`${level.id} [${level.kind}]${ms > 500 ? ` (${ms} ms)` : ''}`, o);
   }
   codexChecks(world);
+  proseChecks(world);
 }
-if (!wanted.length || wanted.includes('forge')) ideaChecks();
+if ((!wanted.length && !guideOnlyRun) || wanted.includes('forge')) ideaChecks();
+if (!wanted.length || args.includes('--guide')) guideChecks();
 void assemble;
 void levelContext;
 console.log(`\n${failures === 0 ? '✔' : '✖'} ${checks} checks, ${failures} failure(s) in ${((Date.now() - t0) / 1000).toFixed(1)} s`);

@@ -17,6 +17,7 @@ import {
   BADGES,
 } from './game.ts';
 import { emptyProgress, type Rating, type WorldLike } from './progress.ts';
+import type { EventResult, GameEvent } from './events.ts';
 
 export interface StorageLike {
   getItem(k: string): string | null;
@@ -42,6 +43,8 @@ export interface GameState {
   completeLevel(id: string, c: Completion): { xp: number; firstPass: boolean };
   rateLevel(id: string, r: Rating): void;
   reviewResult(id: string, passed: boolean): void;
+  /** Report something that happened outside the level flow (Arena, Guide). See events.ts. */
+  recordEvent(e: GameEvent): EventResult;
   setDraft(id: string, text: string): void;
   welcome(): void;
   setSettings(s: Partial<Settings>): void;
@@ -136,6 +139,13 @@ export function createGameStore(deps: StoreDeps): StoreApi<GameState> {
       reviewResult(id, passed) {
         const r = applyReview(get().save, deps.worlds(), id, passed, now());
         commit(r.save, badgeToasts(r.earned));
+      },
+      recordEvent(_e) {
+        // Stub: the core-game agent turns events into XP, quests and badges.
+        const s = get().save;
+        const days = addDay(s.activeDays, now());
+        if (days !== s.activeDays) commit({ ...s, activeDays: days });
+        return { xp: 0 };
       },
       setDraft(id, text) {
         const s = get().save;

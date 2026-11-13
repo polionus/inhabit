@@ -12,11 +12,14 @@ export type Route =
   | { name: 'workshop' }
   | { name: 'graduate' }
   | { name: 'profile' }
+  | { name: 'guide'; id?: string }
+  | { name: 'arena'; sub?: string; arg?: string }
+  | { name: 'share'; code: string }
   | { name: 'notfound'; path: string };
 
 export function parseHash(hash: string): Route {
   const path = hash.replace(/^#/, '').replace(/^\/+/, '').replace(/\/+$/, '');
-  const [a, b] = path.split('/').map((x) => decodeURIComponent(x));
+  const [a, b, c] = path.split('/').map((x) => decodeURIComponent(x));
   switch (a) {
     case '':
     case undefined:
@@ -36,6 +39,12 @@ export function parseHash(hash: string): Route {
       return { name: a };
     case 'codex':
       return { name: 'codex', id: b };
+    case 'guide':
+      return { name: 'guide', id: b };
+    case 'share':
+      return b ? { name: 'share', code: b } : { name: 'home' };
+    case 'arena':
+      return { name: 'arena', sub: b, arg: c };
     default:
       return { name: 'notfound', path };
   }
@@ -48,6 +57,9 @@ export const href = {
   world: (id: string) => `#/world/${encodeURIComponent(id)}`,
   level: (id: string) => `#/level/${encodeURIComponent(id)}`,
   codex: (id?: string) => (id ? `#/codex/${encodeURIComponent(id)}` : '#/codex'),
+  guide: (id?: string) => (id ? `#/guide/${encodeURIComponent(id)}` : '#/guide'),
+  arena: (sub?: string, arg?: string) => '#/arena' + (sub ? `/${encodeURIComponent(sub)}` : '') + (sub && arg ? `/${encodeURIComponent(arg)}` : ''),
+  share: (code: string) => `#/share/${encodeURIComponent(code)}`,
   to: (name: string) => `#/${name}`,
 };
 
