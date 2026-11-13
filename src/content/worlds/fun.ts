@@ -167,7 +167,7 @@ export const world: World = {
       title: 'Equal at every point',
       english: 'If `f x = x` for every `x`, then `f = id`.',
       intro:
-        "Two functions are equal when they agree on every input. The tactic `funext x` turns a goal `f = g` into `f x = g x` for an arbitrary `x`. This is function extensionality, an axiom of Lean's logic: the rules of λ-calculus alone do not give it. The first line is written.",
+        "Two functions are equal when they agree on every input. The tactic `funext x` turns a goal `f = g` into `f x = g x` for an arbitrary `x`. This is function extensionality. The rules of λ-calculus alone do not give it; Lean proves it from its quotient axiom. The first line is written.",
       header: 'theorem eq_id_of_fixed {α : Type} (f : α → α) (h : ∀ x, f x = x) : f = id := by',
       starter: `  funext x
   sorry`,
@@ -183,7 +183,7 @@ export const world: World = {
         { text: '`exact h x` (the goal `f x = id x` matches `f x = x` by unfolding `id`).' },
       ],
       outro:
-        '`funext` says pointwise equality implies equality of functions. It cannot be derived from the basic rules, so Lean takes it as an axiom (it is one half of what `Set.ext` rests on). As a term: `funext h`.',
+        '`funext` says pointwise equality implies equality of functions. It cannot be derived from the basic rules alone; Lean proves it from its quotient axiom `Quot.sound` (it is one half of what `Set.ext` rests on). As a term: `funext h`.',
       unlocks: { tactics: ['funext'], codex: ['funext'] },
     },
     // 07
@@ -510,7 +510,7 @@ export const world: World = {
       name: 'funext',
       summary: 'Prove `f = g` by proving `f x = g x` for arbitrary `x`.',
       body:
-        '`funext x` applies function extensionality. It is an axiom of Lean (the other half of what `Set.ext` is built from). `ext x` does the same for functions.',
+        '`funext x` applies function extensionality. In Lean it is a theorem resting on the quotient axiom `Quot.sound` (the other half of what `Set.ext` is built from). `ext x` does the same for functions.',
       example: `example (α : Type) (f : α → α) (h : ∀ x, f x = x) : f = id := by
   funext x
   exact h x`,

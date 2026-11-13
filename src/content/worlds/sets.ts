@@ -200,7 +200,7 @@ example (α : Type) (A : Set α) (a : α) (h : A a) : a ∈ A := h`,
         },
       ],
       outro:
-        '`ext x` turned a set equality into `x ∈ A ∩ B ↔ x ∈ B ∩ A`. Underneath, `Set.ext` is built from two axioms: `funext` (functions with equal outputs are equal) and `propext` (equivalent propositions are equal). A set is a function into `Prop`, so it needs both. The demo is `Set.inter_comm`.',
+        '`ext x` turned a set equality into `x ∈ A ∩ B ↔ x ∈ B ∩ A`. Underneath, `Set.ext` rests on two principles the basic rules do not give: `funext` (functions with equal outputs are equal) and `propext` (equivalent propositions are equal). A set is a function into `Prop`, so it needs both. The demo is `Set.inter_comm`.',
       unlocks: { tactics: ['ext'], codex: ['ext', 'set-ext'], lemmas: ['Set.inter_comm'] },
     },
 
@@ -586,9 +586,9 @@ example (α : Type) (A : Set α) (a : α) (h : A a) : a ∈ A := h`,
       id: 'set-ext',
       kind: 'concept',
       name: 'Extensionality (funext and propext)',
-      summary: 'Sets with the same elements are equal; this rests on two axioms.',
+      summary: 'Sets with the same elements are equal; this rests on two extensionality principles.',
       body:
-        '`Set.ext` is proved from `funext` (functions equal at every input are equal) and `propext` (logically equivalent propositions are equal). Neither follows from the rules of the type theory alone; they are axioms of Lean. A set is a function into `Prop`, which is why both appear.',
+        '`Set.ext` is proved from `funext` (functions equal at every input are equal) and `propext` (logically equivalent propositions are equal). Neither follows from the basic rules of the type theory alone: `propext` is an axiom of Lean, and `funext` is proved from another axiom, `Quot.sound`. A set is a function into `Prop`, which is why both appear.',
       example: `example (α : Type) (A B : Set α) (h : ∀ x, x ∈ A ↔ x ∈ B) : A = B := Set.ext h`,
     },
     {
