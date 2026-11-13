@@ -543,7 +543,8 @@ export class Meta {
 
   /** View `e` as `base + k` with k > 0 (Nat literal, `Nat.succ`, `x + lit`). */
   private natOffset(e: Expr): { base: Expr | null; k: bigint } | null {
-    if (e.k === 'lit' && typeof e.value === 'bigint') return { base: null, k: e.value };
+    // A literal 0 is not an offset: treating it as one makes `isDefEqOffsetNat` subtract 0 and recurse forever.
+    if (e.k === 'lit' && typeof e.value === 'bigint') return e.value > 0n ? { base: null, k: e.value } : null;
     let k = 0n;
     let x = e;
     for (;;) {
