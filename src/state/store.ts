@@ -2,6 +2,9 @@
 import { createStore, type StoreApi } from 'zustand/vanilla';
 import {
   addDay,
+  bumpDay,
+  bumpStat,
+  logFor,
   applyCompletion,
   applyRating,
   applyReview,
@@ -18,6 +21,7 @@ import {
 } from './game.ts';
 import { emptyProgress, type Rating, type WorldLike } from './progress.ts';
 import type { EventResult, GameEvent } from './events.ts';
+import { settleQuests } from './meta.ts';
 import { exportSections, importSections, resetSections } from './sections.ts';
 
 export interface StorageLike {
@@ -100,6 +104,14 @@ export function createGameStore(deps: StoreDeps): StoreApi<GameState> {
     const badgeToasts = (ids: string[]) =>
       ids.map((id) => `Badge: ${BADGES.find((b) => b.id === id)?.title ?? id}`);
 
+    /** Settle quests (XP once each), then badges, then commit with all toasts. Returns quest XP. */
+    const settle = (save: SaveData, toasts: string[] = []): number => {
+      const q = settleQuests(save, deps.worlds(), now());
+      const b = withBadges(q.save, deps.worlds(), now());
+      commit(b.save, [...toasts, ...q.toasts, ...badgeToasts(b.earned)]);
+      return q.xp;
+    };
+
     return {
       save: loadSave(deps.storage, deps.key),
       toasts: [],
@@ -133,7 +145,7 @@ export function createGameStore(deps: StoreDeps): StoreApi<GameState> {
         const r = applyCompletion(get().save, deps.worlds(), id, c, now());
         const toasts = badgeToasts(r.earned);
         if (r.testedOutWorld) toasts.unshift('Tested out. The rest of the world counts as passed.');
-        commit(r.save, toasts);
+        settle(r.save, toasts);
         return { xp: r.xp, firstPass: r.firstPass };
       },
       rateLevel(id, r) {
@@ -141,14 +153,64 @@ export function createGameStore(deps: StoreDeps): StoreApi<GameState> {
       },
       reviewResult(id, passed) {
         const r = applyReview(get().save, deps.worlds(), id, passed, now());
-        commit(r.save, badgeToasts(r.earned));
+        settle(r.save, badgeToasts(r.earned));
       },
-      recordEvent(_e) {
-        // Stub: the core-game agent turns events into XP, quests and badges.
-        const s = get().save;
-        const days = addDay(s.activeDays, now());
-        if (days !== s.activeDays) commit({ ...s, activeDays: days });
-        return { xp: 0 };
+      recordEvent(e) {
+        const t = now();
+        let s = get().save;
+        let xp = 0;
+        const firstSeen = (key: string): boolean => {
+          if (s.seen[key]) return false;
+          s = { ...s, seen: { ...s.seen, [key]: t } };
+          return true;
+        };
+        switch (e.type) {
+          case 'arena-puzzle':
+            if (e.solved) {
+              xp = Math.round(Math.max(4, Math.min(10, 4 + (e.puzzleRating - 800) / 200)));
+              s = bumpStat(s, 'puzzles');
+              if (e.rated) {
+                s = bumpStat(s, 'ratedSolved');
+                s = bumpDay(s, t, 'puzzles');
+              }
+            }
+            break;
+          case 'arena-daily':
+            if (firstSeen(`daily:${e.dateKey}`)) {
+              xp = 15 + 5 * Math.max(0, e.solved);
+              s = bumpStat(s, 'daily');
+              s = bumpDay(s, t, 'daily');
+            }
+            break;
+          case 'arena-rush':
+            xp = Math.max(0, Math.min(20, Math.floor(e.score)));
+            s = bumpStat(s, 'rushBest', e.score, true);
+            s = bumpDay(s, t, 'rushBest', e.score, true);
+            break;
+          case 'arena-duel':
+            xp = e.won ? 15 : 5;
+            if (e.won) {
+              s = bumpStat(s, 'duelWins');
+              s = bumpDay(s, t, 'duelWins');
+            }
+            break;
+          case 'guide-read':
+            if (firstSeen(`guide:${e.articleId}`)) {
+              xp = 10;
+              s = bumpStat(s, 'guide');
+            }
+            s = bumpDay(s, t, 'guide');
+            break;
+          case 'primer-read':
+            if (firstSeen(`primer:${e.worldId}`)) {
+              xp = 10;
+              s = bumpStat(s, 'primers');
+            }
+            break;
+        }
+        s = { ...s, xp: s.xp + xp, activeDays: addDay(s.activeDays, t), today: logFor(s, t) };
+        settle(s);
+        return { xp };
       },
       markSeen(key) {
         const s = get().save;

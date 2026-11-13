@@ -1,5 +1,7 @@
 /** Save-data shape, migration, ranks, XP, streaks, badges and the pure state transitions. */
 import { afterReview, newItem, retune, type DeckItem } from './leitner.ts';
+import { addDay, currentStreak, dayKey } from './days.ts';
+import { longestStreak, playerLevel, starsFor, totalStars, worldStars } from './core.ts';
 import {
   applyTestOut,
   bossIndex,
@@ -69,6 +71,40 @@ export interface SaveData {
   sandbox: string;
   /** Things seen once (screen intros, primers, guide articles): key → timestamp. */
   seen: Record<string, number>;
+  /** Activity of the current local day; replaced by an empty log when the day changes. */
+  today: DayLog;
+  /** Lifetime counters (keys in `STAT_KEYS`). */
+  stats: Record<string, number>;
+}
+
+export interface DayLog {
+  /** `YYYY-MM-DD` the counts belong to ('' before any activity). */
+  day: string;
+  /** levels, clean, reviews, stars3, puzzles (rated, solved), daily, rushBest (max), duelWins, guide. */
+  counts: Record<string, number>;
+  /** Ids of quests whose XP has been awarded today. */
+  questsDone: string[];
+}
+
+/** Lifetime stat keys: quests, puzzles (solved), ratedSolved, daily (distinct days), rushBest (max), duelWins, guide (distinct articles), primers (distinct). */
+export const STAT_KEYS = ['quests', 'puzzles', 'ratedSolved', 'daily', 'rushBest', 'duelWins', 'guide', 'primers'] as const;
+
+export const emptyDay = (day = ''): DayLog => ({ day, counts: {}, questsDone: [] });
+
+/** The day log for `now`: the stored one if it is today's, else a fresh empty one. */
+export const logFor = (save: SaveData, now: number): DayLog => (save.today.day === dayKey(now) ? save.today : emptyDay(dayKey(now)));
+
+/** Add `n` to a day-log counter (or take the max with `n` when `max`). Marks nothing else. */
+export function bumpDay(save: SaveData, now: number, key: string, n = 1, max = false): SaveData {
+  const log = logFor(save, now);
+  const cur = log.counts[key] ?? 0;
+  const v = max ? Math.max(cur, n) : cur + n;
+  return { ...save, today: { ...log, counts: { ...log.counts, [key]: v } } };
+}
+
+export function bumpStat(save: SaveData, key: string, n = 1, max = false): SaveData {
+  const cur = save.stats[key] ?? 0;
+  return { ...save, stats: { ...save.stats, [key]: max ? Math.max(cur, n) : cur + n } };
 }
 
 export const defaultSettings = (): Settings => ({
@@ -113,6 +149,8 @@ export const defaultSave = (): SaveData => ({
   workshop: emptyWorkshop(),
   sandbox: defaultSandbox,
   seen: {},
+  today: emptyDay(),
+  stats: {},
 });
 
 const isObj = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null && !Array.isArray(x);
@@ -197,35 +235,24 @@ export function migrate(raw: unknown): SaveData {
   }
   out.sandbox = str(raw.sandbox, d.sandbox);
   if (isObj(raw.seen)) for (const [k, v] of Object.entries(raw.seen)) if (typeof v === 'number') out.seen[k] = v;
+  if (isObj(raw.today)) {
+    const t = raw.today;
+    const counts: Record<string, number> = {};
+    if (isObj(t.counts)) for (const [k, v] of Object.entries(t.counts)) if (typeof v === 'number' && Number.isFinite(v) && v >= 0) counts[k] = v;
+    out.today = {
+      day: str(t.day, ''),
+      counts,
+      questsDone: Array.isArray(t.questsDone) ? t.questsDone.filter((x): x is string => typeof x === 'string') : [],
+    };
+  }
+  if (isObj(raw.stats)) for (const [k, v] of Object.entries(raw.stats)) if (typeof v === 'number' && Number.isFinite(v) && v >= 0) out.stats[k] = v;
   out.version = SAVE_VERSION;
   return out;
 }
 
-/* ---------- days, streaks ---------- */
+/* ---------- days, streaks (see days.ts, core.ts) ---------- */
 
-export function dayKey(ms: number): string {
-  const d = new Date(ms);
-  const p = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-}
-
-export function addDay(days: string[], now: number): string[] {
-  const k = dayKey(now);
-  return days.includes(k) ? days : [...days, k].sort();
-}
-
-/** Consecutive active days ending today, or yesterday (a missed day today is not shown as a loss). */
-export function currentStreak(days: string[], now: number): number {
-  const set = new Set(days);
-  let t = now;
-  if (!set.has(dayKey(t))) t -= 86_400_000;
-  let n = 0;
-  while (set.has(dayKey(t))) {
-    n++;
-    t -= 86_400_000;
-  }
-  return n;
-}
+export { addDay, currentStreak, dayKey };
 
 /* ---------- ranks, XP ---------- */
 
@@ -278,20 +305,53 @@ const passedLevels = (c: BadgeCtx) => allLevels(c).filter((l) => isPassed(c.save
 const completeWorlds = (c: BadgeCtx) =>
   c.worlds.filter((w) => !worldIsEmpty(w) && worldComplete(w, c.save.levels));
 
+const stat = (c: BadgeCtx, k: string) => c.save.stats[k] ?? 0;
+const hasThirdStar = (c: BadgeCtx) => allLevels(c).some((l) => starsFor(c.save.levels[l.id], c.save.deck[l.id]) === 3);
+const readCount = (c: BadgeCtx, prefix: string) => Object.keys(c.save.seen).filter((k) => k.startsWith(prefix)).length;
+
 export const BADGES: BadgeDef[] = [
-  { id: 'first-step', title: 'First inhabitant', desc: 'Complete your first level.', test: (c) => passedLevels(c).length >= 1 },
-  { id: 'clean-solve', title: 'No hints needed', desc: 'Solve a proof level without hints.', test: (c) => allLevels(c).some((l) => l.kind === 'proof' && c.save.levels[l.id]?.clean) },
-  { id: 'first-term', title: 'Term builder', desc: 'Finish a level where you write the proof term directly.', test: (c) => allLevels(c).some((l) => l.mode === 'term' && c.save.levels[l.id]?.status === 'solved' && !c.save.levels[l.id]?.testedOut) },
-  { id: 'first-formal', title: 'Translator', desc: 'Formalize an English statement.', test: (c) => allLevels(c).some((l) => l.kind === 'formalize' && isPassed(c.save.levels[l.id]) && !c.save.levels[l.id]?.testedOut) },
-  { id: 'first-world', title: 'Region charted', desc: 'Complete a whole world.', test: (c) => completeWorlds(c).length >= 1 },
-  { id: 'halfway', title: 'Halfway across the map', desc: 'Complete half of the worlds.', test: (c) => c.worlds.length > 0 && completeWorlds(c).length * 2 >= c.worlds.length },
-  { id: 'atlas', title: 'Atlas complete', desc: 'Complete every world.', test: (c) => c.worlds.length > 0 && completeWorlds(c).length === c.worlds.length },
-  { id: 'clean-boss', title: 'Boss, cleanly', desc: 'Beat a boss level with no hints.', test: (c) => allLevels(c).some((l) => l.boss && c.save.levels[l.id]?.clean) },
-  { id: 'test-out', title: 'Shortcut earned', desc: 'Test out of a world by beating its boss.', test: (c) => Object.values(c.save.levels).some((p) => p.testedOut) },
-  { id: 'review-10', title: 'Remembering', desc: 'Pass ten review items.', test: (c) => c.save.reviewsPassed >= 10 },
-  { id: 'box-5', title: 'Long memory', desc: 'Bring a level to the top review box.', test: (c) => Object.values(c.save.deck).some((d) => d.box >= 5) },
-  { id: 'workshop', title: 'My own theorem', desc: 'Prove a theorem of your own in the Workshop.', test: (c) => c.save.theorems.some((t) => t.complete) },
-  { id: 'regular', title: 'Regular', desc: 'Visit on seven different days.', test: (c) => c.save.activeDays.length >= 7 },
+  // path: progress along the map
+  { id: 'first-step', group: 'path', title: 'First inhabitant', desc: 'Complete your first level.', test: (c) => passedLevels(c).length >= 1 },
+  { id: 'first-world', group: 'path', title: 'Region charted', desc: 'Complete a whole world.', test: (c) => completeWorlds(c).length >= 1 },
+  { id: 'halfway', group: 'path', title: 'Halfway across the map', desc: 'Complete half of the worlds.', test: (c) => c.worlds.length > 0 && completeWorlds(c).length * 2 >= c.worlds.length },
+  { id: 'atlas', group: 'path', title: 'Atlas complete', desc: 'Complete every world.', test: (c) => c.worlds.length > 0 && completeWorlds(c).length === c.worlds.length },
+  { id: 'stars-25', group: 'path', title: 'Constellation', desc: 'Earn 25 stars across the levels.', test: (c) => totalStars(c.worlds, c.save) >= 25 },
+  { id: 'stars-100', group: 'path', title: 'Night sky', desc: 'Earn 100 stars across the levels.', test: (c) => totalStars(c.worlds, c.save) >= 100 },
+  { id: 'world-3stars', group: 'path', title: 'Every star in a world', desc: 'Earn all three stars on every level of one world.', test: (c) => c.worlds.some((w) => { const s = worldStars(w, c.save); return s.total > 0 && s.earned === s.total; }) },
+  { id: 'quest-1', group: 'path', title: 'Errand run', desc: 'Complete a daily quest.', test: (c) => stat(c, 'quests') >= 1 },
+  { id: 'quest-10', group: 'path', title: 'Ten errands', desc: 'Complete ten daily quests.', test: (c) => stat(c, 'quests') >= 10 },
+  { id: 'quest-50', group: 'path', title: 'Fifty errands', desc: 'Complete fifty daily quests.', test: (c) => stat(c, 'quests') >= 50 },
+  { id: 'regular', group: 'path', title: 'Regular', desc: 'Visit on seven different days.', test: (c) => c.save.activeDays.length >= 7 },
+  { id: 'streak-3', group: 'path', title: 'Three in a row', desc: 'Keep a three-day streak.', test: (c) => longestStreak(c.save.activeDays) >= 3 },
+  { id: 'streak-7', group: 'path', title: 'A full week', desc: 'Keep a seven-day streak.', test: (c) => longestStreak(c.save.activeDays) >= 7 },
+  { id: 'streak-30', group: 'path', title: 'A month of days', desc: 'Keep a thirty-day streak.', test: (c) => longestStreak(c.save.activeDays) >= 30 },
+  { id: 'level-10', group: 'path', title: 'Level ten', desc: 'Reach player level 10.', test: (c) => playerLevel(c.save.xp).level >= 10 },
+  { id: 'level-20', group: 'path', title: 'Level twenty', desc: 'Reach player level 20.', test: (c) => playerLevel(c.save.xp).level >= 20 },
+  // craft: how you solve
+  { id: 'clean-solve', group: 'craft', title: 'No hints needed', desc: 'Solve a proof level without hints.', test: (c) => allLevels(c).some((l) => l.kind === 'proof' && c.save.levels[l.id]?.clean) },
+  { id: 'first-term', group: 'craft', title: 'Term builder', desc: 'Finish a level where you write the proof term directly.', test: (c) => allLevels(c).some((l) => l.mode === 'term' && c.save.levels[l.id]?.status === 'solved' && !c.save.levels[l.id]?.testedOut) },
+  { id: 'first-formal', group: 'craft', title: 'Translator', desc: 'Formalize an English statement.', test: (c) => allLevels(c).some((l) => l.kind === 'formalize' && isPassed(c.save.levels[l.id]) && !c.save.levels[l.id]?.testedOut) },
+  { id: 'clean-boss', group: 'craft', title: 'Boss, cleanly', desc: 'Beat a boss level with no hints.', test: (c) => allLevels(c).some((l) => l.boss && c.save.levels[l.id]?.clean) },
+  { id: 'test-out', group: 'craft', title: 'Shortcut earned', desc: 'Test out of a world by beating its boss.', test: (c) => Object.values(c.save.levels).some((p) => p.testedOut) },
+  { id: 'workshop', group: 'craft', title: 'My own theorem', desc: 'Prove a theorem of your own in the Workshop.', test: (c) => c.save.theorems.some((t) => t.complete) },
+  // memory: retention
+  { id: 'review-10', group: 'memory', title: 'Remembering', desc: 'Pass ten review items.', test: (c) => c.save.reviewsPassed >= 10 },
+  { id: 'box-5', group: 'memory', title: 'Long memory', desc: 'Bring a level to the top review box.', test: (c) => Object.values(c.save.deck).some((d) => d.box >= 5) },
+  { id: 'first-3star', group: 'memory', title: 'Still there', desc: 'Earn a third star by re-solving a level in Review.', test: hasThirdStar },
+  // arena
+  { id: 'arena-first', group: 'arena', title: 'Into the Arena', desc: 'Solve a rated Arena puzzle.', test: (c) => stat(c, 'ratedSolved') >= 1 },
+  { id: 'arena-10', group: 'arena', title: 'Ten puzzles', desc: 'Solve ten Arena puzzles.', test: (c) => stat(c, 'puzzles') >= 10 },
+  { id: 'arena-100', group: 'arena', title: 'A hundred puzzles', desc: 'Solve one hundred Arena puzzles.', test: (c) => stat(c, 'puzzles') >= 100 },
+  { id: 'daily-1', group: 'arena', title: 'Daily proof', desc: 'Finish a Daily Proof.', test: (c) => stat(c, 'daily') >= 1 },
+  { id: 'daily-7', group: 'arena', title: 'Seven dailies', desc: 'Finish seven Daily Proofs.', test: (c) => stat(c, 'daily') >= 7 },
+  { id: 'rush-10', group: 'arena', title: 'Quick hands', desc: 'Score 10 in Proof Rush.', test: (c) => stat(c, 'rushBest') >= 10 },
+  { id: 'rush-25', group: 'arena', title: 'Fast and sound', desc: 'Score 25 in Proof Rush.', test: (c) => stat(c, 'rushBest') >= 25 },
+  { id: 'duel-1', group: 'arena', title: 'First duel won', desc: 'Win a duel.', test: (c) => stat(c, 'duelWins') >= 1 },
+  { id: 'duel-10', group: 'arena', title: 'Ten duels won', desc: 'Win ten duels.', test: (c) => stat(c, 'duelWins') >= 10 },
+  // reading
+  { id: 'guide-1', group: 'reading', title: 'Reader', desc: 'Read a Guide article to the end.', test: (c) => readCount(c, 'guide:') >= 1 },
+  { id: 'guide-5', group: 'reading', title: 'Well read', desc: 'Read five Guide articles.', test: (c) => readCount(c, 'guide:') >= 5 },
+  { id: 'primers-all', group: 'reading', title: 'Primed', desc: 'Read the primer of every world.', test: (c) => { const ws = c.worlds.filter((w) => !worldIsEmpty(w)); return ws.length > 0 && ws.every((w) => c.save.seen[`primer:${w.id}`]); } },
 ];
 
 /** Badges newly earned given the state. */
@@ -373,6 +433,10 @@ export function applyCompletion(
     }
   }
   let next: SaveData = { ...save, levels, deck, xp: save.xp + xp, activeDays: addDay(save.activeDays, now) };
+  if (status === 'solved' && prev.status !== 'solved') next = bumpDay(next, now, 'levels');
+  if (entry.clean && !prev.clean) next = bumpDay(next, now, 'clean');
+  if (starsFor(entry, deck[levelId]) === 3 && starsFor(prev, save.deck[levelId]) < 3) next = bumpDay(next, now, 'stars3');
+  next = { ...next, today: logFor(next, now) };
   const b = withBadges(next, worlds, now);
   next = b.save;
   return { save: next, xp, earned: b.earned, firstPass, testedOutWorld };
@@ -396,6 +460,9 @@ export function applyReview(save: SaveData, worlds: WorldLike[], levelId: string
     xp: save.xp + (passed ? 3 : 0),
     activeDays: addDay(save.activeDays, now),
   };
+  if (passed) next = bumpDay(next, now, 'reviews');
+  if (starsFor(next.levels[levelId], nextItem) === 3 && starsFor(save.levels[levelId], save.deck[levelId]) < 3) next = bumpDay(next, now, 'stars3');
+  next = { ...next, today: logFor(next, now) };
   const b = withBadges(next, worlds, now);
   next = b.save;
   return { save: next, earned: b.earned };
