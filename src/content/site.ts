@@ -5,7 +5,7 @@ export const home: HomeCopy = {
   hero: {
     eyebrow: 'A free browser game that teaches Lean 4',
     headline: 'Learn to write proofs a computer can check',
-    lede: '**Lean** is a theorem prover: you write a mathematical proof in its language, and it checks every step. Across 124 short levels you learn to write those proofs yourself, and you finish by stating and proving a theorem of your own.',
+    lede: '**Lean** is a theorem prover: you write a proof, and it checks every step. In 124 short levels, each with a lesson beside it, you learn to write proofs yourself, then prove a theorem of your own. The Guide and an optional Arena go further.',
     startLabel: 'Start level one',
     continueLabel: 'Continue',
     aboutLabel: 'New to Lean? Read the introduction',
@@ -79,7 +79,7 @@ export const home: HomeCopy = {
   journey: {
     heading: 'Ten worlds, from first steps to your own theorem',
     intro:
-      'Each world teaches one big idea in 9 to 15 short levels. After the fifth, the map branches: numbers and induction on one side, sets and functions on the other. Both lead to the Formalization Forge, where you state and prove a theorem of your own. If you already know a world, beat its final level to pass it.',
+      'Each world teaches one big idea in 9 to 15 short levels, and opens with a primer that tells the story of that idea. After the fifth, the map branches: numbers and induction on one side, sets and functions on the other. Both lead to the Formalization Forge, where you state and prove a theorem of your own. If you already know a world, beat its final level to pass it.',
   },
 
   method: {
@@ -90,8 +90,8 @@ export const home: HomeCopy = {
         body: 'Some levels stop before a step runs and ask what the goal will become. You commit to an answer, then see what really happens, with a note on why.',
       },
       {
-        title: 'Help comes one step at a time',
-        body: 'Ask for a hint and you get a nudge first, then the name of a tool, then the next line. You take only as much help as you need.',
+        title: 'Explanation beside every level',
+        body: 'Each level has a lesson next to the task, with a worked example of a different problem. Ask for a hint and you get a nudge first, then the name of a tool, then the next line.',
       },
       {
         title: 'Mistakes are explained',
@@ -99,14 +99,14 @@ export const home: HomeCopy = {
       },
       {
         title: 'Ideas come back, nothing punishes you',
-        body: 'Levels you have solved come back for short reviews, first after a day or so, then at longer gaps, so they stay with you. There are no timers, no lives and no streaks to lose.',
+        body: 'Solved levels return for short reviews at growing gaps, so they stay with you. Stars, daily quests and a streak with a weekly rest day mark your progress. The levels have no timers and no lives.',
       },
     ],
   },
 
   audience: {
     heading: 'Who it is for',
-    body: 'Anyone curious about how a computer can check mathematics: a student meeting proofs for the first time, or someone who knows Lean by name and wants a careful way in. You need school algebra and the patience to read closely. No programming is assumed. It is not a reference manual, and if you already prove theorems in Lean every day, you will find little new here.',
+    body: 'Anyone curious about how a computer can check mathematics, and what else Lean can do: a student meeting proofs for the first time, or someone who knows Lean by name and wants a careful way in. You need school algebra and patience to read closely. No programming is assumed. The Guide explains Lean for newcomers. If you already prove theorems in Lean every day, you will find little new here.',
   },
 
   closing: {
@@ -151,7 +151,7 @@ The honest cost: it takes effort. You must spell out steps a human reader would 
     {
       id: 'what-you-do',
       title: 'What you do in the game',
-      body: `The game has 10 worlds and 124 levels, arranged on a map. You start with types and functions, then learn that statements are types and proofs are programs. From there you work through logic, "for all" and "there exists", and equality. Then the map branches: natural numbers, induction and divisibility on one side; sets, and functions ending with Cantor's theorem, on the other. Both meet in a last world where you formalize a theorem of your own.
+      body: `The game has 10 worlds and 124 levels, arranged on a map. You start with types and functions, then learn that statements are types and proofs are programs. Next come logic, "for all" and "there exists", and equality. Then the map branches: natural numbers, induction and divisibility on one side; sets and functions, ending with Cantor's theorem, on the other. Both meet in a last world where you formalize a theorem of your own.
 
 Levels come in five kinds:
 
@@ -161,7 +161,7 @@ Levels come in five kinds:
 - **Concept checks**: short questions with explained answers.
 - **Translate** an English sentence into a Lean statement.
 
-Each world ends with a harder *boss* level that mixes in tools from earlier worlds.`,
+Each world opens with a primer on its big idea and ends with a harder *boss* level. Each level earns up to three stars, the last for solving it again in Review.`,
     },
     {
       id: 'the-name',
@@ -192,7 +192,7 @@ hx : x ∈ A ∩ B
 
 When no goals remain, the level is solved. Errors appear here too, with a plain explanation underneath.
 
-The **Inventory** lists what you have unlocked so far: tactics (proof steps), lemmas (facts already proved) and Codex entries. Clicking a name puts it into your proof. **Hints** come one at a time if you ask, and you can reveal a full solution if you need to.`,
+The **Inventory** lists what you have unlocked so far: tactics (proof steps), lemmas (facts already proved) and Codex entries. Clicking a name puts it into your proof. Beside the task, a **lesson** explains the idea with an example that is not the level itself. **Hints** come one at a time if you ask, and you can reveal a full solution if you need to.`,
     },
     {
       id: 'typing-symbols',
@@ -211,13 +211,13 @@ These are the same abbreviations as in the Lean extension for the VS Code editor
     {
       id: 'how-it-teaches',
       title: 'How the game teaches, and why',
-      body: `Each level adds exactly one new thing: a tactic, an idea or a piece of notation. You always know what a level is about, and nothing new competes for your attention.
+      body: `Each level adds exactly one new thing: a tactic, an idea or a piece of notation. Nothing new competes for your attention.
 
-Each new skill comes in a fixed order. First you step through a complete example. Then you predict what a step will do, finish a proof that is mostly written, put shuffled lines in order, and finally write proofs on your own. By the time you face a blank page, you have already seen the skill used and tried it with support.
+Each new skill comes in a fixed order. First you step through a complete example. Then you predict what a step will do, finish a proof that is mostly written, order shuffled lines, and finally write proofs on your own. By the blank page, you have already seen the skill used.
 
-Hints start vague and get more specific, so you do as much of the thinking as you can. Wrong answers get feedback about the particular mistake, not just "incorrect". Solved levels come back after a few days, then after longer gaps, because recalling something after a gap makes it last longer than rereading it does.
+Hints start vague and get more specific, so you do as much of the thinking as you can. Wrong answers get feedback about the particular mistake. Solved levels come back after a few days, then after longer gaps, because recalling something after a gap lasts longer than rereading it.
 
-There are no timers, lives or streak penalties. Using hints never blocks your progress.`,
+The curriculum has no timers, lives or streak penalties, and using hints never blocks your progress. Timed play exists only in the optional Arena. Stars, daily quests and a streak (one rest day a week is forgiven) record progress; an unfinished quest simply expires.`,
     },
     {
       id: 'is-this-real-lean',
@@ -231,6 +231,16 @@ What is kept: the syntax, and names and statements that follow Lean and its libr
 When you are ready for the real thing, the **Graduate** guide explains the differences, and **Open in real Lean** in the Sandbox and Workshop sends your code to the Lean web editor at https://live.lean-lang.org.`,
     },
     {
+      id: 'the-guide',
+      title: 'The Guide',
+      body: `The levels teach by doing, and the **Guide** explains. It has sixteen articles, each a few minutes of reading. They cover what Lean is and what it can do, from proving theorems to running programs, type classes, automation and verified software. They explain the ideas underneath: types, propositions as types, dependent types, inductive types, the two kinds of equality, and the small kernel that makes a proof trustworthy. They give a method for attacking a proof and for turning English into a Lean statement, and they describe Mathlib and some of the things Lean is used for. Every code block in the Guide is checked by Lean, and each world page links to the articles that support it.`,
+    },
+    {
+      id: 'the-arena',
+      title: 'The Arena',
+      body: `The **Arena** is optional, and it is the only place with timers. A generator makes puzzles on demand: a **Daily Proof** of three puzzles, the same for everyone each UTC day; **rated puzzles** that follow your rating; **Proof Rush**, against the clock or until three strikes; and **duels**, races on the same puzzles against a named bot or a friend. A friend can join live, or you can send a challenge link and they play whenever they like. Friend games are unrated, and there is no public matchmaking, because that would need a server. Results rest on the honour system. Each generated proof puzzle comes with a reference proof that the game's engine accepts.`,
+    },
+    {
       id: 'where-it-leads',
       title: 'Where it leads',
       body: `The **Workshop** is where you formalize a theorem of your own in five steps: *say it* in careful English, *type it* by choosing a type for each object, *define it* by writing any definitions it needs, *state it* in Lean, and *prove it*. If you want a starting point, it suggests 17 theorems. Your theorems are saved.
@@ -239,7 +249,7 @@ The **Sandbox** is a free editor with every tactic unlocked, for experiments.
 
 The **Graduate** guide takes you to real Lean and **Mathlib**: how to try it in your browser, how to install it, the automation tactics the game withheld, how to search the library, and a phrasebook from the names you learned here to the names Mathlib uses.
 
-The **Codex** collects every idea and tactic you meet, as a reference you build while you play.`,
+The **Codex** collects every idea and tactic you meet, as a reference you build while you play. The **Review** screen brings solved levels back, and the **Profile** shows your stars, quests and streak.`,
     },
   ],
   faq: [
@@ -254,6 +264,22 @@ The **Codex** collects every idea and tactic you meet, as a reference you build 
     {
       q: 'How much mathematics do I need?',
       a: 'School algebra and a willingness to read carefully. You do not need to have written proofs before; the logic is taught as you go. Sets, functions and induction are each introduced from the start in their own world.',
+    },
+    {
+      q: 'Is the Arena multiplayer real?',
+      a: 'Yes, in one form. In a live duel, two browsers connect directly to each other, peer to peer, and race the same puzzles. A public broker only introduces them. You can also play a bot, or send a friend a challenge link and let them play later.',
+    },
+    {
+      q: 'Why is there no public matchmaking?',
+      a: 'Matching strangers needs a server that keeps accounts and ratings, and this game has none. It is a static site, so friend games are unrated and results rest on the honour system.',
+    },
+    {
+      q: 'Are the generated puzzles checked?',
+      a: 'Yes. Each generated proof puzzle comes with a reference proof that the game\'s engine accepts, and samples of the generator\'s output are compiled in real Lean. Puzzles are rated by an estimate of difficulty, which can be off.',
+    },
+    {
+      q: 'Does anything leave my browser?',
+      a: 'Nothing, except during a live duel, and when you press **Open in real Lean**, which sends that one piece of code to the Lean web editor. There is no account, no analytics and no tracking. In a live duel the two browsers connect directly, so each side\'s IP address is visible to the other and to the signalling service. The game tells you this before connecting.',
     },
     {
       q: 'Is my progress saved?',
