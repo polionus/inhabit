@@ -74,8 +74,10 @@ export function ScreenHeader({
   const copy = data.screen(id);
   const key = `intro:${id}`;
   const seenAt = useGame((s) => s.save.seen[key]);
-  // Decide once per mount: expanded on the first visit.
-  const [open, setOpen] = useState(() => !seenAt);
+  // Decide once per mount: expanded on the first visit, except on play screens, where the
+  // puzzle must stay above the fold (the explanation is one click away).
+  const playScreen = id === 'arena-daily' || id === 'arena-puzzles' || id === 'arena-rush';
+  const [open, setOpen] = useState(() => !seenAt && !playScreen);
   const panelId = useId();
   useEffect(() => {
     if (copy?.about && !seenAt) game().markSeen(key);
