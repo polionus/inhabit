@@ -64,7 +64,7 @@ export const world: World = {
         { text: '`Nat.mul_one : n * 1 = n`. Rewrite with it.' },
       ],
       outro:
-        '`use 1` gave the witness; the rest is an ordinary equation. In Lean\'s library this is `Nat.dvd_refl`. The proof shows how a definitional property (`n * 1 = n`) can still need a proof when the recursion goes the other way.',
+        '`use 1` gave the witness; the rest is an ordinary equation. In Lean\'s library this is `Nat.dvd_refl`. Notice that even a fact as plain as `n * 1 = n` needed rewriting: multiplication recurses on its second argument, so `n * 1` unfolds to `0 + n`, and `0 + n = n` is not true by computation.',
       unlocks: { lemmas: ['Nat.dvd_refl'] },
     },
     // 03

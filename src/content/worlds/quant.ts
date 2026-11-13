@@ -154,7 +154,7 @@ The old \`h\` is replaced by \`h : P 3 → Q 3\`. The first line is written for 
       title: 'Use a witness',
       intro: `In tactic mode, \`use w\` supplies the witness and leaves you the proof about it. It also tries \`rfl\` on whatever is left.
 
-Core Lean spells a similar tactic \`exists\`; you will see both in the wild.`,
+\`use\` comes from Mathlib. Core Lean spells a similar tactic \`exists\`; you will see both in the wild.`,
       english: 'If 4 satisfies P, then some number satisfies P.',
       header: 'theorem ex_of_inst (P : Nat → Prop) (h : P 4) : ∃ n, P n := by',
       starter: '  sorry',
