@@ -214,6 +214,12 @@ export interface Style {
   prod?: boolean;
 }
 
+/** Sort of element variables, used to annotate binders whose type Lean cannot infer. */
+export const ELEM_SORT = 'α';
+
+/** `¬¬∀ x, …`: does the printed form end in an open-ended binder? */
+const endsInBinder = (f: F): boolean => f.t === 'all' || f.t === 'ex' || (f.t === 'not' && endsInBinder(f.a));
+
 type Pos = 'top' | 'not' | 'andL' | 'andR' | 'orL' | 'orR' | 'impL' | 'impR' | 'iff';
 
 function needParens(f: F, pos: Pos): boolean {
@@ -221,8 +227,10 @@ function needParens(f: F, pos: Pos): boolean {
     case 'atom':
     case 'bot':
     case 'top':
-    case 'not':
       return false;
+    case 'not':
+      // `¬∀ x, …` extends as far right as a quantifier does
+      return endsInBinder(f.a) && pos !== 'top' && pos !== 'impR' && pos !== 'not';
     case 'and':
       return pos === 'not' || pos === 'andL' || pos === 'orL' || pos === 'orR';
     case 'or':
@@ -269,9 +277,13 @@ function showRaw(f: F, st: Style): string {
       return show(f.a, st, 'iff') + ' ↔ ' + show(f.b, st, 'iff');
     case 'all':
     case 'ex': {
+      // a binder not used in its body gets a type ascription (Lean cannot infer it)
+      if (!freeVars(f.a).has(f.x)) {
+        return (f.t === 'all' ? '∀ (' : '∃ (') + f.x + ' : ' + ELEM_SORT + '), ' + show(f.a, st, 'top');
+      }
       const xs = [f.x];
       let body = f.a;
-      while (body.t === f.t) {
+      while (body.t === f.t && freeVars(body.a).has(body.x)) {
         xs.push(body.x);
         body = body.a;
       }

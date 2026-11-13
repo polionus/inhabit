@@ -41,6 +41,8 @@ export interface Naming {
   hyp(f: F): string;
   /** Base name for an element variable bound as `x`. */
   elem?(x: string): string;
+  /** Full control over fresh hypothesis names (overrides `hyp` + priming). */
+  fresh?(f: F, taken: Set<string>): string;
 }
 
 export interface ProverOpts {
@@ -73,8 +75,12 @@ class Abort extends Error {}
 
 export function uniq(base: string, taken: Set<string>): string {
   if (!taken.has(base)) return base;
-  for (const s of ["'", "''"]) if (!taken.has(base + s)) return base + s;
-  for (let i = 3; ; i++) if (!taken.has(base + i)) return base + i;
+  if (!taken.has(base + "'")) return base + "'";
+  const sub = '₀₁₂₃₄₅₆₇₈₉';
+  for (let i = 2; ; i++) {
+    const n = base + String(i).split('').map((d) => sub[Number(d)]).join('');
+    if (!taken.has(n)) return n;
+  }
 }
 
 /** All ways to apply a hypothesis (at least one argument), up to `maxItems` arguments. */
@@ -143,7 +149,8 @@ export class Prover {
   }
 
   private addHyp(c: Ctx, f: F, base?: string): { c: Ctx; name: string } {
-    const name = uniq(base ?? this.opts.naming.hyp(f), c.taken);
+    const nm = this.opts.naming;
+    const name = base !== undefined || !nm.fresh ? uniq(base ?? nm.hyp(f), c.taken) : nm.fresh(f, c.taken);
     const taken = new Set(c.taken);
     taken.add(name);
     return { c: { hyps: [...c.hyps, { name, f }], vars: c.vars, taken }, name };

@@ -40,7 +40,7 @@ function phrase(f: F, o: EnglishOpts, nested: boolean): string {
     case 'all':
       return 'for every ' + f.x + ', ' + phrase(f.a, o, false);
     case 'ex':
-      return 'there is an ' + f.x + ' with ' + phrase(f.a, o, false);
+      return 'there is an ' + f.x + ' such that ' + phrase(f.a, o, false);
   }
 }
 
@@ -62,7 +62,7 @@ export function clause(f: F, o: EnglishOpts = {}): string {
       if (a.t === 'or') return 'neither ' + phrase(a.a, o, true) + ' nor ' + phrase(a.b, o, true) + ' holds';
       if (a.t === 'imp' && lit(a.a) && lit(a.b)) return phrase(a.a, o, true) + ' does not imply ' + phrase(a.b, o, true);
       if (a.t === 'iff') return phrase(a.a, o, true) + ' and ' + phrase(a.b, o, true) + ' are not equivalent';
-      if (a.t === 'ex') return 'there is no ' + a.x + ' with ' + phrase(a.a, o, false);
+      if (a.t === 'ex') return 'there is no ' + a.x + ' such that ' + phrase(a.a, o, false);
       if (a.t === 'all') return 'not every ' + a.x + ' has ' + phrase(a.a, o, false);
       return 'it is not the case that ' + phrase(a, o, true);
     }
@@ -74,7 +74,8 @@ export function clause(f: F, o: EnglishOpts = {}): string {
       if (f.a.t === 'not' && f.a.a.t !== 'all' && f.a.a.t !== 'ex') return 'no ' + f.x + ' has ' + phrase(f.a.a, o, false);
       return phrase(f, o, false);
     case 'ex':
-      return 'some ' + f.x + ' has ' + phrase(f.a, o, false);
+      if (f.a.t === 'atom' || f.a.t === 'and' || (f.a.t === 'not' && f.a.a.t === 'atom')) return 'some ' + f.x + ' has ' + phrase(f.a, o, false);
+      return 'there is an ' + f.x + ' such that ' + phrase(f.a, o, false);
     default:
       return phrase(f, o, false);
   }
@@ -95,7 +96,13 @@ export function sentence(hyps: F[], goal: F, o: EnglishOpts = {}): string {
 
 const article = (s: string) => (/^[AEIOU]/.test(s) ? 'an ' : 'a ') + s;
 
+const typeText = (f: F): string =>
+  f.t === 'atom' ? f.p : f.t === 'imp' ? `${f.a.t === 'imp' ? '(' + typeText(f.a) + ')' : typeText(f.a)} → ${typeText(f.b)}` : f.t === 'and' ? `${f.a.t === 'atom' ? f.a.p : '(' + typeText(f.a) + ')'} × ${f.b.t === 'imp' ? '(' + typeText(f.b) + ')' : typeText(f.b)}` : '?';
+const simpleType = (f: F) => f.t === 'atom' || ((f.t === 'imp' || f.t === 'and') && f.a.t === 'atom' && f.b.t === 'atom');
+
 export function noun(f: F): string {
+  if (f.t === 'imp' && !(simpleType(f.a) && simpleType(f.b))) return `a function of type \`${typeText(f)}\``;
+  if (f.t === 'and' && !(simpleType(f.a) && simpleType(f.b))) return `a pair of type \`${typeText(f)}\``;
   switch (f.t) {
     case 'atom':
       return article(f.p);

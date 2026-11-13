@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "verify:mini": "node scripts/verify-mini.ts",
-    "verify:lean": "node scripts/verify-lean.ts"
+    "verify:lean": "node scripts/verify-lean.ts",
+    "verify:arena": "node scripts/verify-arena.ts"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.4",
