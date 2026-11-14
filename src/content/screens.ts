@@ -102,7 +102,7 @@ export const screens: Partial<Record<ScreenId, ScreenIntro>> = {
     title: 'Arena',
     lede: 'Optional play on generated puzzles: a daily proof, rated puzzles, timed rushes and duels. The curriculum has no timers, and neither does anything here unless you choose a timed mode.',
     about:
-      'The levels are finite, and the Arena is not. A generator makes puzzles on demand, and the same seed always gives the same puzzle, so a link can carry one to a friend. Every generated proof puzzle comes with a reference proof that the engine accepts, and samples are also compiled in real Lean. Puzzles have ratings from 400 to 2400. Arena play earns experience and advances quests like everything else, and it needs no account or server, so results are on the honour system. Nothing leaves your browser except during a live duel.',
+      'The levels are finite, and the Arena is not. A generator makes puzzles on demand, and the same seed always gives the same puzzle, so a link can carry one to a friend. Every generated proof puzzle comes with a reference proof that the engine accepts, and samples are also compiled in real Lean. Puzzles have ratings from about 400 to 2200. Arena play earns experience and advances quests like everything else, and it needs no account or server, so results are on the honour system. Nothing leaves your browser except during a live duel.',
     tips: [
       'Start with the Daily Proof. It is the same three puzzles for everyone that day.',
       'Rated puzzles adapt to you, so a miss is information, not a punishment.',
