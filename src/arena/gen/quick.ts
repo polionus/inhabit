@@ -12,6 +12,7 @@ import { buildProp, propAttempt, PROP_SCHEMAS, uncurry, searchTarget, CLASSICAL_
 import { typeAttempt, typeLang } from './inhabit.ts';
 import { flatTerm } from './emit.ts';
 import type { Pf } from './search.ts';
+import { tidy } from './tidy.ts';
 
 export interface QuickItem {
   quick: QuickKind;
@@ -248,6 +249,7 @@ function provable(rng: Rng, target: number): QuickItem | null {
   const want = three ? rng.pick(['intuitionistic', 'invalid', 'classical'] as const) : rng.pick(['intuitionistic', 'invalid'] as const);
   for (let i = 0; i < 40; i++) {
     const f = provableCand(rng.fork('c' + i));
+    if (!tidy(f, { bottom: target < 500, contraOk: target < 800 })) continue;
     const v = classify(f);
     if (v !== want) continue;
     const vars = atomNames(f).sort();
@@ -256,7 +258,7 @@ function provable(rng: Rng, target: number): QuickItem | null {
     const verify: { ok: string[]; bad: string[] } = { ok: [], bad: [] };
     let proofWhy = 'a constructive proof exists';
     if (v !== 'invalid') {
-      const b = buildProp({ hyps: [], goal: f }, { family: 'prop', mode: v === 'classical' ? 'tactic' : 'term', hypStyle: false, allowClassical: true, allowTrivial: true, maxCost: 24 });
+      const b = buildProp({ hyps: [], goal: f }, { family: 'prop', mode: v === 'classical' ? 'tactic' : 'term', hypStyle: false, allowClassical: true, allowTrivial: true, contraOk: true, maxCost: 24 });
       if (!b) continue;
       verify.ok.push(b.header + '\n' + b.solution);
       const flat = b.term?.trim().replace(/\s+/g, ' ');

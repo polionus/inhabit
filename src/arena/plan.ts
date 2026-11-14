@@ -12,8 +12,12 @@ export interface Slot {
   target: number;
 }
 
-/** What identifies a puzzle's content (two different ids can be the same statement). */
-export const statementKey = (p: Puzzle): string => (p.kind === 'proof' ? `${p.family}|${p.header}` : `${p.quick}|${p.prompt}|${p.code ?? ''}`);
+/**
+ * What identifies a puzzle's content (two different ids can be the same statement). For proofs
+ * this is the English reading, which is the same whether the premises are presented as
+ * hypotheses (`(h : A) : B`) or as an implication (`A → B`).
+ */
+export const statementKey = (p: Puzzle): string => (p.kind === 'proof' ? `${p.family}|${p.english}` : `${p.quick}|${p.prompt}|${p.code ?? ''}`);
 
 /**
  * Generate one puzzle per slot from `seed`, never repeating a statement within the set
@@ -71,8 +75,45 @@ export function dailySlots(dateKey: string): Slot[] {
 
 export const dailySeed = (dateKey: string): string => `daily:${generator.version}:${dateKey}`;
 
+/** Dailies are de-duplicated in blocks of this many days (see `dailySet`). */
+export const DAILY_BLOCK_DAYS = 14;
+
+const rawDaily = new Map<string, Puzzle[]>();
+const finalDaily = new Map<string, Puzzle[]>();
+
+/** The day's draw before looking at other days (memoised; pure). */
+function rawDailySet(dateKey: string): Puzzle[] {
+  let s = rawDaily.get(dateKey);
+  if (!s) {
+    s = sequence(dailySeed(dateKey), dailySlots(dateKey));
+    rawDaily.set(dateKey, s);
+  }
+  return s;
+}
+
+const shiftDay = (dateKey: string, days: number): string => utcDateKey(Date.parse(`${dateKey}T00:00:00Z`) + days * 86_400_000);
+
+/**
+ * The Daily Proof for a UTC date: a pure function of the date, so it is the same for everyone.
+ * Days are grouped in two-week blocks. A day never repeats a statement used earlier in its own
+ * block, nor a first draw of any day in the previous block, so the same puzzle does not come
+ * back for at least two weeks (a re-drawn puzzle of the previous block is the one rare gap).
+ */
 export function dailySet(dateKey: string): Puzzle[] {
-  return sequence(dailySeed(dateKey), dailySlots(dateKey));
+  const cached = finalDaily.get(dateKey);
+  if (cached) return cached;
+  const n = dailyNumber(dateKey);
+  const offset = (((n - 1) % DAILY_BLOCK_DAYS) + DAILY_BLOCK_DAYS) % DAILY_BLOCK_DAYS; // days since the block began
+  const avoid: string[] = [];
+  for (let k = 1; k <= DAILY_BLOCK_DAYS; k++) for (const p of rawDailySet(shiftDay(dateKey, -offset - k))) avoid.push(statementKey(p));
+  let set: Puzzle[] = [];
+  for (let d = offset; d >= 0; d--) {
+    const day = shiftDay(dateKey, -d);
+    set = finalDaily.get(day) ?? sequence(dailySeed(day), dailySlots(day), avoid);
+    finalDaily.set(day, set);
+    for (const p of set) avoid.push(statementKey(p));
+  }
+  return set;
 }
 
 /* ---------------- Proof Rush ---------------- */

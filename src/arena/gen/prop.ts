@@ -30,6 +30,7 @@ import type { Lang } from './emit.ts';
 import { sentence } from './english.ts';
 import { canonicalAtoms, makeHints, makeThemes, propNaming, rate, statementFeatures } from './common.ts';
 import type { Features } from './common.ts';
+import { commute, tidy } from './tidy.ts';
 
 export const LETTERS = ['P', 'Q', 'R', 'S'] as const;
 
@@ -135,7 +136,20 @@ export const PROP_SCHEMAS: readonly (readonly [string, string])[] = [
   ['(P → ¬Q) → ¬(P ∧ Q)', 'negation'],
   ['(P → Q) → (P → ¬Q) → ¬P', 'negation'],
   ['(P ∨ Q) → (P → R) → (Q → S) → R ∨ S', 'case split'],
+  ['¬(P ∨ Q) → (P ↔ Q)', 'iff'],
+  ['(P ↔ Q) ∧ (Q ↔ R) → (P ↔ R)', 'iff'],
+  ['(P → Q) ∧ (Q → R) ∧ (R → P) → (P ↔ R)', 'iff'],
+  ['(P ∨ Q) ∧ (R ∨ S) → (P ∨ R) ∨ (Q ∧ S)', 'case split'],
+  ['(P ∧ Q) ∨ (R ∧ S) → (P ∨ R) ∧ (Q ∨ S)', 'case split'],
+  ['¬¬(P ∨ Q) ↔ ¬(¬P ∧ ¬Q)', 'double negation'],
+  ['¬(P ∧ Q) ∧ (P ∨ Q) → (P ↔ ¬Q)', 'iff'],
+  ['(P ∨ Q) ∧ (P → R) ∧ (Q → R ∧ S) → R', 'case split'],
+  ['(P → Q ∨ R) → (Q → S) → (R → S) → ¬S → ¬P', 'case split'],
+  ['(P ↔ Q) → (P ∨ Q) → P ∧ Q', 'iff'],
+  ['(P ↔ Q) → ¬(P ∧ Q) → ¬P ∧ ¬Q', 'iff'],
   // classical (only offered when classical reasoning is part of the puzzle)
+  ['(¬P → Q) ∧ (¬P → ¬Q) → P', 'classical'],
+  ['(P ↔ ¬Q) → (Q ↔ ¬P)', 'classical'],
   ['(P → Q ∨ R) → (P → Q) ∨ (P → R)', 'classical'],
   ['¬(P ↔ Q) → (P ↔ ¬Q)', 'classical'],
   ['((P → Q) → Q) → (Q → P) → P', 'classical'],
@@ -184,7 +198,8 @@ function substitute(rng: Rng, f: F, strength: number): F {
   const m: Record<string, F> = {};
   const nSub = strength <= 0 ? 0 : Math.min(names.length, rng.int(strength + 1));
   for (const n of rng.shuffle(names).slice(0, nSub)) {
-    const pool = [...names.filter((x) => x !== n), ...free];
+    // a fresh letter keeps the statement tidy (`Q ∧ R` for `Q`, not `Q ∧ P` next to another `P`)
+    const pool = free.length && rng.next() < 0.75 ? free : [...names.filter((x) => x !== n), ...free];
     const y = atom(rng.pick(pool));
     const z = atom(n);
     m[n] = weighted<F>(rng, [
@@ -192,7 +207,7 @@ function substitute(rng: Rng, f: F, strength: number): F {
       [and(z, y), 2],
       [or(z, y), 2],
       [imp(y, z), 2],
-      [not(not(z)), strength >= 2 ? 1 : 0],
+      [not(not(z)), strength >= 3 ? 0.4 : 0],
     ]);
   }
   return substAtoms(f, m);
@@ -211,7 +226,12 @@ export function schemaCand(rng: Rng, strength: number, classical: boolean, iffCh
   const names = atomNames(s.f);
   const perm = rng.shuffle(LETTERS.slice(0, Math.max(names.length, 2)));
   const renamed = substAtoms(s.f, Object.fromEntries(names.map((n, i) => [n, atom(perm[i])])));
-  let f = substitute(rng, renamed, strength);
+  // bracket-shape laws are about the shape: substituting into them only adds clutter
+  const shapeLaw = /associativity|commutativity/.test(s.tag);
+  // negation laws are already about negation: substituting `¬X` into them only stacks `¬`
+  const negLaw = /negation/.test(s.tag);
+  let f = substitute(rng, renamed, shapeLaw || negLaw ? 0 : strength);
+  if (!shapeLaw) f = commute(f, rng);
   if (iffChance > 0 && f.t === 'imp' && f.b.t !== 'imp' && rng.next() < iffChance) {
     const conv = imp(f.b, f.a);
     if (classify(conv) === 'intuitionistic' || (classical && classify(conv) === 'classical')) {
@@ -278,6 +298,8 @@ export interface BuildOpts {
   hypStyle: boolean;
   allowClassical: boolean;
   allowTrivial: boolean;
+  /** Plain `P ∧ ¬P`-style contradictions between letters are allowed (bottom of the range). */
+  contraOk?: boolean;
   maxCost?: number;
 }
 
@@ -294,6 +316,7 @@ export function buildProp(c: Cand, o: BuildOpts): Built | null {
   const goal = substAtoms(c.goal, m);
   const statement = imps(hyps, goal);
   if (size(statement) > 14) return null;
+  if (!tidy(statement, { bottom: o.allowTrivial, contraOk: o.contraOk })) return null;
   const hk = hyps.map(key);
   if (new Set(hk).size !== hk.length || hk.includes(key(goal))) return null;
   // validity
@@ -408,7 +431,7 @@ export function schemaBase(): number[] {
     const { hyps, goal } = uncurry(s.f);
     const b = buildProp(
       { hyps, goal },
-      { family: 'prop', mode: 'tactic', hypStyle: false, allowClassical: true, allowTrivial: true, maxCost: 26 },
+      { family: 'prop', mode: 'tactic', hypStyle: false, allowClassical: true, allowTrivial: true, contraOk: true, maxCost: 26 },
     );
     return b ? b.rating : -1;
   });
@@ -433,7 +456,11 @@ export function propAttempt(rng: Rng, target: number, mode: 'tactic' | 'term', f
     }
     const i = rng.pick(pool);
     const gap = target - base[i];
-    const strength = gap < 100 ? rng.int(2) : gap < 350 ? 1 + rng.int(2) : gap < 650 ? 2 : 3;
+    // a bare schema that already sits on the target would win every seed: give others a turn
+    if (gap < 150 && rng.next() < 0.5) return null;
+    // unsubstitutable laws (negation, bracket shape) reach the top only as bare `↔` forms: keep them rare there
+    if (target >= 1700 && /negation|associativity|commutativity/.test(PARSED[i].tag) && rng.next() < 0.75) return null;
+    const strength = gap < 100 ? (rng.next() < 0.35 ? 0 : 1) : gap < 350 ? 1 + rng.int(2) : gap < 650 ? 2 : 3;
     const iffChance = target >= 1300 ? 0.5 : 0;
     cand = schemaCand(rng, strength, classicalOk, iffChance, [i]);
   } else {
@@ -449,6 +476,7 @@ export function propAttempt(rng: Rng, target: number, mode: 'tactic' | 'term', f
     hypStyle,
     allowClassical: classicalOk,
     allowTrivial: target < 520,
+    contraOk: target < 800,
     maxCost: target >= 1500 ? 26 : 20,
   });
 }

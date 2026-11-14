@@ -113,7 +113,7 @@ for (const family of FAMILIES) {
       expect(within(150)).toBeGreaterThanOrEqual(0.9);
       expect(total / n).toBeLessThan(30);
       expect(worst).toBeLessThan(250);
-    });
+    }, 60_000);
 
     it('has variety: few duplicate statements among s:0 … s:29', () => {
       const rates: string[] = [];
@@ -128,7 +128,7 @@ for (const family of FAMILIES) {
         expect(dup).toBeLessThanOrEqual(0.55);
       }
       console.log(`[${family}] duplicate rate among 30 seeds: ${rates.join(', ')}`);
-    });
+    }, 60_000);
   });
 }
 

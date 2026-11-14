@@ -14,6 +14,7 @@ import type { Lang } from './emit.ts';
 import { typeSentence } from './english.ts';
 import { canonicalAtoms, makeThemes, rate, statementFeatures } from './common.ts';
 import { propAttempt, uncurry } from './prop.ts';
+import { tidy } from './tidy.ts';
 import type { Built } from './prop.ts';
 
 export const TYPE_LETTERS = ['A', 'B', 'C'] as const;
@@ -94,6 +95,7 @@ export function buildType(hyps0: F[], goal0: F, o: { hypStyle: boolean; allowTri
   const goal = substAtoms(goal0, m);
   const statement = imps(hyps, goal);
   if (size(statement) > 11 || hyps.length > 4) return null;
+  if (!tidy(statement, { bottom: o.allowTrivial })) return null;
   const hk = hyps.map(key);
   if (new Set(hk).size !== hk.length || hk.includes(key(goal))) return null;
   if (g4ip(hyps, goal) !== true) return null;

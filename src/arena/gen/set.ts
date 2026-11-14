@@ -15,6 +15,8 @@ import type { Lang } from './emit.ts';
 import { makeHints, makeThemes, rate, statementFeatures } from './common.ts';
 import { PROP_SCHEMAS, PROP_TACTICS, uncurry } from './prop.ts';
 import type { Built } from './prop.ts';
+import { commute, tidy } from './tidy.ts';
+import { imps } from './logic.ts';
 import { classify } from './logic.ts';
 
 export const SET_TACTICS = [...PROP_TACTICS, 'ext'];
@@ -158,8 +160,32 @@ function toSE(f: F, m: Record<string, string>): SE | null {
   }
 }
 
-const TRANSLATABLE = PROP_SCHEMAS.map(([s, tag]) => ({ f: parse(s), tag })).filter((s) => {
-  if (classify(s.f) !== 'intuitionistic') return false;
+/** Textbook set identities and subset facts, written as their elementwise propositions. */
+const SET_LAWS: readonly (readonly [string, string])[] = [
+  ['P ∧ (Q ∨ R) ↔ (P ∧ Q) ∨ (P ∧ R)', 'distributivity'],
+  ['P ∨ (Q ∧ R) ↔ (P ∨ Q) ∧ (P ∨ R)', 'distributivity'],
+  ['(P ∧ ¬Q) ∧ ¬R ↔ P ∧ ¬(Q ∨ R)', 'difference'],
+  ['P ∧ ¬(Q ∨ R) ↔ (P ∧ ¬Q) ∧ (P ∧ ¬R)', 'difference'],
+  ['(P ∨ Q) ∧ ¬R ↔ (P ∧ ¬R) ∨ (Q ∧ ¬R)', 'difference'],
+  ['(P ∧ Q) ∧ ¬R ↔ P ∧ (Q ∧ ¬R)', 'difference'],
+  ['(P ∧ ¬Q) ∨ (Q ∧ ¬P) → P ∨ Q', 'symmetric difference'],
+  ['(P ∧ ¬Q) ∨ (Q ∧ ¬P) → ¬(P ∧ Q)', 'symmetric difference'],
+  ['P ∧ ¬Q ↔ P ∧ ¬(P ∧ Q)', 'difference'],
+  ['(P → Q) → ¬Q ∧ R → ¬P ∧ R', 'complement'],
+  ['(P → Q) → (Q → R) → P ∧ ¬R → False', 'subset'],
+  ['(P → Q) → (P ∧ R) ∨ (Q ∧ R) → Q ∧ R', 'subset'],
+  ['(P → Q) → P ∧ ¬Q → R', 'subset'],
+  ['(P → Q) → P ∧ ¬R → Q ∧ ¬R', 'difference'],
+  ['(P → Q) → R ∧ ¬Q → R ∧ ¬P', 'difference'],
+  ['(P → R) → (Q → R) → P ∨ Q → R', 'subset'],
+  ['(P → Q) → (P → R) → P → Q ∧ R', 'subset'],
+  ['(P ∨ Q) ∧ ¬P → Q', 'difference'],
+  ['(P ∨ Q) ∧ (P ∨ R) ∧ ¬P → Q ∧ R', 'difference'],
+  ['¬(P ∨ Q ∨ R) ↔ ¬P ∧ ¬Q ∧ ¬R', 'De Morgan'],
+];
+
+const TRANSLATABLE = [...PROP_SCHEMAS, ...SET_LAWS].map(([s, tag]) => ({ f: parse(s), tag })).filter((s) => {
+  if (classify(s.f) !== 'intuitionistic' || atomNamesOf(s.f).includes('S')) return false;
   return translate(s.f, { P: 'A', Q: 'B', R: 'C', S: 'D' }) !== null;
 });
 
@@ -232,7 +258,7 @@ function renameSE(e: SE, m: Record<string, string>): SE {
   }
 }
 
-export function buildSet(c0: SetCand, o: { hypStyle: boolean }): Built | null {
+export function buildSet(c0: SetCand, o: { hypStyle: boolean; contraOk?: boolean; doubleNegOk?: boolean }): Built | null {
   // canonical set names by first occurrence
   const order: string[] = [];
   for (const e of [...c0.hyps.flat(), c0.lhs, c0.rhs]) for (const n of setsIn(e, new Set())) if (!order.includes(n)) order.push(n);
@@ -259,6 +285,7 @@ export function buildSet(c0: SetCand, o: { hypStyle: boolean }): Built | null {
   const R0 = mem(rhs);
   if (key(L0) === key(R0)) return null;
   const hypF = hyps.map(([a, b]) => imp(mem(a), mem(b)));
+  if (!tidy(imps(hypF, c0.eq ? iff(L0, R0) : imp(L0, R0)), { contraOk: o.contraOk, maxDoubles: o.doubleNegOk ? 1 : 0 })) return null;
   if (c0.eq) {
     if (g4ip(hypF, iff(L0, R0)) !== true) return null;
   } else if (g4ip([...hypF, L0], R0) !== true) return null;
@@ -345,16 +372,19 @@ export function setAttempt(rng: Rng, target: number): Built | null {
     const letters = rng.shuffle(['A', 'B', 'C']);
     let f = s.f;
     // replace letters by small set expressions (∩, ∪, ᶜ) for harder, more varied facts
-    const nSub = rng.int(1 + Math.round(2 * tt));
-    const pool = ['P', 'Q', 'R'];
+    const nSub = /associativity|commutativity/.test(s.tag) ? 0 : rng.int(1 + Math.round(2 * tt));
     for (let i = 0; i < nSub; i++) {
+      // only fresh letters: `B ∩ C` for `B`, never a set that already occurs
+      const fresh = ['P', 'Q', 'R'].filter((x) => !atomNamesOf(f).includes(x));
+      if (!fresh.length) break;
       const n = rng.pick(atomNamesOf(f));
-      const y = atom(rng.pick(pool.filter((x) => x !== n)));
+      const y = atom(rng.pick(fresh));
       const z = atom(n);
       f = substAtoms(f, { [n]: rng.pick([not(z), and(z, y), or(z, y)]) });
     }
     // a law whose converse also holds becomes an equality
     if (f.t === 'imp' && f.b.t !== 'imp' && rng.next() < 0.25 + 0.4 * tt && g4ip([f.b], f.a) === true) f = iff(f.a, f.b);
+    if (!/associativity|commutativity/.test(s.tag)) f = commute(f, rng);
     c = translate(f, { P: letters[0], Q: letters[1], R: letters[2], S: 'C' });
     if (c) c.tag = s.tag;
   } else {
@@ -372,5 +402,5 @@ export function setAttempt(rng: Rng, target: number): Built | null {
     };
   }
   if (!c) return null;
-  return buildSet(c, { hypStyle: c.hyps.length > 0 && rng.next() < 0.6 });
+  return buildSet(c, { hypStyle: c.hyps.length > 0 && rng.next() < 0.6, contraOk: target < 800, doubleNegOk: c.tag === 'double negation' });
 }

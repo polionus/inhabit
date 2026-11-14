@@ -20,6 +20,22 @@ describe('arena plans', () => {
       expect(new Set(set.map(statementKey)).size).toBe(set.length);
     }
   });
+  it('six weeks of dailies: no statement returns within two weeks', () => {
+    const start = Date.UTC(2026, 10, 14);
+    const days = Array.from({ length: 42 }, (_, i) => dailySet(utcDateKey(start + i * 86_400_000)).map(statementKey));
+    const repeats: string[] = [];
+    days.forEach((keys, i) => {
+      for (let k = 1; k <= 14 && i - k >= 0; k++) for (const key of keys) if (days[i - k].includes(key)) repeats.push(`${i}-${k}: ${key}`);
+    });
+    // Only a re-drawn puzzle of the previous block can slip through; allow at most one in six weeks.
+    expect(repeats.length).toBeLessThanOrEqual(1);
+  });
+  it('a daily does not depend on which other days were computed first', () => {
+    const a = dailySet('2027-03-09').map((p) => p.id);
+    dailySet('2027-03-01');
+    dailySet('2027-03-20');
+    expect(dailySet('2027-03-09').map((p) => p.id)).toEqual(a);
+  });
   it('duel sets are deterministic and free of repeats', () => {
     for (const f of ['blitz', 'standard', 'proofs'] as const) {
       const s = duelSet('abc', f);

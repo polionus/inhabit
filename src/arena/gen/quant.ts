@@ -14,6 +14,7 @@ import { sentence } from './english.ts';
 import { makeHints, makeThemes, propNaming, rate, statementFeatures } from './common.ts';
 import { PROP_SCHEMAS, PROP_TACTICS, uncurry } from './prop.ts';
 import type { Built } from './prop.ts';
+import { tidy } from './tidy.ts';
 import { classify, atomNames } from './logic.ts';
 
 export const QUANT_TACTICS = [...PROP_TACTICS, 'use', 'specialize', 'exists'];
@@ -92,7 +93,8 @@ const LIFTABLE = PROP_SCHEMAS.map(([s, tag]) => ({ f: parse(s), tag })).filter(
     classify(s.f) === 'intuitionistic' &&
     atomNames(s.f).length <= 3 &&
     !atomNames(s.f).includes('S') &&
-    !/True|False/.test(show(s.f)),
+    !/True|False/.test(show(s.f)) &&
+    s.tag !== 'associativity',
 );
 const PRED: Record<string, string> = { P: 'p', Q: 'q', R: 's' };
 
@@ -107,6 +109,8 @@ export interface QCand {
 
 function liftCand(rng: Rng, target: number): QCand | null {
   const s = rng.pick(LIFTABLE);
+  // lifting a double-negation law sprays ¬¬ over every predicate: keep that occasional
+  if (s.tag === 'double negation' && rng.next() < 0.75) return null;
   const at = (x: string) => Object.fromEntries(atomNames(s.f).map((n) => [n, atom(PRED[n], x)]));
   const { hyps, goal } = uncurry(s.f);
   const pt = (f: F) => substAtoms(f, at('x'));
@@ -170,11 +174,12 @@ function arities(f: F, out: Map<string, number>): void {
   }
 }
 
-export function buildQuant(c: QCand, o: { hypStyle: boolean }): Built | null {
+export function buildQuant(c: QCand, o: { hypStyle: boolean; contraOk?: boolean }): Built | null {
   const fs = canonPreds([...c.hyps, c.goal]);
   const hyps = fs.slice(0, -1);
   const goal = fs[fs.length - 1];
   const statement = imps(hyps, goal);
+  if (!tidy(statement, { contraOk: o.contraOk })) return null;
   const hk = hyps.map(key);
   if (new Set(hk).size !== hk.length) return null;
   const ar = new Map<string, number>();
@@ -239,5 +244,5 @@ export function quantAttempt(rng: Rng, target: number): Built | null {
     c = { hyps, goal, tag: s.tag, classical: s.classical };
   } else c = liftCand(rng, target);
   if (!c) return null;
-  return buildQuant(c, { hypStyle: c.hyps.length > 0 && rng.next() < 0.5 });
+  return buildQuant(c, { hypStyle: c.hyps.length > 0 && rng.next() < 0.5, contraOk: target < 800 });
 }

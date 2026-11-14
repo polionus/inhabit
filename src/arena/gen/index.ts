@@ -25,10 +25,10 @@ export const GEN_VERSION = 1;
 
 /** Measured by src/arena/gen/gen.test.ts (see the report in the test output). */
 export const RANGE: Record<PuzzleFamily, [number, number]> = {
-  prop: [400, 2200],
-  inhabit: [400, 2000],
-  quant: [450, 1600],
-  set: [450, 1700],
+  prop: [400, 1900],
+  inhabit: [400, 1900],
+  quant: [450, 1500],
+  set: [450, 1500],
   quick: [400, 1100],
 };
 

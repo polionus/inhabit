@@ -392,7 +392,7 @@ browser, so a seed in a URL *is* a shared puzzle. No `Math.random`, no `Date`. E
 proof puzzle carries a reference solution that the mini-engine accepts under the puzzle's
 `allowedTactics`; `scripts/verify-arena.ts` samples the generator and compiles the samples in
 real Lean. Families: `prop`, `inhabit`, `quant`, `set`, `quick` (see the contract). Puzzles are
-rated from about 400 to 2200 (the range depends on the family) by an estimate of proof
+rated from about 400 to 1900 (the range depends on the family) by an estimate of proof
 difficulty. `src/arena/plan.ts` (frozen) turns seeds
 and dates into the sets each mode plays: `dailySet`, `rushSlot`, `duelSet`, `sequence`, `nth`.
 
