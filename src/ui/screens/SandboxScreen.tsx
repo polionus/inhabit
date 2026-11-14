@@ -8,6 +8,7 @@ import { OpenInLean } from '../components/OpenInLean.tsx';
 import { CommandOutputs, Infoview } from '../components/Infoview.tsx';
 import { SymbolBar } from '../components/SymbolBar.tsx';
 import { useInfo } from '../level/ProofLevel.tsx';
+import { ShareButton } from '../arena/ShareButton.tsx';
 import { Icon, ScreenHeader } from '../components/kit.tsx';
 
 export function SandboxScreen() {
@@ -34,6 +35,7 @@ export function SandboxScreen() {
         actions={
           <>
             <OpenInLean source={text} className="btn outline" />
+            <ShareButton card={{ kind: 'sandbox', title: 'From the Sandbox', source: text }} className="btn outline" />
             <button className="btn ghost" onClick={() => setText('')}><Icon name="close" size={16} /> Clear</button>
           </>
         }

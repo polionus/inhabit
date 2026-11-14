@@ -128,6 +128,7 @@ function LiveDuel({ role, kind, format: hostFormat, roomId }: { role: 'host' | '
   useEffect(() => {
     setError(null);
     let cancelled = false;
+    let created: Session | null = null;
     const start = async () => {
       let tr: DuelTransport | null = null;
       try {
@@ -143,6 +144,7 @@ function LiveDuel({ role, kind, format: hostFormat, roomId }: { role: 'host' | '
           now: () => Date.now(),
         });
         s.onProgress((i, r) => fan.current.push(i, r));
+        created = s;
         attach(s);
         if (role === 'host') setRoom(await tr.host());
         else await tr.join(roomId!);
@@ -150,8 +152,9 @@ function LiveDuel({ role, kind, format: hostFormat, roomId }: { role: 'host' | '
         if (!cancelled) setError(e instanceof Error ? e.message : 'The connection failed.');
       }
     };
-    void start();
-    return () => { cancelled = true; };
+    // Deferred a tick so a development double-mount never opens (and drops) a connection.
+    const t = window.setTimeout(() => void start(), 0);
+    return () => { clearTimeout(t); cancelled = true; created?.close(); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attempt]);
 
@@ -165,10 +168,11 @@ function LiveDuel({ role, kind, format: hostFormat, roomId }: { role: 'host' | '
   if (detail) {
     return (
       <div className="page narrow">
-        <Card tone="flat" role="alert" aria-label="Connection problem">
+        <Card tone="flat" aria-label="Connection problem"><div role="alert">
           <h1>{st?.versionMismatch ? 'Different versions of the game' : 'No duel this time'}</h1>
           <p>{detail}</p>
           {!st?.versionMismatch && <p className="muted small">If no connection forms, a challenge link does the same job: you play the set now, your friend plays it whenever they like.</p>}
+          </div>
           <div className="dl-actions">
             {role === 'host' && !st?.versionMismatch && <button className="btn primary" onClick={asChallenge}>Send a challenge link instead</button>}
             {role === 'host' && <button className="btn" onClick={() => setAttempt((a) => a + 1)}>Try again</button>}

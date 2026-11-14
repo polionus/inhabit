@@ -9,6 +9,7 @@ import { HintLadder } from '../components/HintLadder.tsx';
 import { Inventory } from '../components/Inventory.tsx';
 import { Lean, Markdown } from '../components/Markdown.tsx';
 import { Success, type Reward } from '../components/Success.tsx';
+import { ShareButton } from '../arena/ShareButton.tsx';
 import { Icon, Modal, Pill, Stars } from '../components/kit.tsx';
 import { WorldToken, worldStatus } from '../components/world.tsx';
 import { KIND_ICON } from '../screens/WorldScreen.tsx';
@@ -227,6 +228,9 @@ export function LevelPlayer(props: LevelPlayerProps) {
             actions={
               <>
                 <button className="btn primary big" onClick={props.onNext}>{props.nextLabel ?? 'Next'} <Icon name="arrow-right" size={18} /></button>
+                {(level.kind === 'proof' || level.kind === 'parsons') && outcome.body && !outcome.studied && (
+                  <ShareButton card={{ kind: 'level', ref: levelId, title: level.title, english: englishOf(level) ?? undefined, source: [level.setup, level.header + '\n' + outcome.body + (level.kind === 'proof' && level.after ? '\n' + level.after : '')].filter(Boolean).join('\n') }} />
+                )}
                 {props.extraActions}
               </>
             }

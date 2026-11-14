@@ -35,7 +35,8 @@ export interface SessionOptions {
   gen: number;
   /** Host only: the format to play. */
   format?: DuelFormat;
-  newSeed: () => string;
+  /** Host only. */
+  newSeed?: () => string;
   now: () => number;
   countdownMs?: number;
 }
@@ -77,7 +78,7 @@ export function createSession(o: SessionOptions): Session {
   };
 
   const sendSetup = () => {
-    const seed = o.newSeed();
+    const seed = (o.newSeed ?? (() => 'x'))();
     sentSetup = true;
     set({ seed, phase: 'lobby', startAt: null, rematch: { me: false, them: false }, round: s.round + 1 });
     send({ t: 'setup', seed, format: s.format });

@@ -11,6 +11,7 @@ import { Lean, InlineMd, LeanInline } from '../components/Markdown.tsx';
 import { SymbolBar } from '../components/SymbolBar.tsx';
 import { useInfo } from '../level/ProofLevel.tsx';
 import type { SavedTheorem, WorkshopDraft } from '../../state/game.ts';
+import { ShareButton } from '../arena/ShareButton.tsx';
 import { EmptyState, Icon, ScreenHeader, Tabs, celebrate, sfx } from '../components/kit.tsx';
 
 const STEPS = ['Say it', 'Type it', 'Define it', 'State it', 'Prove it'];
@@ -181,6 +182,7 @@ function Gallery({ onEditFree }: { onEditFree: (t: SavedTheorem) => void }) {
           <div className="actions">
             <OpenInLean source={fullSource(t)} />
             <button className="btn" onClick={() => navigator.clipboard?.writeText(fullSource(t))}>Copy</button>
+            {t.complete && <ShareButton card={{ kind: 'workshop', title: t.name, english: t.english || undefined, source: fullSource(t) }} />}
             <button className="btn" onClick={() => edit(t)}>Edit</button>
             <button className="btn ghost" onClick={() => game().deleteTheorem(t.id)}>Delete</button>
           </div>

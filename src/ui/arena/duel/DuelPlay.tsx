@@ -8,7 +8,7 @@ import { duelReduce, duelView, newDuel, type DuelState, type DuelView, type Puzz
 import type { Bot } from '../../../arena/state/duelBots.ts';
 import type { DuelFormat } from '../../../arena/plan.ts';
 import type { Puzzle } from '../../../arena/types.ts';
-import { Markdown } from '../../components/Markdown.tsx';
+import { Lean, Markdown } from '../../components/Markdown.tsx';
 import { Card, Countdown, Icon, celebrate, sfx } from '../../components/kit.tsx';
 import { PuzzlePlayer, type PuzzleOutcome } from '../PuzzlePlayer.tsx';
 import { Reference } from '../parts.tsx';
@@ -91,6 +91,18 @@ export function DuelPlay(p: DuelPlayProps) {
     if (p.mode === 'challenge' && p.preset) p.preset.forEach((r, i) => dispatch({ type: 'remoteProgress', i, r }));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [started]);
+
+  // A bot's timeline is fixed in advance, so once you are done its remaining results (those inside
+  // the time cap) are simply applied: there is no point making you wait for a program.
+  useEffect(() => {
+    if (!view.meFinished || !p.botTimeline || state.endedAt !== null) return;
+    let ft = 0;
+    p.botTimeline.forEach((r, i) => {
+      ft += r.ms + (i > 0 ? HOLD_MS : 0);
+      dispatch({ type: 'remoteProgress', i, r: ft <= state.capMs ? r : { solved: false, ms: state.capMs } });
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view.meFinished]);
 
   useEffect(() => {
     if (p.opponentLeft) dispatch({ type: 'remoteLeft' });
@@ -255,7 +267,12 @@ function EndScreen(p: DuelPlayProps & { end: DuelEnd }) {
           <div key={pz.id}>
             <p className="small muted">Puzzle {i + 1}, {puzzleLabel(pz)}</p>
             <Markdown className="small" text={pz.kind === 'proof' ? pz.english : pz.prompt} />
-            <Reference puzzle={pz} />
+            {pz.kind === 'quick' ? (
+              <>
+                {pz.code && <Lean code={pz.code} />}
+                <Markdown className="small" text={`**Answer:** ${pz.options.find((o) => o.correct)?.text ?? ''}  \n${pz.options.find((o) => o.correct)?.why ?? ''}`} />
+              </>
+            ) : <Reference puzzle={pz} />}
           </div>
         ))}
       </section>
