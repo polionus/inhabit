@@ -62,7 +62,10 @@
 .share-wrap { display: inline-flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
 .share-msg { font-size: .85rem; color: var(--ok-text); max-width: 28rem; }
 .share-msg.err { color: var(--err-text); }
-.share-card { display: grid; gap: 1rem; }
+.share-card { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+.share-card > * { min-width: 0; }
+.share-card h1 { overflow-wrap: anywhere; }
+.share-card pre.code, .share-card pre.code code { white-space: pre-wrap; overflow-wrap: anywhere; }
 .share-card h1, .share-card h2 { margin: 0; }
 .share-english { font-family: var(--font-read); font-size: 1.15rem; line-height: 1.55; margin: 0; }
 .share-err { white-space: pre-wrap; overflow-wrap: anywhere; }

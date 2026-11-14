@@ -101,8 +101,12 @@ export function createGameStore(deps: StoreDeps): StoreApi<GameState> {
         toasts: [...s.toasts, ...toasts.map((text) => ({ id: toastId++, text }))],
       }));
     };
+    // More than three at once only happens when an old save meets new badges (or on import):
+    // say it once instead of flooding the screen.
     const badgeToasts = (ids: string[]) =>
-      ids.map((id) => `Badge: ${BADGES.find((b) => b.id === id)?.title ?? id}`);
+      ids.length > 3
+        ? [`Badge: ${ids.length} achievements earned so far. See them on your profile.`]
+        : ids.map((id) => `Badge: ${BADGES.find((b) => b.id === id)?.title ?? id}`);
 
     /** Settle quests (XP once each), then badges, then commit with all toasts. Returns quest XP. */
     const settle = (save: SaveData, toasts: string[] = []): number => {
