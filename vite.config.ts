@@ -13,6 +13,8 @@ export default defineConfig({
           if (id.includes('node_modules')) {
             if (id.includes('@codemirror') || id.includes('@lezer') || id.includes('codemirror') || id.includes('style-mod') || id.includes('crelt') || id.includes('w3c-keyname')) return 'codemirror';
             if (id.includes('/react') || id.includes('scheduler') || id.includes('zustand')) return 'react';
+            // PeerJS (live duels) is loaded on demand: its own chunk, never imported by the entry.
+            if (/node_modules\/(peerjs|webrtc-adapter|sdp|eventemitter3|peerjs-js-binarypack|@swc\/helpers)\//.test(id)) return 'peerjs';
             return 'vendor';
           }
           if (id.includes('/src/engine/')) return 'engine';
