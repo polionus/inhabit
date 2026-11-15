@@ -16,13 +16,13 @@ export const screens: Partial<Record<ScreenId, ScreenIntro>> = {
 
   review: {
     title: 'Review',
-    lede: 'Short sessions that bring back levels you solved earlier. Solving something again after a gap is how it stays with you, so this is where the third star is earned.',
+    lede: 'Up to five cards a day, bringing back levels you met earlier. Solving something again after a gap is how it stays with you, and it is where the third star is earned.',
     about:
-      'Every level you complete enters a deck with five boxes. A level you solve again moves up a box and returns after a longer gap: 1, 3, 7, 16 and then 35 days. After a solve you can rate it easy, right or hard, which adjusts the first gap. Sessions mix levels from different worlds, and proof levels start from a blank editor, so you recall the proof rather than recognize it. The third star of a level is earned by solving it again here at least once.',
+      'Every level you finish enters a deck with five boxes. A level you solve again moves up a box and returns after a longer gap: 1, 3, 7, 16 and then 35 days. After a solve you can rate it easy, right or hard, which adjusts the first gap. A session is at most five cards, the ones that have waited longest first, and you can ask for five more. Proof levels start from a blank editor, so you recall the proof and do not just recognize it. Levels whose solution you looked at come back early, for you to solve on your own. The third star of a level is earned by solving it again here at least once.',
     tips: [
       'Short and regular beats long and rare: ten minutes a few times a week is plenty.',
       'Rate honestly. Choosing hard brings a level back sooner, which is what you want for shaky ones.',
-      'An empty queue is fine. Levels return when their gap has passed.',
+      'Nothing ready is fine. Levels return when their gap has passed, and nothing piles up against you.',
     ],
   },
 
@@ -78,7 +78,7 @@ export const screens: Partial<Record<ScreenId, ScreenIntro>> = {
     title: 'Profile',
     lede: 'Your progress, rank, stars, daily quests, streak and badges, and the settings for the game. Everything here is stored in your browser on this device.',
     about:
-      'Your player level comes from the experience you earn by solving levels, reviewing and reading, and it never goes down. Stars show how cleanly you solved each level. Each day brings three quests, such as solving two levels or reading a Guide article, and any you leave unfinished simply expire. Your streak counts active days and forgives one rest day a week. Badges mark milestones. Settings let you lift the tactic lock and mute sound. **Export save** writes your progress to a file you can import on another device, and nothing is sent to a server.',
+      'Your player level comes from the experience you earn by solving levels, reviewing and practicing, and it never goes down. Stars show how you solved each level: one with hints, two without, three once you have solved it again in Review. A level whose solution you looked at stays open but earns no star until you solve it yourself, and the mastery table shows how much of each world is your own work. Each day brings three quests, such as solving two levels or reading a Guide article, and any you leave unfinished simply expire. Your streak counts active days and forgives one rest day a week. Badges mark milestones. Settings let you lift the tactic lock and mute sound. **Export save** writes your progress to a file you can import on another device, and nothing is sent to a server.',
     tips: [
       'Export your save now and then. Clearing browser data erases progress that has not been exported.',
       'Turn off the tactic lock in the settings if you want to use any tactic in any level.',
@@ -136,11 +136,11 @@ export const screens: Partial<Record<ScreenId, ScreenIntro>> = {
 
   'arena-rush': {
     title: 'Proof Rush',
-    lede: 'Quick puzzles against the clock, or until three strikes. A way to practice speed and fluency with short proofs, with personal bests to beat.',
+    lede: 'Quick multiple-choice questions against the clock, or until three strikes. A way to practice reading goals and recognizing the right move fast, with personal bests to beat.',
     about:
-      'Rush has two forms. In the timed form you have 3 or 5 minutes to solve as many puzzles as you can. In Survival you keep going until you have made three strikes. Most puzzles are quick items with short proofs, mixed with a few slightly longer ones, and the rating of the puzzles rises as you go. Your best score in each form is kept. Rush is the one place besides duels where a timer matters, and it is optional. It rewards recognizing common shapes quickly, which comes from the levels and from Review.',
+      'Rush has two forms. In the timed form you have 3 or 5 minutes to solve as many puzzles as you can. In Survival you keep going until you have made three strikes. Every item is a quick question with one right answer, such as the goal after a tactic or the one tactic that works, and the rating rises as you go. In the timed forms a wrong answer costs ten seconds. Your best score in each form is kept. Rush is the one place besides duels where a timer matters, and it is optional. It rewards recognizing common shapes quickly, which comes from the levels and from Review.',
     tips: [
-      'Read the goal aloud before typing. A wrong guess costs more time than a pause.',
+      'Read the goal before choosing. A wrong guess costs more time than a pause.',
       'Survival ends on three strikes, so accuracy matters more than speed there. Try it before the timed form.',
       'Practice the levels and Review first. Rush rewards patterns you already know.',
     ],
