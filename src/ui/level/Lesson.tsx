@@ -1,29 +1,39 @@
 import { useId, useState } from 'react';
 import type { LevelLesson } from '../../content/types.ts';
-import { game } from '../game.ts';
+import { FirstSteps } from './FirstSteps.tsx';
 import { Markdown } from '../components/Markdown.tsx';
 import { Icon } from '../components/kit.tsx';
 
 /**
- * The level's lesson: a reading section under the intro. Collapsible; toggling remembers the
- * choice in `settings.lessonsOpen`. Renders nothing when there is no lesson.
+ * The level's lesson: a reading section under the intro. Collapsible; toggling affects only this
+ * view (SPEC §12.3). The collapsed bar shows a teaser and the reading time. Renders nothing when
+ * there is no lesson (apart from the first-level pointers, which gate themselves).
  */
-export function LessonPanel({ lesson, defaultOpen, remember = true, nudge = false }: { lesson: LevelLesson | undefined; defaultOpen: boolean; remember?: boolean; /** Draw attention to a collapsed lesson (the learner is struggling). */ nudge?: boolean }) {
-  void nudge;
+
+/** First sentence of a lesson, as plain text for the collapsed bar. */
+export function lessonTeaser(body: string): string {
+  const para = body.split(/\n\s*\n/).find((p) => p.trim() && !/^\s*(```|#|\||- |\d+\. )/.test(p)) ?? '';
+  const plain = para.replace(/\s+/g, ' ').replace(/[*_`]/g, '').replace(/\[([^\]]*)\]\([^)]*\)/g, '$1').trim();
+  const m = /^.*?[.!?:](?=\s|$)/.exec(plain);
+  return m ? m[0] : plain;
+}
+
+export function LessonPanel({ lesson, defaultOpen, nudge = false }: { lesson: LevelLesson | undefined; defaultOpen: boolean; /** Ignored: kept for callers; toggling no longer writes a setting. */ remember?: boolean; /** Draw attention to a collapsed lesson (the learner is struggling). */ nudge?: boolean }) {
   const [open, setOpen] = useState(defaultOpen);
   const id = useId();
-  if (!lesson) return null;
+  if (!lesson) return <FirstSteps />;
   const words = (lesson.body + ' ' + (lesson.pitfall ?? '') + ' ' + (lesson.realLean ?? '')).split(/\s+/).length;
-  const toggle = () => {
-    const next = !open;
-    setOpen(next);
-    if (remember) game().setSettings({ lessonsOpen: next });
-  };
+  const toggle = () => setOpen(!open);
+  const teaser = lessonTeaser(lesson.body);
+  const pulse = nudge && !open;
   return (
-    <section className={`lesson ${open ? 'open' : ''}`} aria-labelledby={`${id}-h`}>
+    <>
+    <FirstSteps />
+    <section className={`lesson ${open ? 'open' : ''} ${pulse ? 'nudge' : ''}`} aria-labelledby={`${id}-h`}>
       <button type="button" className="lesson-toggle" aria-expanded={open} aria-controls={`${id}-body`} onClick={toggle}>
         <span className="lesson-badge" aria-hidden="true"><Icon name="book" size={18} /></span>
-        <span id={`${id}-h`}>Lesson</span>
+        <span id={`${id}-h`} className="lesson-label">{pulse ? 'Stuck? The lesson covers this' : 'Lesson'}</span>
+        {!open && teaser && <span className="lesson-teaser">{teaser}</span>}
         <span className="lesson-meta">{Math.max(1, Math.round(words / 200))} min read</span>
         <Icon name="chevron-down" size={18} className="chev" />
       </button>
@@ -45,5 +55,6 @@ export function LessonPanel({ lesson, defaultOpen, remember = true, nudge = fals
         </div>
       )}
     </section>
+    </>
   );
 }

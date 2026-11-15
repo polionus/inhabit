@@ -16,7 +16,7 @@ export const world: World = {
       title: 'Something of type Nat',
       english: 'Give any natural number.',
       intro:
-        "Lean has two basic notions: **terms** and **types**. Every term has a type, written `a : A` and read \"a has type A\". For example `7 : Nat` says that 7 is a natural number (0, 1, 2, …).\n\nYour task: fill the gap with any term of type `Nat`. `sorry` is a placeholder meaning \"to be done\"; replace it.",
+        "Replace `sorry` with any natural number, such as `7`.\n\nThe line `7 : Nat` says that the term `7` has the type `Nat`, the natural numbers 0, 1, 2, …",
       outro:
         "You *inhabited* the type `Nat`: you produced a term of it. Keep that word in mind. The whole game is about inhabiting types, and soon the types will be statements you want to prove.",
       unlocks: { codex: ['terms-types', 'nat', 'sorry', 'example-cmd'] },
@@ -35,7 +35,7 @@ export const world: World = {
       kind: 'choice',
       title: 'Asking for a type',
       intro:
-        "`#check e` asks Lean for the type of `e`. It does not compute anything. `Nat.succ` is the function \"the next number\".\n\nPut your cursor on each `#check` line and read Lean's answer in the panel. Then answer the question.",
+        "Put your cursor on each `#check` line and read Lean's answer in the panel. Then answer the question.\n\n`#check e` asks Lean for the type of `e`; it computes nothing. `Nat.succ` is the function \"the next number\".",
       outro:
         "`Nat → Nat` is a **function type**: \"give me a `Nat`, get a `Nat` back\". And `Nat.succ 3` has type `Nat`: applying a function to an argument gives something of the result type.",
       unlocks: { codex: ['check', 'function-types', 'arrow'] },
@@ -73,7 +73,7 @@ export const world: World = {
       title: 'Using a function',
       english: 'Given a function f from Nat to Nat and a number n, produce a Nat.',
       intro:
-        "To use a function, write it next to its argument: `f n`. No brackets, no commas. The rule is:\n\n- if `f : A → B` and `a : A`, then `f a : B`.\n\nYou are given `f` and `n` as hypotheses above the line. Build a `Nat` from them.",
+        "You are given a function `f` and a number `n` above the line. Replace `sorry` with a `Nat` built from them.\n\nTo use a function, write it next to its argument: `f n`. No brackets, no commas.",
       outro:
         "The rule \"`f : A → B`, `a : A`, so `f a : B`\" is the only way to *use* a function. Keep it in mind: Proposition Peaks turns out to be about this rule.",
       unlocks: { codex: ['application'] },
@@ -93,7 +93,7 @@ export const world: World = {
       title: 'Building a function',
       english: 'Define the function `double` that doubles a number.',
       intro:
-        "To *build* a function, use `fun`: `fun n => n + 1` takes `n` and returns `n + 1`. Worked example: `def addTwo : Nat → Nat := fun n => n + 2`.\n\nNow define `double`. The `fun` is written for you; supply what comes out. Below the editor, a hidden test checks `double 3 = 6` by plain computation (`rfl`).",
+        "Replace `sorry` with what the function returns for the input `n`, so that `double` doubles its input.\n\n`fun n => n + 1` is the function that takes `n` and returns `n + 1`. A hidden test checks `double 3 = 6` by plain computation (`rfl`).",
       outro:
         "`fun` is the way to *make* an element of a function type; application is the way to *use* one. Together they are the whole story of functions, and `def` just gives the result a name.",
       unlocks: { codex: ['fun', 'lambda', 'def'] },
@@ -114,7 +114,7 @@ export const world: World = {
       title: 'Two arguments, one at a time',
       english: 'Define `area`, taking a width and a height and returning their product.',
       intro:
-        "Lean has no functions of two arguments. `Nat → Nat → Nat` means `Nat → (Nat → Nat)`: a function that takes one number and returns *another function*. This is **currying**. So `fun w h => …` is short for `fun w => fun h => …`.\n\nDefine `area w h = w * h`. The tests also use `area 3` with only one argument.",
+        "Replace `sorry` with a function that takes a width `w` and a height `h` and returns their product. Write it as `fun w h => …`.\n\nThe type `Nat → Nat → Nat` means a function that returns a function, so the tests can also write `area 3` with one argument.",
       outro:
         "`area 3` is a function in its own right, still waiting for its second argument. A function of several arguments is a chain of one-argument functions. Later, `P → Q → R` will read as \"given a proof of P and a proof of Q, get R\".",
       unlocks: { codex: ['currying'] },
@@ -136,7 +136,7 @@ example : Nat → Nat := area 3`,
       title: 'Composing functions',
       english: 'Given f : A → B and g : B → C, build a function A → C.',
       intro:
-        "Now with abstract types. `A B C : Type` stand for *any* types, so you know nothing about their elements. The only moves available are applying `f` and `g`.\n\nArrange the lines into a term of type `A → C`. Two lines are traps.",
+        "Arrange the lines into a term of type `A → C`. Two lines are traps.\n\n`A B C : Type` stand for *any* types, so you know nothing about their elements: the only moves are applying `f` and `g`.",
       outro:
         "You never needed to know what `A`, `B`, `C` were. The term works for every choice, because it only follows the types: `a : A`, then `f a : B`, then `g (f a) : C`.",
       header: 'example (A B C : Type) (f : A → B) (g : B → C) : A → C :=',

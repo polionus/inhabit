@@ -31,6 +31,14 @@
 }
 .lesson-toggle:hover { background: var(--surface-2); }
 .lesson-badge { width: 2rem; height: 2rem; border-radius: 10px; display: grid; place-items: center; background: var(--primary-soft); color: var(--primary-text); flex: none; }
+.lesson-label { flex: none; }
+.lesson-teaser { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 500 .88rem/1.2 var(--font-ui); color: var(--muted); }
+.lesson-teaser + .lesson-meta { margin-left: 0; }
+.lesson:not(.open) .lesson-toggle { padding: .65rem 1rem; }
+.lesson.nudge { animation: lesson-nudge 2.4s ease-in-out infinite; }
+.lesson.nudge .lesson-toggle { background: var(--primary-soft); }
+@keyframes lesson-nudge { 0%, 100% { box-shadow: inset 0 0 0 1px var(--line), 0 0 0 0 transparent; } 50% { box-shadow: inset 0 0 0 1px var(--primary-text), 0 0 0 4px var(--primary-soft); } }
+@media (prefers-reduced-motion: reduce) { .lesson.nudge { animation: none; } }
 .lesson-meta { font: 650 .78rem/1 var(--font-ui); color: var(--muted); margin-left: auto; white-space: nowrap; }
 .lesson-toggle .chev { color: var(--muted); transition: transform .2s; flex: none; }
 .lesson.open .lesson-toggle .chev { transform: rotate(180deg); }
@@ -232,7 +240,7 @@ pre.raw { font-size: .84rem; white-space: pre-wrap; margin: .3rem 0; overflow-wr
 
 @media (max-width: 900px) {
   .level { display: block; height: auto; }
-  .task { box-shadow: inset 0 -1px 0 var(--line); overflow: visible; padding: 1rem 1rem 1.5rem; }
+  .task { box-shadow: inset 0 -1px 0 var(--line); overflow: visible; }
   .work { display: block; overflow: visible; }
   .editor-panel { max-height: none !important; overflow: visible; }
   .infoview { min-height: 200px; }
@@ -243,6 +251,16 @@ pre.raw { font-size: .84rem; white-space: pre-wrap; margin: .3rem 0; overflow-wr
   .symbolbar { flex-wrap: nowrap; overflow-x: auto; padding-bottom: .3rem; scrollbar-width: none; }
   .sym { flex: none; }
   .sym-tip { display: none; }
+  .lesson { margin: .7rem 0; }
+  .task { padding: .7rem 1rem 1.2rem; }
+  .task-crumb { margin-bottom: .5rem; }
+  .task-head { margin-bottom: .6rem; }
+  .task-head .task-tags { margin-bottom: .35rem; }
+  .task-intro { line-height: 1.5; }
+  .task-intro p { margin-bottom: .55rem; }
+  .toolbar { margin: .6rem 0; }
+  .lesson.nudge .lesson-teaser { display: none; }
+  .lesson.nudge .lesson-meta { margin-left: auto; }
 }
 @media (max-width: 520px) {
   .sym { min-width: 2.5rem; height: 2.5rem; }

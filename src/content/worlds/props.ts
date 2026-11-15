@@ -16,7 +16,7 @@ export const world: World = {
       title: 'The same program',
       english: 'If P implies Q and Q implies R, then P implies R.',
       intro:
-        "Basecamp's puzzle was `(A → B) → (B → C) → A → C`. Here it is again with `P Q R : Prop` instead of `A B C : Type`.\n\n`Prop` is the type of *statements*. If `P : Prop`, a term `hp : P` is a **proof** of `P`, and `P → Q` reads \"if P then Q\". `theorem` is `example` with a name.\n\nSolve it exactly as you did before.",
+        "Replace `sorry` with a term of the type below. It is Basecamp's puzzle `(A → B) → (B → C) → A → C` again, so solve it exactly as you did before.\n\nThe difference is `P Q R : Prop`: `Prop` is the type of *statements*, a term `hp : P` is a **proof** of `P`, and `P → Q` reads \"if P then Q\".",
       outro:
         "You wrote the same `fun` term as in Basecamp. A proof of \"P implies Q\" *is* a function that turns any proof of `P` into a proof of `Q`. Only the reading changed.",
       unlocks: { codex: ['prop', 'theorem'] },
@@ -36,7 +36,7 @@ export const world: World = {
       kind: 'choice',
       title: 'Modus ponens',
       intro:
-        "In the theorem below, `hpq : P → Q` is a function and `hp : P` is an argument. The proof is the application `hpq hp`.\n\nRead the line and decide what *logical* step it performs. Hover over `hpq hp` in the panel if you like.",
+        "Read the theorem below and decide what *logical* step the application `hpq hp` performs. Hover over `hpq hp` in the panel if you like.\n\nHere `hpq : P → Q` is a function and `hp : P` is its argument.",
       outro:
         "Modus ponens, \"from P and P → Q conclude Q\", is function application. Propositions are types, proofs are terms, `→` is the function arrow. This is the **Curry–Howard correspondence**.",
       unlocks: { codex: ['curry-howard'] },
@@ -72,7 +72,7 @@ export const world: World = {
       title: 'Your first tactic: exact',
       english: 'From a proof of Q and a proof of Q → R, prove R.',
       intro:
-        "`by` switches from writing a term to giving *instructions* for building one. The goal is shown after `⊢`. The simplest instruction is `exact e`: \"the term `e` has exactly the goal's type\".\n\nHere the goal is `R`. Look at the hypotheses above the line and finish with `exact`.",
+        "Replace `sorry` with `exact` and a term of the goal's type. The goal `R` is shown after `⊢`; look at the hypotheses above the line.\n\n`by` switches from writing a term to giving *instructions* for building one. `exact e` means \"the term `e` has exactly the goal's type\".",
       outro:
         "A tactic block is a program that builds a term. `exact` just hands over a finished term. Open the term below: Lean checked *that* against the goal.",
       unlocks: { tactics: ['exact'], codex: ['by', 'tactics-concept', 'exact', 'turnstile'] },

@@ -34,6 +34,17 @@ export interface EditorDiag {
   message: string;
 }
 
+/**
+ * "Type to replace": the range of the placeholder to select, or null. Only when the document
+ * holds exactly one `sorry` (as a whole word).
+ */
+export function placeholderRange(doc: string): { from: number; to: number } | null {
+  const hits = [...doc.matchAll(/(?<![\w.'])sorry(?![\w'])/g)];
+  if (hits.length !== 1) return null;
+  const from = hits[0].index!;
+  return { from, to: from + 'sorry'.length };
+}
+
 export const toEditorDiags = (ds: BodyDiagnostic[]): EditorDiag[] =>
   ds.filter((d) => d.inBody).map((d) => ({ from: d.bFrom, to: d.bTo, severity: d.severity, message: d.message }));
 
@@ -177,7 +188,7 @@ interface Props {
   className?: string;
   /**
    * When the initial text contains exactly one `sorry`, select it the first time the editor is
-   * focused, so that typing replaces the placeholder. (No-op until implemented.)
+   * focused, so that typing replaces the placeholder. Does nothing if the text was edited first.
    */
   selectPlaceholder?: boolean;
 }
@@ -223,7 +234,30 @@ export const Editor = forwardRef<EditorHandle, Props>(function Editor(props, ref
       v.dispatch({ changes: { from: sel.from, to: sel.to, insert: '  ' }, selection: { anchor: sel.from + 2 } });
       return true;
     };
+    // Type to replace: armed until the first focus or the first edit of the text.
+    let armed = !!cb.current.selectPlaceholder && placeholderRange(cb.current.value) !== null;
+    let afterClick = false;
+    const selectSorry = (v: EditorView) => {
+      const r = placeholderRange(v.state.doc.toString());
+      if (r) v.dispatch({ selection: { anchor: r.from, head: r.to } });
+    };
+    const placeholderFocus = EditorView.domEventHandlers({
+      focus(_e, v) {
+        if (!armed) return;
+        armed = false;
+        selectSorry(v);
+        // A pointer click sets its own caret on mouseup; re-apply once after it.
+        afterClick = true;
+        window.setTimeout(() => (afterClick = false), 1500);
+      },
+      click(_e, v) {
+        if (!afterClick) return;
+        afterClick = false;
+        if (v.state.selection.main.empty) selectSorry(v);
+      },
+    });
     const exts: Extension[] = [
+      placeholderFocus,
       history(),
       drawSelection(),
       highlightActiveLine(),
@@ -244,7 +278,11 @@ export const Editor = forwardRef<EditorHandle, Props>(function Editor(props, ref
       fontComp.current.of(EditorView.theme({ '&': { fontSize: `${cb.current.fontSize ?? 15}px` } })),
       roComp.current.of([EditorState.readOnly.of(!!cb.current.readOnly), EditorView.editable.of(true)]),
       EditorView.updateListener.of((u) => {
-        if (u.docChanged) cb.current.onChange?.(u.state.doc.toString());
+        if (u.docChanged) {
+          armed = false;
+          afterClick = false;
+          cb.current.onChange?.(u.state.doc.toString());
+        }
         if (u.docChanged || u.selectionSet) cb.current.onCursor?.(u.state.selection.main.head);
       }),
     ];
@@ -259,6 +297,10 @@ export const Editor = forwardRef<EditorHandle, Props>(function Editor(props, ref
       }),
     });
     view.current = v;
+    if (armed && v.hasFocus) {
+      armed = false;
+      selectSorry(v);
+    }
     cb.current.onCursor?.(v.state.selection.main.head);
     return () => {
       v.destroy();

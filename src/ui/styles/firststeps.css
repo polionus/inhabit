@@ -1,0 +1,14 @@
+/* First-steps pointers on the very first level (src/ui/level/FirstSteps.tsx) */
+.fs-ring { position: fixed; z-index: 54; pointer-events: none; border-radius: var(--r-md); box-shadow: 0 0 0 3px var(--accent, var(--primary)); animation: fs-ring 1.8s ease-in-out infinite; }
+.fs-card {
+  position: fixed; z-index: 55; box-sizing: border-box; padding: .8rem .95rem .7rem;
+  background: var(--surface); color: var(--ink); border-radius: var(--r-lg);
+  box-shadow: 0 0 0 1px var(--line), 0 10px 30px rgba(0, 0, 0, .28);
+}
+.fs-step { font: 800 .7rem/1 var(--font-ui); letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin-bottom: .35rem; }
+.fs-text { margin: 0 0 .6rem; font: 650 .98rem/1.4 var(--font-ui); }
+.fs-text code { font-family: var(--mono); }
+.fs-actions { display: flex; justify-content: flex-end; gap: .5rem; }
+@keyframes fs-ring { 0%, 100% { opacity: 1; } 50% { opacity: .45; } }
+@media (prefers-reduced-motion: reduce) { .fs-ring { animation: none; } }
+.sym.sym-more { font: 700 .78rem/1 var(--font-ui); padding: 0 .7rem; white-space: nowrap; width: auto; }

@@ -248,3 +248,18 @@ export const symbolBar: { symbol: string; abbr: string; name: string }[] = [
   { symbol: "₁", abbr: "1", name: "subscript one" },
   { symbol: "₂", abbr: "2", name: "subscript two" },
 ];
+
+/**
+ * The world in which each symbol of the symbol bar is first needed (SPEC §12.3: the bar grows
+ * with the player). A symbol missing here counts as needed from the start.
+ */
+export const symbolFirstWorld: Record<string, string> = {
+  "→": "types", "λ": "types",
+  "∧": "logic", "∨": "logic", "¬": "logic", "↔": "logic", "⟨": "logic", "⟩": "logic", "·": "logic", "₁": "logic", "₂": "logic",
+  "∀": "quant", "∃": "quant", "α": "quant", "β": "quant",
+  "≠": "eq", "←": "eq", "▸": "eq",
+  "ℕ": "nat",
+  "∈": "sets", "∉": "sets", "⊆": "sets", "∩": "sets", "∪": "sets", "∅": "sets", "ᶜ": "sets",
+  "∘": "fun", "⁻¹": "fun",
+  "∣": "num",
+};
