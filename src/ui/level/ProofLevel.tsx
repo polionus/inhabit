@@ -6,6 +6,7 @@ import { Editor, toEditorDiags, type EditorHandle } from '../lean/Editor.tsx';
 import { mapDiagnostics } from '../lean/offsets.ts';
 import { useCheck } from '../hooks.tsx';
 import { Infoview } from '../components/Infoview.tsx';
+import type { Goal } from '../../engine/types.ts';
 import { Lean } from '../components/Markdown.tsx';
 import { SymbolBar } from '../components/SymbolBar.tsx';
 import type { Run } from './run.ts';
@@ -23,7 +24,17 @@ export function useInfo(result: CheckResult | null, bodyOffset: number, bodyLen:
       }
     }
     const fallback = diags.find((d) => d.code === 'unsolved-goals')?.data?.goals ?? null;
-    return { diags, goals, fallback };
+    // the state where the earliest error starts, so the first error can show its goal
+    let errorGoals = null;
+    const first = diags.filter((d) => d.severity === 'error' && d.inBody).sort((a, b) => a.bFrom - b.bFrom)[0];
+    if (result && first && first.code !== 'parse') {
+      try {
+        errorGoals = engine.goalsAt(result, first.from);
+      } catch {
+        errorGoals = null;
+      }
+    }
+    return { diags, goals, fallback, errorGoals };
   }, [result, bodyOffset, bodyLen, cursor]);
 }
 
@@ -58,6 +69,37 @@ export function ProofLevelView({ run, level }: { run: Run; level: ProofLevel }) 
     }
   }, [result]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // The state the stuck panel reads: at the cursor, else after the last good tactic, else what was left over.
+  const live = useMemo(() => {
+    let goals: Goal[] | null = null;
+    let at: 'cursor' | 'last-step' | 'unsolved' | null = null;
+    // after the last tactic, a `sorry` has closed the goal for now: read the state just before it
+    const sorryStep = result && !result.complete && info.goals && info.goals.length === 0 ? [...result.steps].reverse().find((s) => s.tactic === 'sorry' && s.before.length > 0) : undefined;
+    if (sorryStep) {
+      goals = sorryStep.before;
+      at = 'last-step';
+    } else if (info.goals) {
+      goals = info.goals;
+      at = 'cursor';
+    } else if (result) {
+      const ok = result.steps.filter((s) => s.ok);
+      const last = ok[ok.length - 1];
+      if (last) {
+        goals = last.after;
+        at = 'last-step';
+      } else if (info.fallback) {
+        goals = info.fallback;
+        at = 'unsolved';
+      }
+    }
+    return { goals, at, edited: body !== level.starter };
+  }, [info.goals, info.fallback, result, body, level.starter]);
+  // Debounced: reporting on every keystroke would re-render the whole level screen in a cascade.
+  useEffect(() => {
+    const t = window.setTimeout(() => runRef.current.reportLive?.(live), 120);
+    return () => window.clearTimeout(t);
+  }, [live]);
+
   const onChange = (v: string) => {
     setBody(v);
     runRef.current.saveDraft(v);
@@ -90,7 +132,14 @@ export function ProofLevelView({ run, level }: { run: Run; level: ProofLevel }) 
         pending={pending}
         friendlySorry
         onInsert={(n) => editor.current?.insert(n)}
+        errorGoals={info.errorGoals}
+        onReplace={(from, to, text) => {
+          const next = body.slice(0, from) + text + body.slice(to);
+          setBody(next);
+          runRef.current.saveDraft(next);
+        }}
         emptyHint={level.mode === 'term' ? 'Write a term after the := sign. Errors and types show up here.' : undefined}
+        sorryLeft={!!result && result.decls.some((d) => d.usesSorry)}
       />
     </>
   );

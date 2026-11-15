@@ -1,6 +1,7 @@
 import type { MutableRefObject } from 'react';
 import type { Level } from '../../content/types.ts';
 import type { LevelSession } from '../../game/env.ts';
+import type { Goal } from '../../engine/types.ts';
 
 export interface EditorApi {
   insert?: (text: string) => void;
@@ -15,6 +16,16 @@ export interface RunCompletion {
   term?: string;
 }
 
+/** The live proof state a proof level reports upward, for the stuck panel. */
+export interface LiveState {
+  /** State at the cursor, else after the last successful tactic, else what was left unsolved; null when the engine has none. */
+  goals: Goal[] | null;
+  /** Where `goals` came from. */
+  at: 'cursor' | 'last-step' | 'unsolved' | null;
+  /** The body differs from the starter. */
+  edited: boolean;
+}
+
 /** What each level-kind component gets from the LevelPlayer. */
 export interface Run {
   level: Level;
@@ -27,6 +38,8 @@ export interface Run {
   attempt(): void;
   complete(c?: RunCompletion): void;
   saveDraft(text: string): void;
+  /** Proof levels report their live state here (called only when it changes). */
+  reportLive?: (live: LiveState) => void;
   api: MutableRefObject<EditorApi>;
 }
 

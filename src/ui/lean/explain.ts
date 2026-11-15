@@ -48,7 +48,7 @@ const table: Record<DiagnosticCode, Explainer> = {
   }),
   'name-locked': (d) => ({
     what: `The lemma ${q(d.data?.name)} is blocked in this level, because proving it (or something like it) is the point of the exercise.`,
-    tryThis: ['Build the result from simpler pieces instead.', 'The hint ladder can point at what to use.'],
+    tryThis: ['Build the result from simpler pieces instead.', 'The help panel can point at what to use.'],
   }),
   'type-mismatch': (d) => ({
     what: 'You gave Lean a term of one type where it needed another. Types are the whole game here: every proof is a term whose type is the statement.',

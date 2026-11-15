@@ -5,7 +5,6 @@ import type { LevelSession } from '../../game/env.ts';
 import { data } from '../data.ts';
 import { game, useGame } from '../game.ts';
 import { hintRevealsSolution } from '../lean/hints.ts';
-import { HintLadder } from '../components/HintLadder.tsx';
 import { Inventory } from '../components/Inventory.tsx';
 import { Lean, Markdown } from '../components/Markdown.tsx';
 import { Success, type Reward } from '../components/Success.tsx';
@@ -18,6 +17,7 @@ import { worldComplete } from '../../state/progress.ts';
 import { href } from '../router.ts';
 import { LessonPanel } from './Lesson.tsx';
 import { ProofLevelView } from './ProofLevel.tsx';
+import { StuckHelp } from './StuckHelp.tsx';
 import { ParsonsLevelView } from './ParsonsLevel.tsx';
 import { ChoiceLevelView } from './ChoiceLevel.tsx';
 import { PredictLevelView } from './PredictLevel.tsx';
@@ -25,7 +25,7 @@ import { FormalizeLevelView } from './FormalizeLevel.tsx';
 import { lessonDefaultOpen } from './lessonDefault.ts';
 import { PracticeOffer } from '../practice/PracticeOffer.tsx';
 import { useMedia } from '../hooks.tsx';
-import { hintsOf, type EditorApi, type Run, type RunCompletion } from './run.ts';
+import { hintsOf, type EditorApi, type LiveState, type Run, type RunCompletion } from './run.ts';
 
 const KIND_LABEL: Record<Level['kind'], string> = {
   proof: 'Proof',
@@ -68,9 +68,13 @@ export function LevelPlayer(props: LevelPlayerProps) {
 
   const session: LevelSession = useMemo(() => data.levelSession(levelId, strict), [levelId, strict]);
   const level = session.ctx.level;
-  const hints = hintsOf(level);
+  // A rung that states the solution is not part of the ladder: the solution button covers it.
+  const hints = useMemo(() => hintsOf(level).filter((h) => !hintRevealsSolution(h.text, level)), [level]);
 
   const [revealed, setRevealed] = useState(0);
+  const [toolUsed, setToolUsed] = useState(false);
+  const [failedChecks, setFailedChecks] = useState(0);
+  const [live, setLive] = useState<LiveState | null>(null);
   const [usedSolution, setUsedSolution] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
   const [inventory, setInventory] = useState(false);
@@ -81,9 +85,7 @@ export function LevelPlayer(props: LevelPlayerProps) {
   const deckItem = useGame((s) => s.save.deck[levelId]);
   const api = useRef<EditorApi>({});
   const done = useRef(false);
-  const finalGivesAway = useMemo(() => hints.length > 0 && hintRevealsSolution(hints[hints.length - 1].text, level), [hints, level]);
-  const finalRevealed = finalGivesAway && revealed >= hints.length && hints.length > 1;
-  const attemptsInit = useRef(false);
+  const helpUsed = revealed + (toolUsed ? 1 : 0);
 
   const initialBody = useMemo(() => {
     if (level.kind === 'proof') {
@@ -97,7 +99,14 @@ export function LevelPlayer(props: LevelPlayerProps) {
   const revealHint = () => {
     const n = Math.min(hints.length, revealed + 1);
     setRevealed(n);
-    if (mode === 'play') game().recordHints(levelId, n);
+    if (mode === 'play') game().recordHints(levelId, n + (toolUsed ? 1 : 0));
+  };
+
+  /** "Which tool?" counts as one hint. */
+  const useTool = () => {
+    if (toolUsed) return;
+    setToolUsed(true);
+    if (mode === 'play') game().recordHints(levelId, revealed + 1);
   };
 
   const reveal = () => {
@@ -117,8 +126,8 @@ export function LevelPlayer(props: LevelPlayerProps) {
     (c: RunCompletion = {}) => {
       if (done.current) return;
       done.current = true;
-      const studied = !!c.studied || usedSolution || finalRevealed;
-      const clean = !studied && revealed === 0;
+      const studied = !!c.studied || usedSolution;
+      const clean = !studied && helpUsed === 0;
       const world = session.ctx.world;
       const before = game().save;
       if (mode === 'play') {
@@ -143,7 +152,7 @@ export function LevelPlayer(props: LevelPlayerProps) {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [levelId, mode, usedSolution, finalRevealed, revealed],
+    [levelId, mode, usedSolution, helpUsed],
   );
 
   const run: Run = {
@@ -154,13 +163,14 @@ export function LevelPlayer(props: LevelPlayerProps) {
     solved: !!outcome,
     initialBody,
     attempt: () => {
+      setFailedChecks((n) => n + 1);
       if (mode === 'play') game().recordAttempt(levelId);
     },
+    reportLive: setLive,
     complete,
     saveDraft: (t) => mode === 'play' && game().setDraft(levelId, t),
     api,
   };
-  void attemptsInit;
 
   const world = session.ctx.world;
   const save = useGame((s) => s.save);
@@ -199,14 +209,28 @@ export function LevelPlayer(props: LevelPlayerProps) {
         {englishOf(level) && level.kind !== 'choice' && <Markdown className="english" text={englishOf(level)!} />}
         <Markdown text={level.intro} className="task-intro" />
         {level.kind === 'choice' && <Markdown className="english" text={level.question} />}
-        <LessonPanel lesson={lesson} defaultOpen={lessonDefaultOpen({ ctx: session.ctx, mode, passed, settings: lessonSettings, narrow })} remember={mode === 'play'} />
+        <LessonPanel lesson={lesson} defaultOpen={lessonDefaultOpen({ ctx: session.ctx, mode, passed, settings: lessonSettings, narrow })} remember={mode === 'play'} nudge={failedChecks >= 2 && !outcome && !passed} />
         <div className="toolbar">
           <button className="btn" onClick={() => setInventory(true)}><Icon name="bag" size={18} /> Inventory</button>
-          {sol && !showSolution && !outcome && (
-            <button className="btn ghost" onClick={reveal} title="Marks the level as studied"><Icon name="eye" size={18} /> Show solution</button>
-          )}
         </div>
-        {hints.length > 0 && <HintLadder hints={hints} revealed={revealed} onReveal={revealHint} lastGivesAway={finalGivesAway} />}
+        {!outcome && (
+          <StuckHelp
+            level={level}
+            levelId={levelId}
+            ctx={session.ctx}
+            strict={strict}
+            hints={hints}
+            live={live}
+            revealed={revealed}
+            onRevealHint={revealHint}
+            toolUsed={toolUsed}
+            onUseTool={useTool}
+            failedChecks={failedChecks}
+            canShowSolution={!!sol && !showSolution}
+            onShowSolution={reveal}
+            mode={mode}
+          />
+        )}
         {showSolution && sol && (
           <div className="solution">
             <div className="label">A solution</div>
