@@ -28,6 +28,12 @@ export interface Settings {
   sound: boolean;
   /** Lessons start expanded in the level task panel. */
   lessonsOpen: boolean;
+  /**
+   * When a level's lesson starts expanded. 'auto' (default): only where the level introduces
+   * something new (see src/ui/level/lessonDefault.ts); 'open': always; 'closed': never.
+   * Supersedes `lessonsOpen`, which is kept only so old saves load.
+   */
+  lessonMode: 'auto' | 'open' | 'closed';
 }
 
 export interface SavedTheorem {
@@ -114,6 +120,7 @@ export const defaultSettings = (): Settings => ({
   motion: 'system',
   sound: true,
   lessonsOpen: true,
+  lessonMode: 'auto',
 });
 
 export const emptyWorkshop = (): WorkshopDraft => ({
@@ -200,6 +207,7 @@ export function migrate(raw: unknown): SaveData {
       motion: s.motion === 'reduce' || s.motion === 'full' ? s.motion : 'system',
       sound: typeof s.sound === 'boolean' ? s.sound : true,
       lessonsOpen: typeof s.lessonsOpen === 'boolean' ? s.lessonsOpen : true,
+      lessonMode: s.lessonMode === 'auto' || s.lessonMode === 'open' || s.lessonMode === 'closed' ? s.lessonMode : s.lessonsOpen === false ? 'closed' : 'auto',
     };
   }
   if (Array.isArray(raw.theorems)) {

@@ -175,6 +175,11 @@ interface Props {
   /** Initial cursor position: 'end' (default) or an offset. */
   cursor?: 'end' | number;
   className?: string;
+  /**
+   * When the initial text contains exactly one `sorry`, select it the first time the editor is
+   * focused, so that typing replaces the placeholder. (No-op until implemented.)
+   */
+  selectPlaceholder?: boolean;
 }
 
 export const Editor = forwardRef<EditorHandle, Props>(function Editor(props, ref) {

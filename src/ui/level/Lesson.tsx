@@ -8,7 +8,8 @@ import { Icon } from '../components/kit.tsx';
  * The level's lesson: a reading section under the intro. Collapsible; toggling remembers the
  * choice in `settings.lessonsOpen`. Renders nothing when there is no lesson.
  */
-export function LessonPanel({ lesson, defaultOpen, remember = true }: { lesson: LevelLesson | undefined; defaultOpen: boolean; remember?: boolean }) {
+export function LessonPanel({ lesson, defaultOpen, remember = true, nudge = false }: { lesson: LevelLesson | undefined; defaultOpen: boolean; remember?: boolean; /** Draw attention to a collapsed lesson (the learner is struggling). */ nudge?: boolean }) {
+  void nudge;
   const [open, setOpen] = useState(defaultOpen);
   const id = useId();
   if (!lesson) return null;

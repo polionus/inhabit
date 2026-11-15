@@ -1,6 +1,7 @@
 import { symbolBar } from '../../content/abbreviations.ts';
 
-export function SymbolBar({ onInsert }: { onInsert: (s: string) => void }) {
+export function SymbolBar({ onInsert, unlocked }: { onInsert: (s: string) => void; /** Codex ids the player has unlocked; when given, the bar may show only the symbols met so far. */ unlocked?: string[] }) {
+  void unlocked;
   return (
     <div className="symbolbar" role="toolbar" aria-label="Symbols">
       {symbolBar.map((s) => (

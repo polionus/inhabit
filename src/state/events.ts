@@ -12,6 +12,8 @@ export type GameEvent =
   | { type: 'arena-rush'; score: number; best: boolean }
   /** A duel ended. */
   | { type: 'arena-duel'; won: boolean; opponent: 'bot' | 'friend' }
+  /** A practice set ended: generated problems tied to a level's tactic ('tactic') or English-to-Lean statements ('translate'). */
+  | { type: 'practice'; kind: 'tactic' | 'translate'; levelId?: string; solved: number; total: number }
   /** A Guide article was read to the end. */
   | { type: 'guide-read'; articleId: string }
   /** A world primer was read to the end. */

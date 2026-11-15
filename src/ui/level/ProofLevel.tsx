@@ -66,7 +66,7 @@ export function ProofLevelView({ run, level }: { run: Run; level: ProofLevel }) 
   return (
     <>
       <div className="editor-panel">
-        <SymbolBar onInsert={(s) => editor.current?.insert(s)} />
+        <SymbolBar onInsert={(s) => editor.current?.insert(s)} unlocked={run.session.ctx.codex} />
         <div className="header-ro" aria-label="Statement (read-only)">
           <Lean code={level.header} />
         </div>
@@ -78,6 +78,7 @@ export function ProofLevelView({ run, level }: { run: Run; level: ProofLevel }) 
           diagnostics={toEditorDiags(info.diags)}
           fontSize={run.fontSize}
           ariaLabel="Proof editor"
+          selectPlaceholder
         />
         {level.after && <div className="header-ro after"><Lean code={level.after} /></div>}
       </div>

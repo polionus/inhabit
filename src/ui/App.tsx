@@ -20,11 +20,12 @@ import { AboutScreen } from './screens/About.tsx';
 import { GuideScreen } from './screens/GuideScreen.tsx';
 import { ArenaScreen } from './arena/ArenaScreen.tsx';
 import { ShareScreen } from './arena/ShareScreen.tsx';
+import { PracticeScreen } from './practice/PracticeScreen.tsx';
 
 const SITE = 'Inhabit';
 const HOME_TITLE = 'Inhabit — learn Lean 4, the theorem prover, by playing';
 const PAGE_TITLES: Record<string, string> = {
-  map: 'Map', about: 'About', review: 'Review', codex: 'Codex', sandbox: 'Sandbox', workshop: 'Workshop', graduate: 'Graduate', profile: 'Profile', guide: 'Guide', arena: 'Arena', share: 'Shared proof',
+  map: 'Map', about: 'About', review: 'Review', codex: 'Codex', sandbox: 'Sandbox', workshop: 'Workshop', graduate: 'Graduate', profile: 'Profile', guide: 'Guide', arena: 'Arena', share: 'Shared proof', practice: 'Practice',
 };
 
 function titleFor(route: Route): string {
@@ -80,6 +81,7 @@ export function App() {
       case 'profile': screen = <ProfileScreen />; break;
       case 'guide': screen = <GuideScreen id={route.id} />; break;
       case 'share': screen = <ShareScreen code={route.code} />; break;
+      case 'practice': screen = <PracticeScreen id={route.id} />; break;
       case 'arena': screen = <ArenaScreen sub={route.sub} arg={route.arg} />; break;
       default:
         screen = (

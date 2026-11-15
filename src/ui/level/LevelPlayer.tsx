@@ -22,6 +22,9 @@ import { ParsonsLevelView } from './ParsonsLevel.tsx';
 import { ChoiceLevelView } from './ChoiceLevel.tsx';
 import { PredictLevelView } from './PredictLevel.tsx';
 import { FormalizeLevelView } from './FormalizeLevel.tsx';
+import { lessonDefaultOpen } from './lessonDefault.ts';
+import { PracticeOffer } from '../practice/PracticeOffer.tsx';
+import { useMedia } from '../hooks.tsx';
 import { hintsOf, type EditorApi, type Run, type RunCompletion } from './run.ts';
 
 const KIND_LABEL: Record<Level['kind'], string> = {
@@ -73,7 +76,8 @@ export function LevelPlayer(props: LevelPlayerProps) {
   const [inventory, setInventory] = useState(false);
   const [outcome, setOutcome] = useState<(RunCompletion & { xp: number; studied: boolean; reward: Reward }) | null>(null);
   const [worldDone, setWorldDone] = useState(false);
-  const lessonsOpen = useGame((s) => s.save.settings.lessonsOpen);
+  const lessonSettings = useGame((s) => s.save.settings);
+  const narrow = useMedia('(max-width: 900px)');
   const deckItem = useGame((s) => s.save.deck[levelId]);
   const api = useRef<EditorApi>({});
   const done = useRef(false);
@@ -195,7 +199,7 @@ export function LevelPlayer(props: LevelPlayerProps) {
         {englishOf(level) && level.kind !== 'choice' && <Markdown className="english" text={englishOf(level)!} />}
         <Markdown text={level.intro} className="task-intro" />
         {level.kind === 'choice' && <Markdown className="english" text={level.question} />}
-        <LessonPanel lesson={lesson} defaultOpen={mode === 'play' && !passed && lessonsOpen} remember={mode === 'play'} />
+        <LessonPanel lesson={lesson} defaultOpen={lessonDefaultOpen({ ctx: session.ctx, mode, passed, settings: lessonSettings, narrow })} remember={mode === 'play'} />
         <div className="toolbar">
           <button className="btn" onClick={() => setInventory(true)}><Icon name="bag" size={18} /> Inventory</button>
           {sol && !showSolution && !outcome && (
@@ -231,6 +235,7 @@ export function LevelPlayer(props: LevelPlayerProps) {
                 {(level.kind === 'proof' || level.kind === 'parsons') && outcome.body && !outcome.studied && (
                   <ShareButton card={{ kind: 'level', ref: levelId, title: level.title, english: englishOf(level) ?? undefined, source: [level.setup, level.header + '\n' + outcome.body + (level.kind === 'proof' && level.after ? '\n' + level.after : '')].filter(Boolean).join('\n') }} />
                 )}
+                {mode === 'play' && <PracticeOffer levelId={levelId} when={outcome.studied ? 'studied' : 'after'} />}
                 {props.extraActions}
               </>
             }

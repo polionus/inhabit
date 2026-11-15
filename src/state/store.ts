@@ -205,6 +205,9 @@ export function createGameStore(deps: StoreDeps): StoreApi<GameState> {
             }
             s = bumpDay(s, t, 'guide');
             break;
+          case 'practice':
+            // Stub: the state agent decides XP and day-log counters for practice sets.
+            break;
           case 'primer-read':
             if (firstSeen(`primer:${e.worldId}`)) {
               xp = 10;

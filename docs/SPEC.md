@@ -465,3 +465,71 @@ which serve as world emblems the way pieces do on a chess site.
 - **Celebration** proportional to the event: a tick and a sound for a level, a burst for a
   boss, a full celebration with the world recap for a world.
 - XP is still tied to learning or play events only; nothing can be bought or lost.
+
+---
+
+## 12. Understanding first (v3)
+
+Decided after a six-hats review (facts, feelings, risks, strengths, ideas, synthesis). Diagnosis:
+the game certified completion rather than understanding (the answer was one hint away and paid
+almost like a solve), put reading in front of doing (about 1,800 words before 36 typed characters
+in the first five levels), and was unkind at the moment of confusion (a stack of red errors).
+Eighteen of 35 tactics were never used again after the level that introduced them.
+
+Lines that every change here respects: nothing ever blocks progress; the solution is always one
+click away; first-time support is faded, not removed; Lean's real error message stays visible;
+test-out stays; the Workshop stays optional.
+
+### 12.1 Help that reads the learner's own goal (the stuck panel)
+Help on a proof level is one panel with this order:
+1. **Read the goal** — free (does not cost the clean solve). A description, computed from the live
+   proof state, of what the goal is and which hypotheses bear on it, ending in a question
+   ("the goal is an implication A → B. What do you gain if you assume A?"). It names no tactic.
+2. **Which tool?** — counts as a hint. Names the tactic or term construct for that goal shape,
+   chosen only from what the level's inventory allows, and says what it will do to the goal. It
+   never writes the line for the learner.
+3. **The authored hints**, minus any rung that states the solution.
+4. **A smaller version first** — where generated practice covers the topic (§12.4).
+5. **Show the solution** — a separate button, always available; marks the level *studied*.
+Levels without a live proof state (choice, predict, formalize) keep their authored hints.
+Diagnostics are calm: the first error is shown in full (Lean's message, the plain-language
+explanation, the goal at that point, a "did you mean" when the engine offers one); the rest sit
+behind "n more". A proof that still contains `sorry` is never shown a green tick.
+
+### 12.2 Solved and studied are different things
+- *Studied* (solution shown): the path stays open, but the level earns no XP and no star and
+  shows a quiet grey mark with an invitation to solve it unaided. Solving it later earns the
+  full reward. No copy scolds.
+- XP is paid for solving and for practice, not for scrolling: reading events pay nothing by
+  themselves (a reading quest still can).
+- Mastery is visible: world pages and the profile show how many levels were solved unaided, and
+  a boss beaten without hints is marked.
+- Review is a short daily deck: at most five cards a session, most overdue first, with no
+  backlog number anywhere. More can be asked for.
+- Quests fit the player: Arena quests appear only once the player has the tactics for them
+  (world `logic` complete), and timed or duel quests only for players already using the Arena.
+
+### 12.3 Doing before reading
+- `settings.lessonMode`: `auto` (default) opens a lesson only on an unsolved level that
+  introduces something new (it unlocks a tactic, or is the first level of its world) and never
+  on a narrow viewport; `open` and `closed` override. Toggling one lesson does not change the
+  setting. A collapsed lesson draws attention to itself after repeated failed checks.
+- The first levels are written so that the player types within seconds: the task in a sentence
+  or two, the placeholder `sorry` selected so typing replaces it, and only the symbols met so
+  far on the symbol bar.
+
+### 12.4 Practice from the generator
+- After a level whose tactic the generator can produce, the success card offers a short set of
+  generated problems that use it, restricted to what the player has unlocked
+  (`#/practice/<levelId>`). Optional; never a quest that nags; shown only where supported
+  (worlds `types`, `props`, `logic`, `quant`, `sets`; not rewriting, induction or functions,
+  for which no generator family exists yet).
+- The same source provides the "smaller version" for a stuck learner and "prove one like it
+  yourself" after a solution was shown.
+- **Translate** (`#/practice/translate`): an English sentence, the learner types the Lean
+  statement, the engine compares it with the reference by definitional equality. Practice for
+  the capstone skill beyond the nine authored formalize levels.
+
+### 12.5 Deferred
+Reminders for tactics going stale; generator families for `rw`, induction, `calc`, `funext`;
+bots that explain their proofs; ghost replays; any gate on a boss; analytics.
