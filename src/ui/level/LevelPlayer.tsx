@@ -243,6 +243,7 @@ export function LevelPlayer(props: LevelPlayerProps) {
         )}
         {outcome && (
           <Success
+            levelId={levelId}
             outro={level.outro}
             term={outcome.term}
             termOpen={level.kind === 'proof' && level.showTerm}
