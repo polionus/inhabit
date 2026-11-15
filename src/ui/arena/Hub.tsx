@@ -77,6 +77,18 @@ export function Hub() {
           <div className="mode-stats"><Pill>bots · live · challenge link</Pill></div>
           <a className="btn primary block" href="#/arena/duel">Duel</a>
         </Card>
+
+        <Card className="mode-card" as="section" aria-label="Practice by level">
+          <div className="mode-head"><span className="mode-icon"><Icon name="target" size={22} /></span><h2>Practice by level</h2></div>
+          <p className="muted">Short sets of generated problems on the tactic a level taught. Find them on a level's success card, or open a region from the map.</p>
+          <a className="btn block" href={href.map()}>Open the map</a>
+        </Card>
+
+        <Card className="mode-card" as="section" aria-label="Translate">
+          <div className="mode-head"><span className="mode-icon"><Icon name="book" size={22} /></span><h2>Translate</h2></div>
+          <p className="muted">An English sentence in, a Lean statement out. Five at a time, checked by the engine.</p>
+          <a className="btn primary block" href={href.practice('translate')}>Translate</a>
+        </Card>
       </div>
 
       <div className="hub-foot">
