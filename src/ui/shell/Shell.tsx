@@ -72,7 +72,7 @@ function NavLinks({ active, due, onNavigate }: { active: string; due: number; on
               <span className="nav-icon" aria-hidden="true"><Icon name={n.icon} size={22} /></span>
               <span className="nav-label">{n.label}</span>
               {n.name === 'review' && due > 0 && (
-                <span className="nav-count tnum" aria-label={`${due} due`}>{due > 99 ? '99+' : due}</span>
+                <span className="nav-count tnum" aria-label={`${due} ready today`}>{due}</span>
               )}
             </a>
           </li>
@@ -147,10 +147,10 @@ function TabBar({ active }: { active: string }) {
             <a key={n.name} className={`tb-link ${on ? 'active' : ''}`} href={n.to} aria-current={on ? 'page' : undefined}>
               <span className="tb-icon" aria-hidden="true">
                 <Icon name={n.icon} size={22} />
-                {n.name === 'review' && p.due > 0 && <span className="tb-dot tnum">{p.due > 99 ? '99+' : p.due}</span>}
+                {n.name === 'review' && p.due > 0 && <span className="tb-dot tnum">{p.due}</span>}
               </span>
               <span className="tb-label">{n.label}</span>
-              {n.name === 'review' && p.due > 0 && <span className="sr-only">, {p.due} due</span>}
+              {n.name === 'review' && p.due > 0 && <span className="sr-only">, {p.due} ready today</span>}
             </a>
           );
         })}

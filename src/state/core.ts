@@ -5,20 +5,37 @@
 import type { DeckItem } from './leitner.ts';
 import type { SaveData } from './game.ts';
 import { dayIndex, dayKey } from './days.ts';
-import { isPassed, requiredLevels, type LevelProgress, type WorldLike } from './progress.ts';
+import { requiredLevels, type LevelProgress, type WorldLike } from './progress.ts';
 
 export type Stars = 0 | 1 | 2 | 3;
 
 /**
- * 1 = passed (solved or studied); 2 = status `solved` and `clean` (no hints, solution never shown);
- * 3 = two stars and at least one passed review recorded (`reps > lapses`; a failed review alone never counts).
- * A level only "studied" is capped at 1 star. `applyCompletion` upgrades studied -> solved and sets `clean`
- * only when the later solve is itself clean, so it can reach 2 stars only by a clean solve.
+ * 0 = unseen or only studied (solution shown: no star until it is solved unaided); 1 = solved (with hints, or by
+ * test-out); 2 = solved and `clean` (no hints, solution never shown); 3 = two stars and at least one passed
+ * review recorded (`reps > lapses`; a failed review alone never counts).
  */
 export function starsFor(p: LevelProgress | undefined, d: DeckItem | undefined): Stars {
-  if (!isPassed(p)) return 0;
-  if (!p?.clean || p.status !== 'solved') return 1;
+  if (p?.status !== 'solved') return 0;
+  if (!p.clean) return 1;
   return d && d.reps > d.lapses ? 3 : 2;
+}
+
+/**
+ * Mastery over a world's required levels. `unaided` = solved by the player (with or without hints; not
+ * tested-out, not studied); `clean` = the subset solved without hints; `studied` = solution was shown.
+ */
+export function worldMastery(w: WorldLike, save: SaveData): { unaided: number; clean: number; studied: number; total: number } {
+  const req = requiredLevels(w);
+  let unaided = 0, clean = 0, studied = 0;
+  for (const l of req) {
+    const p = save.levels[l.id];
+    if (p?.status === 'studied') studied++;
+    else if (p?.status === 'solved' && !p.testedOut) {
+      unaided++;
+      if (p.clean) clean++;
+    }
+  }
+  return { unaided, clean, studied, total: req.length };
 }
 
 /** Stars over a world's required levels. */

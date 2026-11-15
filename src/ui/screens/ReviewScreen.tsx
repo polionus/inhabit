@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { data } from '../data.ts';
 import { game, store, useGame } from '../game.ts';
-import { dueLabel, pickSession, pickPractice, dueIds } from '../../state/leitner.ts';
+import { dueLabel, nextReviewAt, pickPractice, reviewReady, reviewSession } from '../../state/leitner.ts';
 import { LevelPlayer } from '../level/LevelPlayer.tsx';
 import { href } from '../router.ts';
 import { Card, EmptyState, Icon, Pill, ProgressBar, ScreenHeader, StatTile, celebrate, sfx } from '../components/kit.tsx';
@@ -18,21 +18,26 @@ export function ReviewScreen() {
 
   const worldOf = (id: string) => data.findLevel(id)?.world.id;
   const now = Date.now();
-  const dueCount = dueIds(deck, now).length;
+  // Only cards whose level still exists count; the number shown is never more than today's five.
+  const liveDeck = Object.fromEntries(Object.entries(deck).filter(([id]) => data.findLevel(id)));
+  const ready = reviewReady(liveDeck, now);
+  const nextAt = nextReviewAt(liveDeck);
 
   const completedIds = Object.entries(levels).filter(([id, p]) => (p.status === 'solved' || p.status === 'studied') && data.findLevel(id)).map(([id]) => id);
 
+  const startSession = () => {
+    const sv = store.getState().save;
+    const live = Object.fromEntries(Object.entries(sv.deck).filter(([id]) => data.findLevel(id)));
+    const s = reviewSession(live, Date.now(), { levels: sv.levels });
+    setPractice(false);
+    setSession(s);
+    setI(0);
+    setResults({});
+  };
   if (!session) {
     const upcoming = Object.entries(deck).filter(([, d]) => d.due > now).sort((a, b) => a[1].due - b[1].due).slice(0, 5);
     const deckSize = Object.keys(deck).length;
     const reviewsPassed = store.getState().save.reviewsPassed;
-    const startSession = () => {
-      const s = pickSession(store.getState().save.deck, worldOf, Date.now(), 8);
-      setPractice(false);
-      setSession(s);
-      setI(0);
-      setResults({});
-    };
     const startPractice = () => {
       setPractice(true);
       setSession(pickPractice(completedIds, worldOf, 5));
@@ -42,28 +47,30 @@ export function ReviewScreen() {
     return (
       <div className="page review-page">
         <ScreenHeader id="review" title="Review" icon="review" />
-        <div className="review-stats">
-          <StatTile icon="review" tone="primary" value={dueCount} label="due now" />
-          <StatTile icon="codex" value={deckSize} label="in your deck" />
-          <StatTile icon="check" tone="ok" value={reviewsPassed} label="reviews passed" />
-        </div>
         {deckSize === 0 ? (
           <EmptyState icon="review" title="Nothing to review yet" action={<a className="btn primary" href={href.map()}>Play a level</a>}>
-            Finished levels join your review deck and come back here when they are due.
+            Levels you finish join your review deck and come back here when they are ready.
           </EmptyState>
         ) : (
-          <Card tone={dueCount ? 'primary' : 'default'} className="review-start">
+          <Card tone={ready ? 'primary' : 'default'} className="review-start">
             <div>
-              <h2>{dueCount ? `${dueCount} ${dueCount === 1 ? 'item is' : 'items are'} due` : 'Nothing is due right now'}</h2>
-              <p className="muted">{dueCount ? 'A session takes up to 8, mixed across worlds.' : 'Come back later; there is no rush. You can practise anyway.'}</p>
+              <h2>{ready ? `${ready} ${ready === 1 ? 'card is' : 'cards are'} ready today` : 'Nothing is ready right now'}</h2>
+              <p className="muted">
+                {ready
+                  ? 'A short session: the ones that have waited longest come first.'
+                  : nextAt
+                    ? `The next card comes back ${dueLabel({ box: 1, due: nextAt, last: 0, reps: 0, lapses: 0 }, now)}. Nothing to do until then.`
+                    : 'Nothing to do for now.'}
+              </p>
             </div>
             <div className="actions">
-              <button className={`btn big ${dueCount ? 'primary' : ''}`} disabled={dueCount === 0} onClick={startSession}><Icon name="play" size={18} /> Start a session</button>
-              {completedIds.length > 0 && <button className="btn outline big" onClick={startPractice}>Practise anyway</button>}
+              <button className={`btn big ${ready ? 'primary' : ''}`} disabled={ready === 0} onClick={startSession}><Icon name="play" size={18} /> Start today's session</button>
+              {completedIds.length > 0 && <button className={`btn big ${ready ? 'ghost' : 'outline'}`} onClick={startPractice}>Practise anyway</button>}
             </div>
             {completedIds.length > 0 && <p className="muted small practice-note">Practising picks up to 5 finished levels at random. It does not change your review schedule.</p>}
           </Card>
         )}
+        {reviewsPassed > 0 && <p className="muted small review-passed tnum">{reviewsPassed} reviews passed so far.</p>}
         {upcoming.length > 0 && (
           <>
             <h2 className="section-title"><Icon name="calendar" size={20} /> Coming up</h2>
@@ -86,7 +93,7 @@ export function ReviewScreen() {
   }
 
   if (i >= session.length) {
-    return <SessionDone session={session} results={results} practice={practice} deck={deck} onDone={() => setSession(null)} />;
+    return <SessionDone session={session} results={results} practice={practice} deck={liveDeck} onDone={() => setSession(null)} onMore={startSession} />;
   }
 
   const id = session[i];
@@ -113,8 +120,9 @@ export function ReviewScreen() {
   );
 }
 
-function SessionDone({ session, results, practice, deck, onDone }: { session: string[]; results: Record<string, boolean>; practice: boolean; deck: Record<string, DeckItem>; onDone: () => void }) {
+function SessionDone({ session, results, practice, deck, onDone, onMore }: { session: string[]; results: Record<string, boolean>; practice: boolean; deck: Record<string, DeckItem>; onDone: () => void; onMore: () => void }) {
   const passed = Object.values(results).filter(Boolean).length;
+  const more = practice ? 0 : reviewReady(deck, Date.now());
   useEffect(() => {
     const t = window.setTimeout(() => {
       if (passed > 0) {
@@ -128,22 +136,24 @@ function SessionDone({ session, results, practice, deck, onDone }: { session: st
   return (
     <div className="page narrow">
       <Card tone={passed === session.length ? 'ok' : 'default'} className="session-done">
-        <span className="eyebrow">{practice ? 'Practice done' : 'Session done'}</span>
-        <h1><span className="tnum">{passed}</span> of <span className="tnum">{session.length}</span> came back cleanly</h1>
+        <span className="eyebrow">{practice ? 'Practice done' : 'Review'}</span>
+        <h1>{practice ? 'Nicely done' : "That is today's five"}</h1>
+        <p className="muted"><span className="tnum">{passed}</span> of <span className="tnum">{session.length}</span> came back cleanly.</p>
         <ProgressBar value={session.length ? passed / session.length : 0} tone="ok" size="md" label={`${passed} of ${session.length} passed`} />
         {practice && <p className="muted practice-note">Practice only: your review schedule was not changed by the ones you got right.</p>}
         <ul className="session-list">
           {session.map((id) => (
             <li key={id} className={results[id] ? 'ok' : ''}>
               <span className="sl-mark" aria-hidden="true"><Icon name={results[id] ? 'check' : 'review'} size={16} strokeWidth={3} /></span>
-              <span className="sl-title">{data.findLevel(id)?.level.title ?? id}<span className="sr-only">{results[id] ? ', passed' : ', comes back sooner'}</span></span>
+              <span className="sl-title">{data.findLevel(id)?.level.title ?? id}<span className="sr-only">{results[id] ? ', passed' : ', comes back tomorrow'}</span></span>
               {!practice && deck[id] && <span className="muted small tnum">box {deck[id].box} · {dueLabel(deck[id], Date.now())}</span>}
             </li>
           ))}
         </ul>
         <div className="actions">
-          <button className="btn primary big" onClick={onDone}>Done</button>
-          <a className="btn outline big" href={href.map()}>Back to the map</a>
+          {more > 0 && <button className="btn outline big" onClick={onMore}>Five more</button>}
+          <button className={`btn big ${more > 0 ? 'ghost' : 'primary'}`} onClick={onDone}>Done</button>
+          <a className="btn ghost big" href={href.map()}>Back to the map</a>
         </div>
       </Card>
     </div>

@@ -4,6 +4,7 @@ import {
   addDay,
   bumpDay,
   bumpStat,
+  dayKey,
   logFor,
   applyCompletion,
   applyRating,
@@ -168,9 +169,15 @@ export function createGameStore(deps: StoreDeps): StoreApi<GameState> {
           s = { ...s, seen: { ...s.seen, [key]: t } };
           return true;
         };
+        const arenaDay = () => {
+          const k = dayKey(t);
+          const days = s.arenaDays ?? [];
+          if (!days.includes(k)) s = { ...s, arenaDays: [...days, k].slice(-30) };
+        };
         switch (e.type) {
           case 'arena-puzzle':
             if (e.solved) {
+              arenaDay();
               xp = Math.round(Math.max(4, Math.min(10, 4 + (e.puzzleRating - 800) / 200)));
               s = bumpStat(s, 'puzzles');
               if (e.rated) {
@@ -184,6 +191,7 @@ export function createGameStore(deps: StoreDeps): StoreApi<GameState> {
               xp = 15 + 5 * Math.max(0, e.solved);
               s = bumpStat(s, 'daily');
               s = bumpDay(s, t, 'daily');
+              if (e.solved > 0) arenaDay();
             }
             break;
           case 'arena-rush':
@@ -193,26 +201,33 @@ export function createGameStore(deps: StoreDeps): StoreApi<GameState> {
             break;
           case 'arena-duel':
             xp = e.won ? 15 : 5;
+            s = bumpStat(s, 'duels');
             if (e.won) {
               s = bumpStat(s, 'duelWins');
               s = bumpDay(s, t, 'duelWins');
             }
             break;
           case 'guide-read':
-            if (firstSeen(`guide:${e.articleId}`)) {
-              xp = 10;
-              s = bumpStat(s, 'guide');
-            }
+            // Reading pays nothing by itself (a reading quest still can).
+            if (firstSeen(`guide:${e.articleId}`)) s = bumpStat(s, 'guide');
             s = bumpDay(s, t, 'guide');
             break;
           case 'practice':
-            // Stub: the state agent decides XP and day-log counters for practice sets.
+            // 3 XP per solved problem, at most 12 per set. Counters: problems solved per kind, and sets finished.
+            {
+              const n = Math.max(0, Math.min(Math.floor(e.solved) || 0, Math.floor(e.total) || 0));
+              xp = Math.min(12, 3 * n);
+              const key = e.kind === 'translate' ? 'translate' : 'practice';
+              s = bumpStat(s, key, n);
+              s = bumpDay(s, t, key, n);
+              if (e.total > 0) {
+                s = bumpStat(s, 'practiceSets');
+                s = bumpDay(s, t, 'practiceSets');
+              }
+            }
             break;
           case 'primer-read':
-            if (firstSeen(`primer:${e.worldId}`)) {
-              xp = 10;
-              s = bumpStat(s, 'primers');
-            }
+            if (firstSeen(`primer:${e.worldId}`)) s = bumpStat(s, 'primers');
             break;
         }
         s = { ...s, xp: s.xp + xp, activeDays: addDay(s.activeDays, t), today: logFor(s, t) };

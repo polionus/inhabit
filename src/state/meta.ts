@@ -6,10 +6,11 @@
 import type { SaveData } from './game.ts';
 import { bumpStat, dayKey, logFor } from './game.ts';
 import { dueIds } from './leitner.ts';
-import { isPassed, type WorldLike } from './progress.ts';
+import { isPassed, worldComplete, type WorldLike } from './progress.ts';
 import { starsFor } from './core.ts';
 
-export { levelCost, longestStreak, playerLevel, starsFor, streakInfo, totalStars, worldStars } from './core.ts';
+export { levelCost, longestStreak, playerLevel, starsFor, streakInfo, totalStars, worldMastery, worldStars } from './core.ts';
+export { masteryOf, type Mastery } from './progress.ts';
 export type { Stars, StreakInfo } from './core.ts';
 
 export interface Quest {
@@ -39,6 +40,10 @@ interface Ctx {
   passed: number;
   unfinished: number;
   secondStars: number;
+  /** World `logic` is complete: the player has the tactics Arena puzzles use. */
+  logicDone: boolean;
+  /** Passed a level in props, logic, quant or sets. */
+  canPractice: boolean;
   /** Seeded numbers for this day, one per pool entry (stable). */
   pick: (key: string, options: number[]) => number;
 }
@@ -67,7 +72,7 @@ const POOL: Template[] = [
   {
     key: 'clean-solve', arena: false, curriculum: true, count: 'clean',
     offered: (c) => c.unfinished + (c.counts.clean ?? 0) > 0,
-    make: () => ({ title: 'Solve one cleanly', desc: 'Solve a level with no hints and without showing the solution.', goal: 1, xp: 20, href: '#/map' }),
+    make: () => ({ title: 'Solve a level without hints', desc: 'Solve a level with no hints and without showing the solution.', goal: 1, xp: 20, href: '#/map' }),
   },
   {
     key: 'review', arena: false, curriculum: false, count: 'reviews',
@@ -88,13 +93,18 @@ const POOL: Template[] = [
     make: () => ({ title: 'Read a Guide article', desc: 'Read any Guide article to the end.', goal: 1, xp: 10, href: '#/guide' }),
   },
   {
+    key: 'practice-set', arena: false, curriculum: false, count: 'practiceSets',
+    offered: (c) => c.canPractice || (c.counts.practiceSets ?? 0) > 0,
+    make: () => ({ title: 'Finish a practice set', desc: 'Work through a short set of practice problems.', goal: 1, xp: 15, href: '#/map' }),
+  },
+  {
     key: 'daily', arena: true, curriculum: false, count: 'daily',
-    offered: () => true,
+    offered: (c) => c.logicDone,
     make: () => ({ title: 'Finish the Daily Proof', desc: "Work through today's set of proofs.", goal: 1, xp: 20, href: '#/arena/daily' }),
   },
   {
     key: 'puzzles', arena: true, curriculum: false, count: 'puzzles',
-    offered: () => true,
+    offered: (c) => c.logicDone,
     make: (c) => {
       const goal = c.pick('puzzles', [1, 2, 3]);
       return { title: `Solve ${goal} rated ${plural(goal, 'puzzle', 'puzzles')}`, desc: `Solve ${goal} rated Arena ${plural(goal, 'puzzle', 'puzzles')}.`, goal, xp: 10 + 5 * goal, href: '#/arena/puzzles' };
@@ -102,7 +112,7 @@ const POOL: Template[] = [
   },
   {
     key: 'rush', arena: true, curriculum: false, count: 'rushBest',
-    offered: () => true,
+    offered: (c) => c.logicDone && (c.save.stats.rushBest ?? 0) > 0,
     make: (c) => {
       const goal = c.pick('rush', [6, 8, 10, 12]);
       return { title: `Score ${goal} in Proof Rush`, desc: `Reach a score of ${goal} in a single Proof Rush run.`, goal, xp: 15 + goal, href: '#/arena/rush' };
@@ -110,10 +120,12 @@ const POOL: Template[] = [
   },
   {
     key: 'duel', arena: true, curriculum: false, count: 'duelWins',
-    offered: () => true,
+    offered: (c) => c.logicDone && (c.save.stats.duels ?? 0) > 0,
     make: () => ({ title: 'Win a duel', desc: 'Win one duel in the Arena.', goal: 1, xp: 25, href: '#/arena/duel' }),
   },
 ];
+
+const PRACTICE_WORLDS = ['props', 'logic', 'quant', 'sets'];
 
 /** FNV-1a string hash. */
 function hash(s: string): number {
@@ -135,8 +147,9 @@ function rng(seed: number): () => number {
 
 /**
  * Today's three quests with live progress. Deterministic for a given day and save situation.
- * Selection: one curriculum quest while levels remain; at most one Arena quest for a player who started
- * the day with fewer than 10 passed levels; the rest from a day-seeded shuffle of what is offered.
+ * Selection: one curriculum quest while levels remain; Arena quests only once world `logic` is complete (rush and duel
+ * only for players who have used that mode), at most one a day unless Arena puzzles were solved on three of the last
+ * seven active days; the rest from a day-seeded shuffle of what is offered.
  * Review quests only appear when items are due (or were passed today), so the set stays stable as you work.
  */
 export function todaysQuests(save: SaveData, worlds: WorldLike[], now: number): Quest[] {
@@ -150,6 +163,8 @@ export function todaysQuests(save: SaveData, worlds: WorldLike[], now: number): 
     due: dueIds(save.deck, now).filter((id) => ids.has(id)).length,
     passed,
     unfinished: levels.filter((l) => !isPassed(save.levels[l.id])).length,
+    logicDone: (() => { const w = worlds.find((x) => x.id === 'logic'); return !!w && w.levels.length > 0 && worldComplete(w, save.levels); })(),
+    canPractice: worlds.some((w) => PRACTICE_WORLDS.includes(w.id) && w.levels.some((l) => isPassed(save.levels[l.id]))),
     secondStars: levels.filter((l) => starsFor(save.levels[l.id], save.deck[l.id]) === 2).length,
     pick: (key, options) => options[hash(`${day}:${key}`) % options.length],
   };
@@ -158,8 +173,11 @@ export function todaysQuests(save: SaveData, worlds: WorldLike[], now: number): 
     .map((t) => ({ t, r: random() }))
     .sort((a, b) => a.r - b.r)
     .map((x) => x.t);
-  // The player's skill at the start of the day (finishing levels today must not reshuffle the quests).
-  const beginner = passed - (counts.levels ?? 0) < 10;
+  // Arena habit, judged on the last seven active days before today (so playing today does not reshuffle the quests).
+  const recent = save.activeDays.filter((d) => d < day).slice(-7);
+  const arenaDays = new Set(save.arenaDays ?? []);
+  const arenaHabit = recent.filter((d) => arenaDays.has(d)).length >= 3;
+  const maxArena = arenaHabit ? 3 : 1;
   const chosen: Template[] = [];
   const curriculum = shuffled.find((t) => t.curriculum);
   if (curriculum) chosen.push(curriculum);
@@ -167,11 +185,13 @@ export function todaysQuests(save: SaveData, worlds: WorldLike[], now: number): 
   for (const t of shuffled) {
     if (chosen.length >= 3) break;
     if (chosen.includes(t)) continue;
-    if (t.arena && beginner && arena >= 1) continue;
+    if (t.arena && arena >= maxArena) continue;
     if (t.arena) arena++;
     chosen.push(t);
   }
-  for (const t of shuffled) if (chosen.length < 3 && !chosen.includes(t)) chosen.push(t); // fallback: tiny pools
+  // Fallback for tiny pools: anything offered, then any non-Arena quest, so there are always three.
+  for (const t of shuffled) if (chosen.length < 3 && !chosen.includes(t) && (!t.arena || arena < maxArena)) chosen.push(t);
+  for (const t of POOL) if (chosen.length < 3 && !chosen.includes(t) && !t.arena) chosen.push(t);
   const log = logFor(save, now);
   return chosen.map((t) => {
     const m = t.make(ctx);

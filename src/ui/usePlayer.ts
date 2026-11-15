@@ -4,7 +4,7 @@ import { data } from './data.ts';
 import { useGame } from './game.ts';
 import { rankFor } from '../state/game.ts';
 import { playerLevel, streakInfo, todaysQuests, totalStars, type Quest, type StreakInfo } from '../state/meta.ts';
-import { dueIds } from '../state/leitner.ts';
+import { reviewReady } from '../state/leitner.ts';
 import { requiredLevels } from '../state/progress.ts';
 
 export interface PlayerView {
@@ -14,6 +14,9 @@ export interface PlayerView {
   streak: StreakInfo;
   stars: number;
   starsMax: number;
+  /** Cards ready for review today (at most 5). Never a backlog count. */
+  ready: number;
+  /** Same as `ready` (kept for older callers). */
   due: number;
 }
 
@@ -27,6 +30,7 @@ export function usePlayer(): PlayerView {
     } catch {
       stars = 0;
     }
+    const liveReady = reviewReady(Object.fromEntries(Object.entries(save.deck).filter(([id]) => data.findLevel(id))), now);
     return {
       xp: save.xp,
       level: playerLevel(save.xp),
@@ -34,7 +38,8 @@ export function usePlayer(): PlayerView {
       streak: streakInfo(save, now),
       stars,
       starsMax: data.worlds.reduce((n, w) => n + requiredLevels(w).length * 3, 0),
-      due: dueIds(save.deck, now).length,
+      ready: liveReady,
+      due: liveReady,
     };
   }, [save]);
 }

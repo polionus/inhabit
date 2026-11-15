@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Rating } from '../../state/progress.ts';
 import { playerLevel } from '../../state/meta.ts';
+import { data } from '../data.ts';
 import { Markdown, Lean } from './Markdown.tsx';
 import { Icon, ProgressBar, Stars, celebrate, centerOf, sfx, type CelebrateKind } from './kit.tsx';
 
@@ -27,6 +28,7 @@ export function Success({
   note,
   reward,
   review = false,
+  levelId,
 }: {
   outro?: string;
   term?: string;
@@ -39,6 +41,8 @@ export function Success({
   note?: string;
   reward?: Reward;
   review?: boolean;
+  /** Optional: the level just finished (read from the route when omitted). */
+  levelId?: string;
 }) {
   const [showTerm, setShowTerm] = useState(!!termOpen);
   const ref = useRef<HTMLElement>(null);
@@ -63,7 +67,7 @@ export function Success({
 
   // Sound and celebration, once.
   useEffect(() => {
-    if (!reward) return;
+    if (!reward || studied) return;
     const timers: number[] = [];
     if (reward.sound) timers.push(window.setTimeout(() => sfx.play(reward.sound!), 0));
     if (reward.celebration) timers.push(window.setTimeout(() => celebrate(reward.celebration!, centerOf(ref.current?.querySelector('.success-check'))), 120));
@@ -77,6 +81,9 @@ export function Success({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const lid = levelId ?? decodeURIComponent(/^#\/level\/([^/?]+)/.exec(typeof window !== 'undefined' ? window.location.hash : '')?.[1] ?? '');
+  const found = lid ? data.findLevel(lid) : undefined;
+  const workshopLine = !review && !!found && (found.level.kind === 'formalize' || found.world.id === 'forge');
   const title = studied ? 'Studied' : review ? 'Remembered' : reward?.boss ? 'Boss defeated' : 'Solved';
   return (
     <section className={`success ${studied ? 'studied' : ''} ${reward?.boss && !studied ? 'boss' : ''}`} aria-label="Level complete" role="status" aria-live="polite" ref={ref}>
@@ -86,18 +93,17 @@ export function Success({
         </span>
         <div className="success-title">
           <h2>{title}</h2>
-          {studied ? (
-            <span className="success-sub">You saw the answer, so this one comes back in Review for you to solve fresh.</span>
-          ) : review ? (
+          {studied ? null : review ? (
             <span className="success-sub">It moves up a box in your review deck.</span>
           ) : (
             reward && reward.stars < 3 && <span className="success-sub">{reward.stars < 2 ? 'Solve it again without hints for a second star.' : 'Solve it again in Review for the third star.'}</span>
           )}
         </div>
-        {reward && reward.stars > 0 && !review && <Stars value={reward.stars} size="lg" animate sound={!studied} />}
+        {reward && reward.stars > 0 && !review && !studied && <Stars value={reward.stars} size="lg" animate />}
       </div>
+      {studied && <p className="studied-note">You have seen how it goes. Solve it on your own when you are ready, and it will count in full.</p>}
       {note && <p className="muted small">{note}</p>}
-      {xp > 0 && before && after && (
+      {!studied && xp > 0 && before && after && (
         <>
           <div className="success-rewards">
             <span className="xp-gain tnum"><Icon name="bolt" size={20} /> +{xp} XP</span>
@@ -134,6 +140,9 @@ export function Success({
             </button>
           ))}
         </div>
+      )}
+      {workshopLine && (
+        <p className="workshop-line muted small"><Icon name="workshop" size={15} /> <a href="#/workshop">State a theorem of your own in the Workshop</a></p>
       )}
       <div className="actions">{actions}</div>
     </section>

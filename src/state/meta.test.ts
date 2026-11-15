@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { DAY } from './leitner.ts';
-import type { WorldLike } from './progress.ts';
+import { DAY, reviewReady, reviewSession } from './leitner.ts';
+import { isPassed, type WorldLike } from './progress.ts';
 import { BADGES, applyCompletion, applyReview, dayKey, defaultSave, migrate, type SaveData } from './game.ts';
-import { playerLevel, settleQuests, starsFor, streakInfo, todaysQuests, worldStars } from './meta.ts';
+import { masteryOf, playerLevel, settleQuests, starsFor, streakInfo, todaysQuests, worldMastery, worldStars } from './meta.ts';
 import { createGameStore } from './store.ts';
 import type { GameEvent } from './events.ts';
 
@@ -20,16 +20,16 @@ describe('stars', () => {
   it('covers every case', () => {
     expect(starsFor(undefined, undefined)).toBe(0);
     expect(starsFor({ status: 'unseen', hintsUsed: 0, attempts: 0 }, undefined)).toBe(0);
-    expect(starsFor({ status: 'studied', hintsUsed: 0, attempts: 0 }, item(3))).toBe(1);
+    expect(starsFor({ status: 'studied', hintsUsed: 0, attempts: 0 }, item(3))).toBe(0); // studied earns no star
     expect(starsFor({ ...solvedP(false) }, item(3))).toBe(1);
     expect(starsFor(solvedP(true), undefined)).toBe(2);
     expect(starsFor(solvedP(true), item(0))).toBe(2);
     expect(starsFor(solvedP(true), item(1, 1))).toBe(2); // only a failed review
     expect(starsFor(solvedP(true), item(2, 1))).toBe(3);
   });
-  it('a studied level stays at one star until solved cleanly', () => {
+  it('a studied level has no star until solved unaided', () => {
     let s = applyCompletion(defaultSave(), worlds, 'a1', { studied: true, clean: false }, 1).save;
-    expect(starsFor(s.levels.a1, s.deck.a1)).toBe(1);
+    expect(starsFor(s.levels.a1, s.deck.a1)).toBe(0);
     s = applyCompletion(s, worlds, 'a1', { studied: false, clean: false }, 2).save; // solved with hints
     expect(starsFor(s.levels.a1, s.deck.a1)).toBe(1);
     s = applyCompletion(s, worlds, 'a1', { studied: false, clean: true }, 3).save;
@@ -92,34 +92,77 @@ describe('streaks', () => {
   });
 });
 
+const qworlds: WorldLike[] = [
+  ...worlds,
+  { id: 'props', requires: [], levels: lv('p', 2) },
+  { id: 'logic', requires: ['props'], levels: lv('l', 2) },
+];
+const veteran = (extra: Partial<SaveData> = {}): SaveData => ({
+  ...defaultSave(),
+  levels: Object.fromEntries(['p1', 'p2', 'l1', 'l2'].map((id) => [id, solvedP(false)])),
+  ...extra,
+});
+
 describe('quests', () => {
-  it('three quests, deterministic for a day, varying across days', () => {
+  it('three quests, deterministic for a day; a new player gets only curriculum and reading quests', () => {
     const s = defaultSave();
     const a = todaysQuests(s, worlds, base);
     expect(a).toHaveLength(3);
     expect(new Set(a.map((q) => q.id)).size).toBe(3);
     expect(todaysQuests(s, worlds, base + 3600_000)).toEqual(a);
-    const sets = new Set<string>();
-    for (let d = 1; d <= 28; d++) sets.add(todaysQuests(s, worlds, noon(d)).map((q) => q.id.slice(11)).sort().join());
-    expect(sets.size).toBeGreaterThan(5);
+    for (let d = 0; d < 30; d++) {
+      for (const q of todaysQuests(s, qworlds, noon(d + 1))) expect(q.id).toMatch(/solve-levels|clean-solve|guide/);
+    }
     for (const q of a) {
       expect(q.xp).toBeGreaterThanOrEqual(10);
       expect(q.xp).toBeLessThanOrEqual(30);
       expect(q.href.startsWith('#/')).toBe(true);
     }
   });
-  it('always has a curriculum quest while levels remain; beginners get at most one Arena quest', () => {
+  it('varies across days once the player has more to offer', () => {
+    const s = veteran({ stats: { rushBest: 6, duels: 1 }, deck: { l1: item(0) } });
+    const sets = new Set<string>();
+    for (let d = 1; d <= 28; d++) {
+      const q = todaysQuests(s, qworlds, noon(d));
+      expect(q).toHaveLength(3);
+      sets.add(q.map((x) => x.id.slice(11)).sort().join());
+    }
+    expect(sets.size).toBeGreaterThan(5);
+  });
+  it('Arena quests need world logic complete; rush and duel need prior use; at most one a day without the habit', () => {
     const arena = (id: string) => /daily|puzzles|rush|duel/.test(id);
+    const kinds = new Set<string>();
+    const half: SaveData = { ...defaultSave(), levels: { p1: solvedP(false), p2: solvedP(false), l1: solvedP(false) }, stats: { rushBest: 9, duels: 3 } };
     for (let d = 1; d <= 60; d++) {
       const t = base + d * DAY;
-      const q = todaysQuests(defaultSave(), worlds, t);
-      expect(q.some((x) => /solve-levels|clean-solve/.test(x.id))).toBe(true);
-      expect(q.filter((x) => arena(x.id)).length).toBeLessThanOrEqual(1);
+      expect(todaysQuests(half, qworlds, t).filter((x) => arena(x.id))).toHaveLength(0);
+      const fresh = todaysQuests(veteran(), qworlds, t);
+      expect(fresh.filter((x) => arena(x.id)).length).toBeLessThanOrEqual(1);
+      expect(fresh.some((x) => /rush|duel/.test(x.id))).toBe(false);
+      const used = todaysQuests(veteran({ stats: { rushBest: 9, duels: 3 } }), qworlds, t);
+      expect(used.filter((x) => arena(x.id)).length).toBeLessThanOrEqual(1);
+      used.forEach((x) => kinds.add(x.id.slice(11)));
     }
-    const levels = Object.fromEntries(worlds.flatMap((w) => w.levels).slice(0, 12).map((l) => [l.id, solvedP(false)]));
-    let many = 0;
-    for (let d = 1; d <= 60; d++) many = Math.max(many, todaysQuests({ ...defaultSave(), levels }, worlds, base + d * DAY).filter((x) => arena(x.id)).length);
-    expect(many).toBeGreaterThan(1);
+    expect(kinds.has('rush') && kinds.has('duel')).toBe(true);
+  });
+  it('an Arena habit (puzzles on 3 of the last 7 active days) allows more than one Arena quest', () => {
+    const arena = (id: string) => /daily|puzzles|rush|duel/.test(id);
+    let most = 0;
+    for (let d = 10; d < 70; d++) {
+      const t = base + d * DAY;
+      const days = [1, 2, 3, 4, 5].map((o) => dayKey(t - o * DAY)).sort();
+      const habit = veteran({ stats: { rushBest: 9, duels: 3 }, activeDays: days, arenaDays: days.slice(0, 3) });
+      most = Math.max(most, todaysQuests(habit, qworlds, t).filter((x) => arena(x.id)).length);
+    }
+    expect(most).toBeGreaterThan(1);
+  });
+  it('the practice quest needs a passed level in props, logic, quant or sets', () => {
+    let seen = false;
+    for (let d = 0; d < 60; d++) {
+      expect(todaysQuests(defaultSave(), qworlds, base + d * DAY).some((q) => q.id.endsWith(':practice-set'))).toBe(false);
+      seen ||= todaysQuests(veteran(), qworlds, base + d * DAY).some((q) => q.id.endsWith(':practice-set'));
+    }
+    expect(seen).toBe(true);
   });
   it('review quests appear only when items are due', () => {
     for (let d = 0; d < 40; d++) expect(todaysQuests(defaultSave(), worlds, base + d * DAY).some((q) => q.id.endsWith(':review'))).toBe(false);
@@ -179,9 +222,9 @@ describe('events', () => {
     expect(ev(s, { type: 'arena-rush', score: 50, best: true })).toBe(20);
     expect(ev(s, { type: 'arena-duel', won: true, opponent: 'bot' })).toBe(15);
     expect(ev(s, { type: 'arena-duel', won: false, opponent: 'friend' })).toBe(5);
-    expect(ev(s, { type: 'guide-read', articleId: 'x' })).toBe(10);
+    expect(ev(s, { type: 'guide-read', articleId: 'x' })).toBe(0); // reading pays nothing
     expect(ev(s, { type: 'guide-read', articleId: 'x' })).toBe(0);
-    expect(ev(s, { type: 'primer-read', worldId: 'a' })).toBe(10);
+    expect(ev(s, { type: 'primer-read', worldId: 'a' })).toBe(0);
     expect(ev(s, { type: 'primer-read', worldId: 'a' })).toBe(0);
     const v = save();
     expect(v.activeDays).toEqual([dayKey(base)]);
@@ -204,8 +247,8 @@ describe('events', () => {
       if (!q) continue;
       const before = save().xp;
       const got = ev(s, { type: 'guide-read', articleId: `g${d}` });
-      expect(got).toBe(10);
-      expect(save().xp - before).toBe(10 + q.xp);
+      expect(got).toBe(0);
+      expect(save().xp - before).toBe(q.xp);
       hit = true;
     }
     expect(hit).toBe(true);
@@ -242,7 +285,7 @@ describe('migrate and badges', () => {
     expect(ids.length).toBeGreaterThanOrEqual(30);
     for (const old of ['first-step', 'clean-solve', 'first-term', 'first-formal', 'first-world', 'halfway', 'atlas', 'clean-boss', 'test-out', 'review-10', 'box-5', 'workshop', 'regular']) expect(ids).toContain(old);
     for (const b of BADGES) {
-      expect(['path', 'craft', 'memory', 'arena', 'reading']).toContain(b.group);
+      expect(['path', 'craft', 'memory', 'arena', 'reading', 'practice']).toContain(b.group);
       expect(b.desc).not.toMatch(/!/);
     }
   });
@@ -257,5 +300,105 @@ describe('migrate and badges', () => {
     const got = BADGES.filter((b) => b.test({ save, worlds })).map((b) => b.id);
     expect(got).toEqual(expect.arrayContaining(['first-3star', 'world-3stars', 'quest-1', 'quest-10', 'streak-3', 'primers-all']));
     expect(got).not.toContain('streak-7');
+  });
+});
+
+describe('understanding first (SPEC 12.2)', () => {
+  const studiedP = { status: 'studied' as const, hintsUsed: 0, attempts: 1 };
+  it('studying earns no XP and no star, but opens the path and enters the deck', () => {
+    const r = applyCompletion(defaultSave(), worlds, 'a1', { studied: true, clean: false }, 1);
+    expect(r.xp).toBe(0);
+    expect(r.save.xp).toBe(0);
+    expect(r.save.levels.a1.status).toBe('studied');
+    expect(starsFor(r.save.levels.a1, r.save.deck.a1)).toBe(0);
+    expect(r.save.deck.a1).toBeTruthy();
+    expect(isPassed(r.save.levels.a1)).toBe(true);
+  });
+  it('solving a studied level later pays in full, with the clean bonus', () => {
+    const s = applyCompletion(defaultSave(), worlds, 'a1', { studied: true, clean: false }, 1).save;
+    const hinted = applyCompletion(s, worlds, 'a1', { studied: false, clean: false }, 2);
+    expect(hinted.xp).toBe(20);
+    expect(hinted.save.levels.a1.studiedFirst).toBe(true);
+    expect(hinted.earned).toContain('second-look');
+    const clean = applyCompletion(s, worlds, 'a1', { studied: false, clean: true }, 2);
+    expect(clean.xp).toBe(25);
+    expect(clean.save.today.counts.levels).toBe(1);
+  });
+  it('masteryOf and worldMastery', () => {
+    expect(masteryOf(undefined)).toBe('none');
+    expect(masteryOf(studiedP)).toBe('studied');
+    expect(masteryOf(solvedP(false))).toBe('solved');
+    expect(masteryOf(solvedP(true))).toBe('clean');
+    const save: SaveData = {
+      ...defaultSave(),
+      levels: { a1: solvedP(true), a2: solvedP(false), a3: studiedP, a4: { ...solvedP(false), testedOut: true }, a5: { status: 'unseen', hintsUsed: 0, attempts: 0 } },
+    };
+    expect(worldMastery(worlds[0], save)).toEqual({ unaided: 2, clean: 1, studied: 1, total: 12 });
+  });
+  it('a save with studied levels loads and simply shows fewer stars', () => {
+    const old = { version: 1, xp: 90, levels: { a1: { status: 'studied', hintsUsed: 2, attempts: 3 }, a2: { status: 'solved', hintsUsed: 0, attempts: 1, clean: true } }, deck: { a1: { box: 1, due: 5, last: 0, reps: 0, lapses: 0 } } };
+    const m = migrate(JSON.parse(JSON.stringify(old)));
+    expect(m.xp).toBe(90);
+    expect(m.levels.a1.status).toBe('studied');
+    expect(worldStars(worlds[0], m)).toEqual({ earned: 2, total: 36 });
+    expect(m.arenaDays).toEqual([]);
+    expect(migrate(JSON.parse(JSON.stringify(m)))).toEqual(m);
+  });
+  it('Own work badge needs every required level solved unaided', () => {
+    const levels = Object.fromEntries(worlds[1].levels.filter((l) => !('optional' in l)).map((l) => [l.id, solvedP(false)]));
+    const has = (save: SaveData) => BADGES.find((b) => b.id === 'own-work')!.test({ save, worlds });
+    expect(has({ ...defaultSave(), levels })).toBe(true);
+    expect(has({ ...defaultSave(), levels: { ...levels, b1: studiedP } })).toBe(false);
+    expect(has({ ...defaultSave(), levels: { ...levels, b1: { ...solvedP(false), testedOut: true } } })).toBe(false);
+  });
+  it('practice events pay 3 XP per solved problem (cap 12) and count', () => {
+    const t = base;
+    const s = createGameStore({ worlds: () => worlds, now: () => t, key: 'k' });
+    expect(s.getState().recordEvent({ type: 'practice', kind: 'tactic', levelId: 'a1', solved: 2, total: 5 }).xp).toBe(6);
+    expect(s.getState().recordEvent({ type: 'practice', kind: 'translate', solved: 9, total: 9 }).xp).toBe(12);
+    expect(s.getState().recordEvent({ type: 'practice', kind: 'tactic', solved: 0, total: 5 }).xp).toBe(0);
+    const v = s.getState().save;
+    expect(v.stats).toMatchObject({ practice: 2, translate: 9, practiceSets: 3 });
+    expect(v.today.counts).toMatchObject({ practice: 2, translate: 9, practiceSets: 3 });
+    expect(v.activeDays).toEqual([dayKey(base)]);
+    expect(v.badges['practice-1']).toBeTruthy();
+    expect(v.badges['practice-25']).toBeFalsy();
+    s.getState().recordEvent({ type: 'practice', kind: 'translate', solved: 12, total: 12 });
+    s.getState().recordEvent({ type: 'practice', kind: 'translate', solved: 12, total: 12 });
+    expect(s.getState().save.badges['practice-25']).toBeTruthy();
+  });
+  it('practice quest completes on a practice event', () => {
+    for (let d = 0; d < 60; d++) {
+      const t = base + d * DAY;
+      const save = veteran();
+      if (!todaysQuests(save, qworlds, t).some((q) => q.id.endsWith(':practice-set'))) continue;
+      const s = createGameStore({ worlds: () => qworlds, now: () => t, key: 'k' });
+      s.getState().importJson(JSON.stringify(save));
+      s.getState().recordEvent({ type: 'practice', kind: 'tactic', solved: 1, total: 3 });
+      expect(todaysQuests(s.getState().save, qworlds, t).find((q) => q.id.endsWith(':practice-set'))!.done).toBe(true);
+      return;
+    }
+    throw new Error('practice quest never offered');
+  });
+  it('duels played and Arena days are recorded', () => {
+    const s = createGameStore({ worlds: () => worlds, now: () => base, key: 'k' });
+    s.getState().recordEvent({ type: 'arena-duel', won: false, opponent: 'bot' });
+    s.getState().recordEvent({ type: 'arena-puzzle', solved: true, rated: true, puzzleRating: 900 });
+    expect(s.getState().save.stats.duels).toBe(1);
+    expect(s.getState().save.arenaDays).toEqual([dayKey(base)]);
+  });
+  it('review sessions: five at most, most overdue first, studied first among equals', () => {
+    const deck = Object.fromEntries(Array.from({ length: 9 }, (_, i) => [`x${i}`, { box: 1, due: 100 + i, last: 0, reps: 0, lapses: 0 }]));
+    deck.s1 = { box: 1, due: 100, last: 0, reps: 0, lapses: 0 };
+    deck.t1 = { box: 1, due: 100, last: 0, reps: 0, lapses: 0 };
+    deck.later = { box: 1, due: 10_000, last: 0, reps: 0, lapses: 0 };
+    const levels = { s1: studiedP, t1: solvedP(false) };
+    expect(reviewSession(deck, 5000, { levels })).toEqual(['s1', 't1', 'x0', 'x1', 'x2']);
+    expect(reviewSession(deck, 5000, { size: 2 })).toHaveLength(2);
+    expect(reviewSession(deck, 50)).toEqual([]);
+    expect(reviewReady(deck, 5000)).toBe(5);
+    expect(reviewReady(deck, 101)).toBe(4);
+    expect(reviewReady({}, 5000)).toBe(0);
+    expect(reviewSession(deck, 5000).includes('later')).toBe(false);
   });
 });

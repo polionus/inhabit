@@ -1,5 +1,5 @@
 /** Leitner spaced-repetition scheduling (SPEC §5.4). Pure. */
-import type { Rating } from './progress.ts';
+import type { Progress, Rating } from './progress.ts';
 
 export const DAY = 86_400_000;
 /** Days until next review, by box 1..5. */
@@ -52,6 +52,35 @@ export function dueIds(deck: Record<string, DeckItem>, now: number): string[] {
   return Object.keys(deck)
     .filter((id) => isDue(deck[id], now))
     .sort((a, b) => deck[a].due - deck[b].due);
+}
+
+export const SESSION_SIZE = 5;
+
+/**
+ * Today's short review deck: at most `size` (default 5) due ids, most overdue first; among equals,
+ * levels that were only studied (pass `levels`) come first. "More" is simply another call: the items
+ * just reviewed are no longer due.
+ */
+export function reviewSession(
+  deck: Record<string, DeckItem>,
+  now: number,
+  opts: { size?: number; levels?: Progress } = {},
+): string[] {
+  const size = Math.max(0, Math.floor(opts.size ?? SESSION_SIZE));
+  const studied = (id: string) => (opts.levels?.[id]?.status === 'studied' ? 0 : 1);
+  return dueIds(deck, now)
+    .sort((a, b) => deck[a].due - deck[b].due || studied(a) - studied(b) || (a < b ? -1 : a > b ? 1 : 0))
+    .slice(0, size);
+}
+
+/** How many cards are ready today: min(due, 5). The only review number shown anywhere. */
+export const reviewReady = (deck: Record<string, DeckItem>, now: number): number =>
+  Math.min(SESSION_SIZE, dueIds(deck, now).length);
+
+/** When the next card comes back (ms timestamp), or null if the deck is empty. */
+export function nextReviewAt(deck: Record<string, DeckItem>): number | null {
+  const ds = Object.values(deck).map((d) => d.due);
+  return ds.length ? Math.min(...ds) : null;
 }
 
 /** Up to `n` due items, interleaved round-robin across worlds (interleaving effect). */

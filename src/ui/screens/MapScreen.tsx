@@ -114,13 +114,14 @@ export function MapScreen() {
               <a className="btn primary big block" href="#/workshop"><Icon name="workshop" size={18} /> Open the Workshop</a>
             )}
             {p.due > 0 && (
-              <a className="btn outline block" href="#/review"><Icon name="review" size={18} /> Review <Pill tone="primary">{p.due} due</Pill></a>
+              <a className="btn outline block" href="#/review"><Icon name="review" size={18} /> Review <Pill tone="primary">{p.due} ready</Pill></a>
             )}
           </Card>
           <Card tone="flat" className="map-legend">
             <h2 className="eyebrow">How stars work</h2>
             <ul>
-              <li><Stars value={1} size="sm" /> <span>Passed</span></li>
+              <li><Stars value={0} size="sm" /> <span>Studied: solve it yourself for a star</span></li>
+              <li><Stars value={1} size="sm" /> <span>Solved</span></li>
               <li><Stars value={2} size="sm" /> <span>Solved with no hints</span></li>
               <li><Stars value={3} size="sm" /> <span>Then solved again in Review</span></li>
             </ul>

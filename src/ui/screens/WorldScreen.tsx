@@ -3,7 +3,7 @@ import type { Level } from '../../content/types.ts';
 import { data } from '../data.ts';
 import { game, useGame } from '../game.ts';
 import { bossIndex, canTestOut, levelPlayable, levelState, worldUnlocked } from '../../state/progress.ts';
-import { starsFor } from '../../state/meta.ts';
+import { masteryOf, starsFor, worldMastery } from '../../state/meta.ts';
 import { Markdown } from '../components/Markdown.tsx';
 import { Card, EmptyState, Icon, Pill, ProgressBar, Stars, type IconName } from '../components/kit.tsx';
 import { WorldToken, worldStatus } from '../components/world.tsx';
@@ -109,6 +109,7 @@ export function WorldScreen({ id }: { id: string }) {
     );
   }
   const st = worldStatus(w, save);
+  const mastery = worldMastery(w, save);
   const unlocked = worldUnlocked(w, data.worlds, levels);
   const boss = bossIndex(w);
   const test = canTestOut(w, data.worlds, levels) && unlocked && st.state !== 'complete';
@@ -142,6 +143,12 @@ export function WorldScreen({ id }: { id: string }) {
               </div>
               <Pill tone="gold" icon="star">{st.stars.earned}/{st.stars.total}</Pill>
               {st.state === 'complete' && <Pill tone="ok" icon="check">Complete</Pill>}
+            </div>
+          )}
+          {st.state !== 'empty' && mastery.total > 0 && (
+            <div className="mastery-line">
+              <ProgressBar value={mastery.unaided / mastery.total} tone="ok" size="sm" label={`${mastery.unaided} of ${mastery.total} solved on your own`} />
+              <span className="tnum">{mastery.unaided} of {mastery.total} solved on your own</span>
             </div>
           )}
           <div className="actions">
@@ -204,27 +211,31 @@ export function WorldScreen({ id }: { id: string }) {
               const playable = levelPlayable(w, i, data.worlds, levels);
               const stars = starsFor(p, save.deck[l.id]);
               const isNext = next?.id === l.id;
-              const label = p?.status === 'solved' ? (p.testedOut ? 'Tested out' : 'Solved') : p?.status === 'studied' ? 'Studied' : ls === 'locked' ? (playable ? 'Test out' : 'Locked') : isNext ? 'Play' : 'Open';
+              const m = masteryOf(p);
+              const studied = m === 'studied';
+              const cleanBoss = !!l.boss && m === 'clean';
+              const label = m === 'studied' ? 'Studied' : p?.status === 'solved' ? (p.testedOut ? 'Tested out' : 'Solved') : ls === 'locked' ? (playable ? 'Test out' : 'Locked') : isNext ? 'Play' : 'Open';
               const inner = (
                 <>
                   <span className="lt-top">
                     <span className="lt-num tnum">{i + 1}</span>
                     <span className="lt-kind"><Icon name={KIND_ICON[l.kind]} size={15} /> {KIND_LABEL[l.kind]}</span>
-                    {l.boss && <span className="lt-boss"><Icon name="crown-fill" size={15} /> Boss</span>}
+                    {l.boss && <span className={`lt-boss ${cleanBoss ? 'clean' : ''}`}><Icon name="crown-fill" size={15} /> {cleanBoss ? 'Boss, no hints' : 'Boss'}</span>}
                     {l.optional && <span className="lt-side">Side quest</span>}
                   </span>
                   <span className="lt-title">{l.title}</span>
                   <span className="lt-foot">
-                    {ls === 'locked' && !playable ? <Icon name="lock" size={16} /> : <Stars value={stars} size="sm" />}
+                    {ls === 'locked' && !playable ? <Icon name="lock" size={16} /> : studied ? <span className="lt-studied-mark" aria-hidden="true"><Icon name="book" size={16} /></span> : <Stars value={stars} size="sm" />}
                     <span className={`lt-state ${ls}`}>{isNext && <Icon name="play" size={12} />} {label}</span>
+                    {studied && <span className="lt-action">Solve it yourself</span>}
                   </span>
                 </>
               );
-              const cls = `ltile ${ls} ${l.boss ? 'boss' : ''} ${isNext ? 'next' : ''} ${l.optional ? 'optional' : ''}`;
+              const cls = `ltile ${ls} ${studied ? 'studied' : ''} ${l.boss ? 'boss' : ''} ${isNext ? 'next' : ''} ${l.optional ? 'optional' : ''}`;
               return (
                 <li key={l.id} className="ltile-li">
                   {playable ? (
-                    <a href={href.level(l.id)} className={cls} aria-label={`Level ${i + 1}: ${l.title}. ${KIND_LABEL[l.kind]}${l.boss ? ', boss' : ''}${l.optional ? ', side quest' : ''}. ${label}. ${stars} of 3 stars.`}>{inner}</a>
+                    <a href={href.level(l.id)} className={cls} aria-label={`Level ${i + 1}: ${l.title}. ${KIND_LABEL[l.kind]}${l.boss ? ', boss' : ''}${l.optional ? ', side quest' : ''}. ${label}.${studied ? ' Solve it yourself.' : ` ${stars} of 3 stars.`}`}>{inner}</a>
                   ) : (
                     <div className={cls} aria-disabled="true" aria-label={`Level ${i + 1}: ${l.title}. Locked.`}>{inner}</div>
                   )}

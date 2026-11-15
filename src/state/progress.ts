@@ -19,6 +19,8 @@ export interface LevelProgress {
   selfAssessed?: boolean;
   rating?: Rating;
   firstPassAt?: number;
+  /** The first pass was by revealing the solution; it was later solved unaided. */
+  studiedFirst?: boolean;
 }
 
 export type Progress = Record<string, LevelProgress>;
@@ -40,6 +42,15 @@ export const emptyProgress = (): LevelProgress => ({ status: 'unseen', hintsUsed
 
 export const isPassed = (p: LevelProgress | undefined): boolean =>
   p?.status === 'solved' || p?.status === 'studied';
+
+export type Mastery = 'none' | 'studied' | 'solved' | 'clean';
+
+/** What the player has shown on a level: nothing, seen the solution, solved (maybe with hints), or solved cleanly. */
+export function masteryOf(p: LevelProgress | undefined): Mastery {
+  if (p?.status === 'studied') return 'studied';
+  if (p?.status === 'solved') return p.clean ? 'clean' : 'solved';
+  return 'none';
+}
 
 export const requiredLevels = (w: WorldLike): LevelLike[] => w.levels.filter((l) => !l.optional);
 

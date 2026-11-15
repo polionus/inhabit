@@ -150,6 +150,7 @@ function Dashboard() {
   const cont = start.kind === 'continue' ? data.findLevel(start.href.replace('#/level/', '')) : undefined;
   const st = cont ? worldStatus(cont.world, save) : null;
   const unread = data.guide.find((a) => !save.seen[`guide:${a.id}`]);
+  const studiedIds = data.worlds.flatMap((w) => w.levels).filter((l) => save.levels[l.id]?.status === 'studied').map((l) => l.id);
   const qDone = quests.filter((q) => q.done).length;
   return (
     <div className="page wide dash">
@@ -198,10 +199,17 @@ function Dashboard() {
 
         <Card as="section" className="dash-review" aria-labelledby="rv-h">
           <div className="card-head"><h2 id="rv-h"><Icon name="review" size={18} /> Review</h2></div>
-          <p className="dash-big"><span className="tnum">{p.due}</span> <span className="streak-unit">due</span></p>
-          <p className="muted small">{p.due ? 'Solving things again a little later is what makes them stick.' : 'Nothing due right now. Finished levels come back on a schedule.'}</p>
-          <a className={`btn block ${p.due ? '' : 'outline'}`} href="#/review">{p.due ? 'Start a review session' : 'Open Review'}</a>
+          <p className="dash-big"><span className="tnum">{p.ready}</span> <span className="streak-unit">ready today</span></p>
+          <p className="muted small">{p.ready ? 'A short session. Solving things again a little later is what makes them stick.' : 'Nothing is ready right now. Finished levels come back on a schedule.'}</p>
+          <a className={`btn block ${p.ready ? '' : 'outline'}`} href="#/review">{p.ready ? 'Start today’s session' : 'Open Review'}</a>
         </Card>
+
+        {studiedIds.length > 0 && (
+          <Card as="a" href={href.level(studiedIds[0])} className="dash-studied" aria-label={`${studiedIds.length} ${studiedIds.length === 1 ? 'level' : 'levels'} to solve on your own. Start with ${data.findLevel(studiedIds[0])?.level.title ?? 'the first'}.`}>
+            <div className="card-head"><h2><Icon name="book" size={18} /> {studiedIds.length} {studiedIds.length === 1 ? 'level' : 'levels'} to solve on your own</h2></div>
+            <p className="muted small">You have seen how {studiedIds.length === 1 ? 'it goes' : 'they go'}. Solving {studiedIds.length === 1 ? 'it' : 'them'} yourself counts in full. Start with {data.findLevel(studiedIds[0])?.level.title}.</p>
+          </Card>
+        )}
 
         <DailyCard />
 

@@ -1,7 +1,7 @@
 /** Save-data shape, migration, ranks, XP, streaks, badges and the pure state transitions. */
 import { afterReview, newItem, retune, type DeckItem } from './leitner.ts';
 import { addDay, currentStreak, dayKey } from './days.ts';
-import { longestStreak, playerLevel, starsFor, totalStars, worldStars } from './core.ts';
+import { longestStreak, playerLevel, starsFor, totalStars, worldMastery, worldStars } from './core.ts';
 import {
   applyTestOut,
   bossIndex,
@@ -81,19 +81,25 @@ export interface SaveData {
   today: DayLog;
   /** Lifetime counters (keys in `STAT_KEYS`). */
   stats: Record<string, number>;
+  /** Recent days (newest last, at most 30) on which the player solved Arena puzzles; used to fit quests. */
+  arenaDays?: string[];
 }
 
 export interface DayLog {
   /** `YYYY-MM-DD` the counts belong to ('' before any activity). */
   day: string;
-  /** levels, clean, reviews, stars3, puzzles (rated, solved), daily, rushBest (max), duelWins, guide. */
+  /** levels, clean, reviews, stars3, puzzles (rated, solved), daily, rushBest (max), duelWins, guide, practice, translate (problems solved), practiceSets. */
   counts: Record<string, number>;
   /** Ids of quests whose XP has been awarded today. */
   questsDone: string[];
 }
 
-/** Lifetime stat keys: quests, puzzles (solved), ratedSolved, daily (distinct days), rushBest (max), duelWins, guide (distinct articles), primers (distinct). */
-export const STAT_KEYS = ['quests', 'puzzles', 'ratedSolved', 'daily', 'rushBest', 'duelWins', 'guide', 'primers'] as const;
+/**
+ * Lifetime stat keys: quests, puzzles (solved), ratedSolved, daily (distinct days), rushBest (max), duelWins,
+ * duels (played), guide (distinct articles), primers (distinct), practice (tactic problems solved),
+ * translate (translate problems solved), practiceSets (sets finished).
+ */
+export const STAT_KEYS = ['quests', 'puzzles', 'ratedSolved', 'daily', 'rushBest', 'duelWins', 'duels', 'guide', 'primers', 'practice', 'translate', 'practiceSets'] as const;
 
 export const emptyDay = (day = ''): DayLog => ({ day, counts: {}, questsDone: [] });
 
@@ -158,6 +164,7 @@ export const defaultSave = (): SaveData => ({
   seen: {},
   today: emptyDay(),
   stats: {},
+  arenaDays: [],
 });
 
 const isObj = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null && !Array.isArray(x);
@@ -180,6 +187,7 @@ export function migrate(raw: unknown): SaveData {
       if (typeof v.selfAssessed === 'boolean') lp.selfAssessed = v.selfAssessed;
       if (v.rating === 'easy' || v.rating === 'right' || v.rating === 'hard') lp.rating = v.rating;
       if (typeof v.firstPassAt === 'number') lp.firstPassAt = v.firstPassAt;
+      if (v.studiedFirst === true) lp.studiedFirst = true;
       out.levels[id] = lp;
     }
   }
@@ -254,6 +262,7 @@ export function migrate(raw: unknown): SaveData {
     };
   }
   if (isObj(raw.stats)) for (const [k, v] of Object.entries(raw.stats)) if (typeof v === 'number' && Number.isFinite(v) && v >= 0) out.stats[k] = v;
+  if (Array.isArray(raw.arenaDays)) out.arenaDays = raw.arenaDays.filter((x): x is string => typeof x === 'string').slice(-30);
   out.version = SAVE_VERSION;
   return out;
 }
@@ -287,7 +296,7 @@ export function rankFor(xp: number): { title: string; index: number; next?: { ti
 const BASE_XP: Record<string, number> = { proof: 20, parsons: 10, choice: 8, predict: 8, formalize: 25 };
 
 export function xpFor(level: LevelLike, o: { studied: boolean; clean: boolean }): number {
-  if (o.studied) return 5;
+  if (o.studied) return 0;
   const base = (BASE_XP[level.kind] ?? 10) * (level.boss ? 2 : 1);
   return base + (o.clean ? 5 : 0);
 }
@@ -302,7 +311,7 @@ export interface BadgeCtx {
 export interface BadgeDef {
   id: string;
   /** For grouping on the profile page. */
-  group?: 'path' | 'craft' | 'memory' | 'arena' | 'reading';
+  group?: 'path' | 'craft' | 'memory' | 'arena' | 'reading' | 'practice';
   title: string;
   desc: string;
   test: (c: BadgeCtx) => boolean;
@@ -341,11 +350,16 @@ export const BADGES: BadgeDef[] = [
   { id: 'first-formal', group: 'craft', title: 'Translator', desc: 'Formalize an English statement.', test: (c) => allLevels(c).some((l) => l.kind === 'formalize' && isPassed(c.save.levels[l.id]) && !c.save.levels[l.id]?.testedOut) },
   { id: 'clean-boss', group: 'craft', title: 'Boss, cleanly', desc: 'Beat a boss level with no hints.', test: (c) => allLevels(c).some((l) => l.boss && c.save.levels[l.id]?.clean) },
   { id: 'test-out', group: 'craft', title: 'Shortcut earned', desc: 'Test out of a world by beating its boss.', test: (c) => Object.values(c.save.levels).some((p) => p.testedOut) },
+  { id: 'second-look', group: 'craft', title: 'Second look', desc: 'Solve on your own a level whose solution you had seen.', test: (c) => Object.values(c.save.levels).some((p) => p.status === 'solved' && p.studiedFirst) },
+  { id: 'own-work', group: 'craft', title: 'Own work', desc: 'Solve every required level of a world on your own.', test: (c) => c.worlds.some((w) => { const m = worldMastery(w, c.save); return m.total > 0 && m.unaided === m.total; }) },
   { id: 'workshop', group: 'craft', title: 'My own theorem', desc: 'Prove a theorem of your own in the Workshop.', test: (c) => c.save.theorems.some((t) => t.complete) },
   // memory: retention
   { id: 'review-10', group: 'memory', title: 'Remembering', desc: 'Pass ten review items.', test: (c) => c.save.reviewsPassed >= 10 },
   { id: 'box-5', group: 'memory', title: 'Long memory', desc: 'Bring a level to the top review box.', test: (c) => Object.values(c.save.deck).some((d) => d.box >= 5) },
   { id: 'first-3star', group: 'memory', title: 'Still there', desc: 'Earn a third star by re-solving a level in Review.', test: hasThirdStar },
+  // practice
+  { id: 'practice-1', group: 'practice', title: 'Practice set', desc: 'Finish a practice set.', test: (c) => stat(c, 'practiceSets') >= 1 },
+  { id: 'practice-25', group: 'practice', title: 'Twenty-five problems', desc: 'Solve 25 practice problems.', test: (c) => stat(c, 'practice') + stat(c, 'translate') >= 25 },
   // arena
   { id: 'arena-first', group: 'arena', title: 'Into the Arena', desc: 'Solve a rated Arena puzzle.', test: (c) => stat(c, 'ratedSolved') >= 1 },
   { id: 'arena-10', group: 'arena', title: 'Ten puzzles', desc: 'Solve ten Arena puzzles.', test: (c) => stat(c, 'puzzles') >= 10 },
@@ -414,7 +428,7 @@ export function applyCompletion(
     if (level) xp = xpFor(level, { studied: c.studied, clean: c.clean });
   } else if (prev.status === 'studied' && !c.studied) {
     status = 'solved';
-    if (level) xp = Math.floor((BASE_XP[level.kind] ?? 10) / 2);
+    if (level) xp = xpFor(level, { studied: false, clean: c.clean });
   }
   const entry: LevelProgress = {
     ...prev,
@@ -423,7 +437,9 @@ export function applyCompletion(
     clean: prev.clean || (!c.studied && c.clean) || undefined,
     selfAssessed: c.selfAssessed || prev.selfAssessed,
     firstPassAt: prev.firstPassAt ?? now,
+    studiedFirst: prev.studiedFirst || (prev.status === 'studied' && status === 'solved') || undefined,
   };
+  if (!entry.studiedFirst) delete entry.studiedFirst;
   if (!entry.clean) delete entry.clean;
   if (!entry.selfAssessed) delete entry.selfAssessed;
   let levels: Progress = { ...save.levels, [levelId]: entry };

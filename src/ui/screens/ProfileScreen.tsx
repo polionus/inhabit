@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { data } from '../data.ts';
 import { game, useGame } from '../game.ts';
 import { BADGES, dayKey, type BadgeDef } from '../../state/game.ts';
+import { worldMastery } from '../../state/meta.ts';
 import { useArenaSummary } from '../../arena/state/summary.ts';
 import { usePlayer } from '../usePlayer.ts';
 import { PlayerCard } from '../shell/PlayerCard.tsx';
@@ -13,6 +14,7 @@ const GROUPS: { id: NonNullable<BadgeDef['group']>; title: string; icon: IconNam
   { id: 'path', title: 'The path', icon: 'map' },
   { id: 'craft', title: 'Craft', icon: 'workshop' },
   { id: 'memory', title: 'Memory', icon: 'review' },
+  { id: 'practice', title: 'Practice', icon: 'bolt' },
   { id: 'reading', title: 'Reading', icon: 'guide' },
   { id: 'arena', title: 'Arena', icon: 'arena' },
 ];
@@ -48,7 +50,7 @@ export function ProfileScreen() {
   const [confirm, setConfirm] = useState(false);
   const file = useRef<HTMLInputElement>(null);
   const levels = Object.values(save.levels);
-  const solved = levels.filter((l) => l.status === 'solved').length;
+  const solved = levels.filter((l) => l.status === 'solved' && !l.testedOut).length;
   const clean = levels.filter((l) => l.clean).length;
   const earned = BADGES.filter((b) => save.badges[b.id]).length;
 
@@ -99,6 +101,28 @@ export function ProfileScreen() {
         })}
       </ul>
 
+      <h2 className="section-title"><Icon name="check-circle" size={20} /> Mastery</h2>
+      <p className="muted small mastery-note">Levels you solved yourself. A level whose solution you looked at is marked studied and counts in full once you solve it on your own.</p>
+      <ul className="mastery-list">
+        {data.worlds.filter((w) => w.levels.length > 0).map((w) => {
+          const m = worldMastery(w, save);
+          return (
+            <li key={w.id}>
+              <a href={href.world(w.id)} className="mastery-row">
+                <span className="ms-title">{w.title}</span>
+                <ProgressBar value={m.total ? m.unaided / m.total : 0} tone="ok" size="xs" label={`${w.title}: ${m.unaided} of ${m.total} solved on your own`} />
+                <span className="ms-nums tnum">
+                  <span title="Solved on your own">{m.unaided}/{m.total} own</span>
+                  <span className="ms-sep" aria-hidden="true">·</span>
+                  <span title="Solved without hints">{m.clean} no hints</span>
+                  {m.studied > 0 && <><span className="ms-sep" aria-hidden="true">·</span><span className="ms-studied" title="Solution seen">{m.studied} studied</span></>}
+                </span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+
       <h2 className="section-title"><Icon name="trophy" size={20} /> Achievements <span className="count tnum">{earned}/{BADGES.length}</span></h2>
       {GROUPS.map((g) => {
         const list = BADGES.filter((b) => (b.group ?? 'path') === g.id);
@@ -137,7 +161,7 @@ export function ProfileScreen() {
             <input type="range" min={12} max={22} value={s.fontSize} onChange={(e) => game().setSettings({ fontSize: Number(e.target.value) })} />
           </label>
           <Toggle label="Sound effects" desc="Quiet, synthesised sounds for solves, stars and quests." checked={s.sound} onChange={(v) => game().setSettings({ sound: v })} />
-          <Toggle label="Open lessons by default" desc="Show each unsolved level's lesson expanded under the task." checked={s.lessonsOpen} onChange={(v) => game().setSettings({ lessonsOpen: v })} />
+          <Seg label="Open the lesson" value={s.lessonMode} options={[['auto', 'When a level teaches something new'], ['open', 'Always'], ['closed', 'Never']]} onChange={(v) => game().setSettings({ lessonMode: v })} />
           <Toggle label="Tactic inventory lock" desc="Only allow tactics you have unlocked." checked={s.strictInventory} onChange={(v) => game().setSettings({ strictInventory: v })} />
         </Card>
         <Card as="section" className="save-card" aria-labelledby="save-h">
