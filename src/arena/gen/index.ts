@@ -20,6 +20,11 @@ import { SET_TACTICS, setAttempt } from './set.ts';
 import { QUICK_KINDS, quickAttempt } from './quick.ts';
 import type { QuickItem } from './quick.ts';
 import { proofPar, quickPar } from './common.ts';
+import { ARITH_TACTICS, OPEN, familyEnv } from './arith.ts';
+import type { ArithBuilt } from './arith.ts';
+import { rwAttempt } from './rw.ts';
+import { indAttempt } from './ind.ts';
+import { divAttempt } from './div.ts';
 
 export const GEN_VERSION = 1;
 
@@ -29,12 +34,15 @@ export const RANGE: Record<PuzzleFamily, [number, number]> = {
   inhabit: [400, 1900],
   quant: [450, 1500],
   set: [450, 1500],
+  rw: [400, 800],
+  ind: [720, 1000],
+  div: [400, 850],
   quick: [400, 1100],
 };
 
 const TOL = 90;
 
-function allowedFor(family: ProofFamily, b: Built): string[] {
+function allowedFor(family: ProofFamily, b: ArithBuilt): string[] {
   switch (family) {
     case 'prop':
       return b.classical ? [...PROP_TACTICS, ...CLASSICAL_TACTICS] : [...PROP_TACTICS];
@@ -44,18 +52,25 @@ function allowedFor(family: ProofFamily, b: Built): string[] {
       return b.classical ? [...QUANT_TACTICS, ...CLASSICAL_TACTICS] : [...QUANT_TACTICS];
     case 'set':
       return [...SET_TACTICS];
+    case 'rw':
+    case 'ind':
+    case 'div':
+      return [...ARITH_TACTICS[family]];
   }
 }
 
-const ATTEMPT: Record<ProofFamily, (rng: Rng, target: number) => Built | null> = {
+const ATTEMPT: Record<ProofFamily, (rng: Rng, target: number) => Built | ArithBuilt | null> = {
   prop: (rng, t) => propAttempt(rng, t, 'tactic', 'prop'),
   inhabit: inhabitAttempt,
   quant: quantAttempt,
   set: setAttempt,
+  rw: (rng, t) => rwAttempt(rng, t, OPEN),
+  ind: (rng, t) => indAttempt(rng, t, OPEN),
+  div: (rng, t) => divAttempt(rng, t, OPEN),
 };
 
-function verifies(b: Built, allowed: string[]): boolean {
-  const r = engine.check(engine.baseEnv(), b.header + '\n' + b.solution, { allowedTactics: allowed });
+function verifies(family: ProofFamily, b: ArithBuilt, allowed: string[]): boolean {
+  const r = engine.check(familyEnv(family), b.header + '\n' + b.solution, { allowedTactics: allowed });
   return r.complete;
 }
 
@@ -79,7 +94,7 @@ function pick<T extends { rating: number }>(
   return null;
 }
 
-function proofPuzzle(id: string, family: ProofFamily, b: Built): ProofPuzzle {
+function proofPuzzle(id: string, family: ProofFamily, b: ArithBuilt): ProofPuzzle {
   return {
     kind: 'proof',
     id,
@@ -143,7 +158,7 @@ export function generateDetailed(spec: PuzzleSpec): { puzzle: Puzzle; verify?: {
       return fallbackQuick(id, spec.seed, ks);
     }
     const rng = makeRng(`${family}|${spec.seed}|${target}`);
-    const b = pick(rng, target, (r) => ATTEMPT[family](r, target), (x) => verifies(x, allowedFor(family, x)), 70);
+    const b = pick(rng, target, (r) => ATTEMPT[family](r, target), (x) => verifies(family, x, allowedFor(family, x)), 70);
     if (b) return { puzzle: proofPuzzle(id, family, b) };
   } catch {
     // fall through to the fallback
@@ -155,7 +170,7 @@ function fallbackProof(id: string, family: PuzzleFamily, seed: string): Puzzle {
   const fam: ProofFamily = family === 'quick' ? 'prop' : family;
   try {
     const rng = makeRng(`fallback|${fam}|${seed}`);
-    const b = pick(rng, 500, (r) => ATTEMPT[fam](r, 500), (x) => verifies(x, allowedFor(fam, x)), 30);
+    const b = pick(rng, 500, (r) => ATTEMPT[fam](r, 500), (x) => verifies(fam, x, allowedFor(fam, x)), 30);
     if (b) return proofPuzzle(id, fam, b);
   } catch {
     // last resort below
@@ -211,7 +226,7 @@ function fallbackQuick(id: string, seed: string, kinds: QuickKind[]): { puzzle: 
 function check(puzzle: ProofPuzzle, body: string): { complete: boolean; result: CheckResult; bodyOffset: number } {
   const head = (puzzle.setup ? puzzle.setup + '\n' : '') + puzzle.header + '\n';
   const bodyOffset = head.length;
-  let result = engine.check(engine.baseEnv(), head + body, { allowedTactics: puzzle.allowedTactics });
+  let result = engine.check(familyEnv(puzzle.family), head + body, { allowedTactics: puzzle.allowedTactics });
   const axioms = result.decls.filter((d) => d.kind === 'axiom' && d.from >= bodyOffset);
   if (axioms.length) {
     result = {

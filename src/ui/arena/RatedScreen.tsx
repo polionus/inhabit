@@ -6,7 +6,7 @@ import { Pill, ScreenHeader, celebrate, sfx } from '../components/kit.tsx';
 import { CountUp, Reference } from './parts.tsx';
 import { PuzzlePlayer, type PuzzleOutcome } from './PuzzlePlayer.tsx';
 
-const FAMILY_LABEL: Record<PuzzleFamily, string> = { prop: 'Logic', inhabit: 'Terms', quant: 'Quantifiers', set: 'Sets', quick: 'Quick' };
+const FAMILY_LABEL: Record<PuzzleFamily, string> = { prop: 'Logic', inhabit: 'Terms', quant: 'Quantifiers', set: 'Sets', rw: 'Rewriting', ind: 'Induction', div: 'Divisibility', quick: 'Quick' };
 
 interface Stage {
   cur: RatedCurrent;

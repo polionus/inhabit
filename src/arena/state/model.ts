@@ -21,7 +21,7 @@ export const RUSH_STRIKES = 3;
 export const RUSH_LIMIT_MS: Record<RushMode, number | null> = { m3: 180_000, m5: 300_000, survival: null };
 
 export const RATED_FAMILIES: PuzzleFamily[] = ['prop', 'inhabit', 'quant', 'set', 'quick'];
-const FAMILY_WEIGHT: Record<PuzzleFamily, number> = { prop: 3, inhabit: 2, quant: 2, set: 2, quick: 2 };
+const FAMILY_WEIGHT: Record<PuzzleFamily, number> = { prop: 3, inhabit: 2, quant: 2, set: 2, rw: 0, ind: 0, div: 0, quick: 2 };
 
 export interface HistoryPoint { t: number; r: number }
 

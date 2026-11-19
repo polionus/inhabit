@@ -39,7 +39,7 @@ export function saveDuel(entry: DuelHistoryEntry, botId?: string): void {
 
 export const fmtSecs = (ms: number): string => (ms < 60_000 ? `${(ms / 1000).toFixed(1)} s` : `${Math.floor(ms / 60_000)}:${String(Math.floor((ms % 60_000) / 1000)).padStart(2, '0')}`);
 
-export const puzzleLabel = (p: Puzzle): string => (p.kind === 'quick' ? `Quick, ${p.quick.replace('-', ' ')}` : { prop: 'Propositions', inhabit: 'Terms', quant: 'Quantifiers', set: 'Sets' }[p.family]);
+export const puzzleLabel = (p: Puzzle): string => (p.kind === 'quick' ? `Quick, ${p.quick.replace('-', ' ')}` : { prop: 'Propositions', inhabit: 'Terms', quant: 'Quantifiers', set: 'Sets', rw: 'Rewriting', ind: 'Induction', div: 'Divisibility' }[p.family]);
 
 export function Avatar({ bot, size = 44 }: { bot: Bot; size?: number }) {
   return (

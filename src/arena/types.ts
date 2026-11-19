@@ -16,9 +16,12 @@ export type GenVersion = number;
  *  inhabit  write a term of the given type, no tactics            (Curry–Howard: types over A B C : Type, and Props)
  *  quant    prove a first-order statement with ∀ / ∃ over predicates
  *  set      prove a set-algebra fact (⊆ ∩ ∪ ᶜ \ ∅ univ)
+ *  rw       rewrite with equations over Nat: hypotheses, `symm`, `calc`, `subst`, bank lemmas
+ *  ind      prove a Nat identity by induction
+ *  div      divisibility and parity (`∣`, `Even`, `Odd`): witnesses, `obtain`, bank lemmas
  *  quick    multiple choice, answerable in seconds; correctness is computed by the engine
  */
-export type ProofFamily = 'prop' | 'inhabit' | 'quant' | 'set';
+export type ProofFamily = 'prop' | 'inhabit' | 'quant' | 'set' | 'rw' | 'ind' | 'div';
 export type PuzzleFamily = ProofFamily | 'quick';
 
 /** Kinds of quick item. Each has an engine-computed correct answer. */
@@ -56,8 +59,9 @@ export interface ProofPuzzle extends PuzzleBase {
   starter: string;
   /**
    * A reference body. MUST be `complete` when checked as `setup + header + "\n" + solution` with
-   * `engine.check(engine.baseEnv(), src, { allowedTactics })`, and MUST compile in real Lean 4
-   * (with `import Game.Core`).
+   * `engine.check(familyEnv(family), src, { allowedTactics })` (src/arena/gen/arith.ts: the base
+   * library, plus the Nat lemma bank for `rw` / `ind` / `div`), and MUST compile in real Lean 4
+   * (with `import Game.Core` and the bank's own lemmas).
    */
   solution: string;
   /** Tactics the solver may use (canonical names). `[]` for term mode. */

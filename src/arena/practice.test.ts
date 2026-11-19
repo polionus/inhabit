@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { engine } from '../engine/index.ts';
 import { worlds, levelContext } from '../content/index.ts';
 import { generator } from './gen/index.ts';
+import { familyEnv, lemmasIn } from './gen/arith.ts';
 import { statementKey } from './plan.ts';
 import { GENERATOR_TACTICS, practiceFocus, practiceSet, smallerVersion, headConnective } from './practice.ts';
 import type { ProofFamily, ProofPuzzle } from './types.ts';
@@ -18,7 +19,7 @@ function sampleTactics(fam: ProofFamily): string[] {
   for (let i = 0; i < 300; i++) {
     const p = generator.generate({ seed: 't' + i, family: fam, target: lo + ((hi - lo) * (i % 10)) / 9 });
     if (p.kind !== 'proof') continue;
-    const r = engine.check(engine.baseEnv(), p.header + '\n' + p.solution, { allowedTactics: p.allowedTactics });
+    const r = engine.check(familyEnv(fam), p.header + '\n' + p.solution, { allowedTactics: p.allowedTactics });
     for (const d of r.decls) for (const t of d.usedTactics) s.add(t);
   }
   return [...s].sort();
@@ -26,17 +27,28 @@ function sampleTactics(fam: ProofFamily): string[] {
 
 describe('GENERATOR_TACTICS', () => {
   it('is what the generator emits (re-derived by sampling)', () => {
-    for (const fam of ['prop', 'inhabit', 'quant', 'set'] as const) expect(sampleTactics(fam)).toEqual(GENERATOR_TACTICS[fam]);
+    for (const fam of ['prop', 'inhabit', 'quant', 'set', 'rw', 'ind', 'div'] as const) expect(sampleTactics(fam), fam).toEqual(GENERATOR_TACTICS[fam]);
   }, 60000);
 });
 
 describe('practiceFocus', () => {
-  it('never throws and is null for worlds without a generator family', () => {
+  it('never throws, and serves each world with its own families', () => {
+    const allowed: Record<string, ProofFamily[]> = {
+      types: ['inhabit'],
+      props: ['prop', 'inhabit'],
+      logic: ['prop', 'inhabit'],
+      quant: ['quant', 'inhabit'],
+      sets: ['set', 'inhabit'],
+      eq: ['rw'],
+      nat: ['ind', 'rw'],
+      num: ['div', 'rw'],
+      fun: ['rw', 'quant', 'set'],
+      forge: ['rw', 'set', 'prop'],
+    };
     for (const { w, l } of allLevels) {
       const f = practiceFocus(l.id);
-      if (['eq', 'nat', 'fun', 'num', 'forge'].includes(w.id)) expect(f, l.id).toBeNull();
       if (f) {
-        expect(['types', 'props', 'logic', 'quant', 'sets']).toContain(w.id);
+        expect(allowed[w.id], l.id).toContain(f.family);
         for (const t of f.tactics) expect(GENERATOR_TACTICS[f.family]).toContain(t);
       }
     }
@@ -49,6 +61,12 @@ describe('practiceFocus', () => {
     expect(practiceFocus('quant-04')).toBeNull(); // specialize: the generator never emits it
     expect(practiceFocus('types-09')?.family).toBe('inhabit');
     expect(practiceFocus('types-02')).toBeNull(); // a choice level
+    expect(practiceFocus('eq-07')).toMatchObject({ family: 'rw', tactics: ['symm'] });
+    expect(practiceFocus('eq-11')).toMatchObject({ family: 'rw', tactics: ['subst'] });
+    expect(practiceFocus('nat-06')?.family).toBe('ind');
+    expect(practiceFocus('nat-11')?.family).toBe('rw'); // a rewriting level, no induction
+    expect(practiceFocus('num-06')).toMatchObject({ family: 'div', tactics: ['refine'] });
+    expect(practiceFocus('eq-09')).toBeNull(); // term mode about numbers
   });
 });
 
@@ -75,14 +93,19 @@ describe('practiceSet', () => {
         // complete under the generator's own check...
         expect(generator.check(p, p.solution).complete, `${id} ${p.id}`).toBe(true);
         // ...and with the allowed tactics restricted to the level's inventory
-        const r = engine.check(engine.baseEnv(), p.header + '\n' + p.solution, { allowedTactics: inv });
+        const r = engine.check(familyEnv(p.family), p.header + '\n' + p.solution, { allowedTactics: inv });
         expect(r.complete, `${id} ${p.id} under inventory`).toBe(true);
         expect(p.allowedTactics.every((t) => inv.includes(t))).toBe(true);
+        // ...citing only lemmas the level has unlocked (bank lemmas, or equations its codex introduced)
+        const ctx = levelContext(id);
+        const unlocked = new Set([...ctx.lemmas.map((l) => l.name), ...ctx.codex]);
+        for (const l of lemmasIn(p.solution)) expect(unlocked.has(l), `${id}: ${l} not unlocked`).toBe(true);
       }
     }
     for (const [w, [a, b]] of Object.entries(count)) perWorld[w] = `${a}/${b}`;
     console.log(`practice-supported levels: ${ok} of ${allLevels.length}`, JSON.stringify(perWorld));
-    expect(ok).toBeGreaterThan(10);
+    expect(ok).toBeGreaterThanOrEqual(55);
+    for (const w of ['eq', 'nat', 'num']) expect(count[w][0], w).toBeGreaterThanOrEqual(6);
   }, 120000);
 
   it('is deterministic, rounds differ, ratings rise', () => {
@@ -115,6 +138,14 @@ describe('smallerVersion', () => {
     const inv = levelContext('logic-06').allowedTactics;
     expect(engine.check(engine.baseEnv(), p.header + '\n' + p.solution, { allowedTactics: inv }).complete).toBe(true);
     expect(smallerVersion('eq-03')).toBeNull();
+  });
+  it('serves the arithmetic worlds', () => {
+    for (const id of ['eq-04', 'eq-08', 'nat-06', 'nat-11', 'num-02', 'num-08']) {
+      const p = smallerVersion(id);
+      expect(p, id).not.toBeNull();
+      expect(generator.check(p!, p!.solution).complete, id).toBe(true);
+      expect(p!.rating, id).toBeLessThan(1000);
+    }
   });
   it('knows the head connective', () => {
     expect(headConnective('P ∨ Q → Q ∨ P')).toBe('→');

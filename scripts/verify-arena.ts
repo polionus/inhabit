@@ -1,11 +1,13 @@
 /**
  * Ground-truth check for the Arena generator: compile generated puzzles in REAL Lean 4.
  *
- *   node scripts/verify-arena.ts [n=60]
+ *   node scripts/verify-arena.ts [n=60] [--no-practice]
  *
- * Generates n puzzles per proof family (prop, inhabit, quant, set) spread over each family's rating
- * range, plus n quick items, writes lean-verify/Game/Generated/arena.lean (importing only
- * Game.Core, each puzzle in its own namespace) and runs `lake env lean` on it.
+ * Generates n puzzles per proof family (prop, inhabit, quant, set, rw, ind, div) spread over each
+ * family's rating range, plus n quick items, plus the practice sets (rounds 0 and 1) and the
+ * "smaller version" of every level that has practice; writes lean-verify/Game/Generated/arena.lean
+ * (importing only Game.Core, then the bank's own `game` lemmas for Nat and divisibility, each
+ * puzzle in its own namespace) and runs `lake env lean` on it.
  *
  * Fails on any error or `sorry` warning in a reference solution. For quick items it checks what
  * real Lean can check: the correct answer's snippet compiles (goal-state items end in
@@ -17,12 +19,17 @@ import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { generateDetailed, generator } from '../src/arena/gen/index.ts';
-import type { ProofFamily, PuzzleFamily } from '../src/arena/types.ts';
+import { ARITH_LEMMAS } from '../src/arena/gen/arith.ts';
+import { hasPractice, practiceSet, smallerVersion } from '../src/arena/practice.ts';
+import { worlds } from '../src/content/index.ts';
+import type { ProofFamily, ProofPuzzle, PuzzleFamily } from '../src/arena/types.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const leanDir = join(root, 'lean-verify');
 const genDir = join(leanDir, 'Game', 'Generated');
-const n = Math.max(1, Number(process.argv[2] ?? 60) || 60);
+const args = process.argv.slice(2);
+const n = Math.max(1, Number(args.find((a) => /^\d+$/.test(a)) ?? 60) || 60);
+const withPractice = !args.includes('--no-practice');
 
 type Kind = 'proof' | 'quick-ok' | 'quick-bad';
 const lines: string[] = [];
@@ -34,9 +41,11 @@ const block = (label: string, kind: Kind, code: string) => {
   lines.push(`namespace ${name}`, ...code.split('\n'), `end ${name}`, '');
 };
 lines.push('import Game.Core', 'set_option linter.unusedVariables false', '');
+// The game's own lemmas (not in Lean core) that the arithmetic families may cite.
+for (const l of ARITH_LEMMAS.filter((l) => l.origin === 'game')) lines.push(...l.source.split('\n'), '');
 
 const counts: Record<string, number> = {};
-const proofFamilies: ProofFamily[] = ['prop', 'inhabit', 'quant', 'set'];
+const proofFamilies: ProofFamily[] = ['prop', 'inhabit', 'quant', 'set', 'rw', 'ind', 'div'];
 for (const family of [...proofFamilies, 'quick' as PuzzleFamily]) {
   const [lo, hi] = generator.range[family];
   for (let i = 0; i < n; i++) {
@@ -54,6 +63,23 @@ for (const family of [...proofFamilies, 'quick' as PuzzleFamily]) {
       counts['quick snippets bad'] = (counts['quick snippets bad'] ?? 0) + verify.bad.length;
     }
   }
+}
+
+if (withPractice) {
+  const proofBlock = (label: string, p: ProofPuzzle) => {
+    block(`${label} ${p.id} (rating ${p.rating})`, 'proof', `${p.setup ? p.setup + '\n' : ''}${p.header}\n${p.solution}`);
+    counts[`practice ${p.family}`] = (counts[`practice ${p.family}`] ?? 0) + 1;
+  };
+  let levels = 0;
+  for (const w of worlds)
+    for (const l of w.levels) {
+      if (!hasPractice(l.id)) continue;
+      levels++;
+      for (const round of [0, 1]) for (const p of practiceSet(l.id, round)) proofBlock(`practice ${l.id} r${round}`, p);
+      const s = smallerVersion(l.id);
+      if (s) proofBlock(`smaller ${l.id}`, s);
+    }
+  counts['practice levels'] = levels;
 }
 
 mkdirSync(genDir, { recursive: true });

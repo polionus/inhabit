@@ -62,7 +62,7 @@ export function statementFeatures(fs: F[]): { negs: number; depth: number; quant
   return { negs, depth, quants };
 }
 
-const FAMILY_BONUS: Record<ProofFamily, number> = { prop: 0, inhabit: 40, quant: 60, set: 40 };
+const FAMILY_BONUS: Record<ProofFamily, number> = { prop: 0, inhabit: 40, quant: 60, set: 40, rw: 0, ind: 0, div: 0 };
 
 /** Estimated difficulty on the 400–2400 scale. */
 export function rate(x: Features): number {
