@@ -378,6 +378,29 @@ export interface WorldLessons {
   levels: Record<string, LevelLesson>;
 }
 
+/**
+ * A chapter explainer: a blog-style article for one world, readable on its own at `#/chapter/<worldId>`
+ * and linked from the roadmap. Lives in `src/content/chapters/<worldId>.ts`.
+ * Longer and more reflective than the primer (which stays on the world page as the short story):
+ * why the idea matters, the key notions with small examples, one proof walked through line by line,
+ * common mistakes, and where the idea shows up in real Lean and Mathlib.
+ */
+export interface ChapterExplainer {
+  worldId: string;
+  /** Article headline, e.g. "Propositions are types: what a proof really is". Not the world name. */
+  title: string;
+  /** One-sentence standfirst under the headline (15–35 words). */
+  dek: string;
+  /**
+   * Markdown, 900–1500 words, `##` subheadings (4–7 of them), no `#`. ```lean blocks are checked with
+   * every tactic and lemma available by the END of this world (same rule as the primer). Plain ``` blocks
+   * are display only. Do not list the levels; the page adds the chapter contents itself.
+   */
+  body: string;
+  /** Related Guide article ids, shown as "Read next". 1–3. */
+  guide: string[];
+}
+
 export type GuideSection = 'lean' | 'theory' | 'practice' | 'ecosystem';
 
 /** One article of the Guide: long-form reading about Lean itself, independent of any level. */

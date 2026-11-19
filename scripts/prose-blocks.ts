@@ -2,6 +2,7 @@
  * Fenced code blocks in prose (lessons, primers, guide). See the fence convention in
  * src/content/types.ts ("Prose layers"). Shared by verify-mini.ts and verify-lean.ts.
  */
+import { chapterFor } from '../src/content/chapters/index.ts';
 import type { GuideArticle, WorldLessons } from '../src/content/types.ts';
 
 export interface ProseBlock {
@@ -39,7 +40,12 @@ export function lessonBlocks(lessons: WorldLessons | undefined, levelId: string)
 
 export function worldProseBlocks(lessons: WorldLessons | undefined): ProseBlock[] {
   if (!lessons) return [];
-  return [...fenced(lessons.primer, `primer ${lessons.worldId}`), ...fenced(lessons.recap, `recap ${lessons.worldId}`)];
+  const ch = chapterFor(lessons.worldId);
+  return [
+    ...fenced(lessons.primer, `primer ${lessons.worldId}`),
+    ...fenced(lessons.recap, `recap ${lessons.worldId}`),
+    ...(ch ? fenced(ch.body, `chapter ${lessons.worldId}`) : []),
+  ];
 }
 
 export function guideBlocks(articles: GuideArticle[]): ProseBlock[] {

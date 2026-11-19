@@ -25,6 +25,7 @@ import { ideas } from '../src/content/ideas.ts';
 import { assemble, checkBody, envWithLemmas, fullEnv, levelSession } from '../src/game/env.ts';
 import { worldLessons } from '../src/content/lessons/index.ts';
 import { guide } from '../src/content/guide.ts';
+import { chapterFor } from '../src/content/chapters/index.ts';
 import { KNOWN_LANGS, guideBlocks, lessonBlocks, nsOf, words, worldProseBlocks, type ProseBlock } from './prose-blocks.ts';
 
 const args = process.argv.slice(2);
@@ -279,6 +280,12 @@ function proseChecks(world: World): void {
   checks++;
   if (lessons.primer) limit(o, 'primer', lessons.primer, 400, 700);
   if (lessons.recap) limit(o, 'recap', lessons.recap, 80, 160);
+  const ch = chapterFor(world.id);
+  if (ch) {
+    limit(o, 'chapter body', ch.body, 900, 1500);
+    limit(o, 'chapter dek', ch.dek, 15, 35);
+    for (const g of ch.guide) if (!guide.some((a) => a.id === g)) fail(o, `chapter: unknown guide article '${g}'`);
+  }
   const ids = new Set(world.levels.map((l) => l.id));
   for (const id of Object.keys(lessons.levels)) if (!ids.has(id)) fail(o, `lesson for unknown level id '${id}'`);
   let have = 0;
