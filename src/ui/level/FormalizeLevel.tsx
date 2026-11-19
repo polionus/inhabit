@@ -9,6 +9,7 @@ import { useDebounced } from '../hooks.tsx';
 import { DiagnosticItem } from '../components/Infoview.tsx';
 import { Lean, LeanInline, Markdown } from '../components/Markdown.tsx';
 import { SymbolBar } from '../components/SymbolBar.tsx';
+import { KbdHint } from '../components/KbdHint.tsx';
 import type { Run } from './run.ts';
 
 type Verdict =
@@ -85,6 +86,7 @@ export function FormalizeLevelView({ run, level }: { run: Run; level: FormalizeL
         <Editor
           ref={editor}
           value={text}
+          onSubmit={() => { if (text.trim() && !resolved) submit(); }}
           onChange={(v) => {
             setText(v);
             if (verdict && !resolved) setVerdict(null);
@@ -96,7 +98,7 @@ export function FormalizeLevelView({ run, level }: { run: Run; level: FormalizeL
           className="small-editor"
         />
         <div className="actions">
-          <button className="btn primary" disabled={!text.trim() || resolved} onClick={submit}>Check my statement</button>
+          <button className="btn primary" disabled={!text.trim() || resolved} onClick={submit}>Check my statement <KbdHint /></button>
         </div>
       </div>
       <section className="infoview" aria-label="Reading back">

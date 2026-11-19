@@ -2,6 +2,7 @@
  * `#/practice/translate`: an English sentence, the learner types the Lean statement, the engine
  * compares it with the reference by definitional equality. Sets of five, ratings rising.
  */
+import { KbdHint } from '../components/KbdHint.tsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { engine } from '../../engine/index.ts';
 import { checkTranslation, translateSet, type TranslateItem, type Verdict } from '../../arena/translate.ts';
@@ -166,6 +167,7 @@ function Statement({ item, last, onFinish }: { item: TranslateItem; last: boolea
         <Editor
           ref={editor}
           value={text}
+          onSubmit={() => { if (text.trim() && !done) check(); }}
           onChange={(v) => {
             setText(v);
             if (verdict && !accepted) setVerdict(null);
@@ -177,7 +179,7 @@ function Statement({ item, last, onFinish }: { item: TranslateItem; last: boolea
           className="small-editor"
         />
         <div className="actions">
-          <button className="btn primary" disabled={!text.trim() || done} onClick={check}>Check</button>
+          <button className="btn primary" disabled={!text.trim() || done} onClick={check}>Check <KbdHint /></button>
           <button className="btn" disabled={done} onClick={() => setShown(true)}>Show a correct statement</button>
         </div>
       </div>

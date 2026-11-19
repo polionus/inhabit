@@ -1,10 +1,10 @@
-import { data } from '../data.ts';
+import { lazyData } from '../lazyData.ts';
 import { Markdown } from '../components/Markdown.tsx';
 import { openInRealLean } from '../lean/openInLean.ts';
 import { EmptyState, Icon, ScreenHeader } from '../components/kit.tsx';
 
 export function GraduateScreen() {
-  const { graduate, phrasebook } = data;
+  const { graduate, phrasebook } = lazyData;
   return (
     <div className="page narrow graduate-page">
       <ScreenHeader

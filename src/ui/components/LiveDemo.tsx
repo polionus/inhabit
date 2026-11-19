@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { engine } from '../../engine/index.ts'; // always the real engine, never fixtures
 import type { Goal } from '../../engine/types.ts';
 import type { HomeDemo } from '../../content/types.ts';
-import { highlightHtml } from '../lean/highlight.ts';
+import { highlightHtml } from '../lean/highlightCore.ts';
 import { demoStates, describeGoals } from '../demoSteps.ts';
 import { Goals } from './Infoview.tsx';
 import { InlineMd, Markdown } from './Markdown.tsx';

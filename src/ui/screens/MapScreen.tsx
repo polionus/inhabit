@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { World } from '../../content/types.ts';
 import { chapterFor } from '../../content/chapters/index.ts';
-import { LevelRows, readMinutes } from '../components/ChapterLevels.tsx';
+import { LevelRows } from '../components/ChapterLevels.tsx';
 import { worldMastery } from '../../state/meta.ts';
 import { data } from '../data.ts';
 import { useGame } from '../game.ts';
@@ -93,7 +93,7 @@ function Roadmap({ currentId }: { currentId?: string }) {
               )}
               <div className="rm-actions">
                 {ch ? (
-                  <a className="btn outline" href={href.chapter(w.id)}><Icon name="book" size={16} /> Read the explainer <span className="muted tnum">{readMinutes(ch.body)} min</span></a>
+                  <a className="btn outline" href={href.chapter(w.id)}><Icon name="book" size={16} /> Read the explainer <span className="muted tnum">{ch.minutes} min</span></a>
                 ) : (
                   <span className="rm-soon"><Icon name="book" size={16} /> Explainer coming soon</span>
                 )}

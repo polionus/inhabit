@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Marked } from 'marked';
-import { highlightHtml } from '../lean/highlight.ts';
+import { highlightHtml } from '../lean/highlightCore.ts';
 import { getCodex } from '../data.ts';
 import { CodexModal } from './CodexCard.tsx';
 

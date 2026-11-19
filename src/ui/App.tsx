@@ -1,28 +1,61 @@
-import { useEffect } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { useRoute, href, type Route } from './router.ts';
 import { ErrorBoundary } from './hooks.tsx';
 import { game, useGame } from './game.ts';
-import { data, getCodex } from './data.ts';
+import { data, getCodex, loadLessons } from './data.ts';
 import { Toasts } from './components/Toasts.tsx';
 import { Shell } from './shell/Shell.tsx';
 import { EmptyState } from './components/kit.tsx';
-import { MapScreen } from './screens/MapScreen.tsx';
-import { WorldScreen } from './screens/WorldScreen.tsx';
-import { LevelScreen } from './screens/LevelScreen.tsx';
-import { ReviewScreen } from './screens/ReviewScreen.tsx';
-import { CodexScreen } from './screens/CodexScreen.tsx';
-import { SandboxScreen } from './screens/SandboxScreen.tsx';
-import { WorkshopScreen } from './screens/WorkshopScreen.tsx';
-import { GraduateScreen } from './screens/GraduateScreen.tsx';
-import { ProfileScreen } from './screens/ProfileScreen.tsx';
 import { HomeScreen } from './screens/Home.tsx';
-import { AboutScreen } from './screens/About.tsx';
-import { GuideScreen } from './screens/GuideScreen.tsx';
-import { ArenaScreen } from './arena/ArenaScreen.tsx';
-import { ShareScreen } from './arena/ShareScreen.tsx';
-import { PracticeScreen } from './practice/PracticeScreen.tsx';
-import { ChapterScreen } from './screens/ChapterScreen.tsx';
 import { chapterFor } from '../content/chapters/index.ts';
+import { guideMeta } from '../content/guideMeta.ts';
+
+// Everything except Home loads on demand. Each loader is also used to prefetch after first paint.
+const loaders = {
+  map: () => import('./screens/MapScreen.tsx').then((m) => ({ default: m.MapScreen })),
+  world: () => loadLessons().then(() => import('./screens/WorldScreen.tsx').then((m) => ({ default: m.WorldScreen }))),
+  level: () => loadLessons().then(() => import('./screens/LevelScreen.tsx').then((m) => ({ default: m.LevelScreen }))),
+  review: () => loadLessons().then(() => import('./screens/ReviewScreen.tsx').then((m) => ({ default: m.ReviewScreen }))),
+  codex: () => import('./screens/CodexScreen.tsx').then((m) => ({ default: m.CodexScreen })),
+  sandbox: () => import('./screens/SandboxScreen.tsx').then((m) => ({ default: m.SandboxScreen })),
+  workshop: () => import('./screens/WorkshopScreen.tsx').then((m) => ({ default: m.WorkshopScreen })),
+  graduate: () => import('./screens/GraduateScreen.tsx').then((m) => ({ default: m.GraduateScreen })),
+  profile: () => import('./screens/ProfileScreen.tsx').then((m) => ({ default: m.ProfileScreen })),
+  about: () => import('./screens/About.tsx').then((m) => ({ default: m.AboutScreen })),
+  guide: () => import('./screens/GuideScreen.tsx').then((m) => ({ default: m.GuideScreen })),
+  arena: () => import('./arena/ArenaScreen.tsx').then((m) => ({ default: m.ArenaScreen })),
+  share: () => import('./arena/ShareScreen.tsx').then((m) => ({ default: m.ShareScreen })),
+  practice: () => import('./practice/PracticeScreen.tsx').then((m) => ({ default: m.PracticeScreen })),
+  chapter: () => import('./screens/ChapterScreen.tsx').then((m) => ({ default: m.ChapterScreen })),
+};
+const MapScreen = lazy(loaders.map);
+const WorldScreen = lazy(loaders.world);
+const LevelScreen = lazy(loaders.level);
+const ReviewScreen = lazy(loaders.review);
+const CodexScreen = lazy(loaders.codex);
+const SandboxScreen = lazy(loaders.sandbox);
+const WorkshopScreen = lazy(loaders.workshop);
+const GraduateScreen = lazy(loaders.graduate);
+const ProfileScreen = lazy(loaders.profile);
+const AboutScreen = lazy(loaders.about);
+const GuideScreen = lazy(loaders.guide);
+const ArenaScreen = lazy(loaders.arena);
+const ShareScreen = lazy(loaders.share);
+const PracticeScreen = lazy(loaders.practice);
+const ChapterScreen = lazy(loaders.chapter);
+
+/** After first paint, quietly fetch the screens a new player reaches first. */
+function prefetchSoon() {
+  const run = () => [loaders.level, loaders.map, loaders.world].forEach((f) => void f().catch(() => {}));
+  const ric = (window as unknown as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => void }).requestIdleCallback;
+  if (ric) ric(run, { timeout: 3000 });
+  else setTimeout(run, 1200);
+}
+
+/** Same footprint as a screen, so nothing jumps while a chunk arrives. */
+function ScreenFallback() {
+  return <div className="page" aria-busy="true" style={{ minHeight: '60vh' }} />;
+}
 
 const SITE = 'Inhabit';
 const HOME_TITLE = 'Inhabit — learn Lean 4, the theorem prover, by playing';
@@ -36,6 +69,7 @@ function titleFor(route: Route): string {
     case 'level': return `${data.findLevel(route.id)?.level.title ?? 'Level'} · ${SITE}`;
     case 'world': return `${data.worlds.find((w) => w.id === route.id)?.title ?? 'Region'} · ${SITE}`;
     case 'chapter': return `${chapterFor(route.id)?.title ?? data.worlds.find((w) => w.id === route.id)?.title ?? 'Chapter'} · ${SITE}`;
+    case 'guide': return `${route.id ? (guideMeta.find((a) => a.id === route.id)?.title ?? 'Guide') : 'Guide'} · ${SITE}`;
     case 'codex': return `${route.id ? (getCodex(route.id)?.name ?? 'Codex') : 'Codex'} · ${SITE}`;
     case 'notfound': return `Not found · ${SITE}`;
     default: return `${PAGE_TITLES[route.name]} · ${SITE}`;
@@ -59,6 +93,7 @@ export function App() {
   useSettingsEffect();
   useEffect(() => {
     game().touch();
+    prefetchSoon();
   }, []);
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -104,7 +139,7 @@ export function App() {
       <a className="skip" href="#main" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus(); }}>Skip to content</a>
       <Shell route={route} banners={banners}>
         <main id="main" tabIndex={-1}>
-          <ErrorBoundary resetKey={key}>{screen}</ErrorBoundary>
+          <ErrorBoundary resetKey={key}><Suspense fallback={<ScreenFallback />}>{screen}</Suspense></ErrorBoundary>
         </main>
       </Shell>
       <Toasts />

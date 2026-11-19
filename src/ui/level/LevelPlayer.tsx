@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { KbdHint } from '../components/KbdHint.tsx';
 import { celebrate } from '../components/celebrate.ts';
 import type { Level } from '../../content/types.ts';
 import type { LevelSession } from '../../game/env.ts';
@@ -81,6 +82,20 @@ export function LevelPlayer(props: LevelPlayerProps) {
   const [inventory, setInventory] = useState(false);
   const [outcome, setOutcome] = useState<(RunCompletion & { xp: number; studied: boolean; reward: Reward }) | null>(null);
   const [worldDone, setWorldDone] = useState(false);
+  // Ctrl/Cmd+Enter goes on once the level is solved. Active only then, so it never competes with the editor.
+  const advanceRef = useRef<(() => void) | undefined>(undefined);
+  advanceRef.current = outcome || (mode === 'review' && showSolution) ? props.onNext : undefined;
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' || !(e.ctrlKey || e.metaKey) || e.shiftKey || e.altKey) return;
+      if (!advanceRef.current || document.querySelector('[role="dialog"]')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      advanceRef.current();
+    };
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
+  }, []);
   const lessonSettings = useGame((s) => s.save.settings);
   const narrow = useMedia('(max-width: 900px)');
   const deckItem = useGame((s) => s.save.deck[levelId]);
@@ -258,7 +273,7 @@ export function LevelPlayer(props: LevelPlayerProps) {
             review={mode === 'review'}
             actions={
               <>
-                <button className="btn primary big" onClick={props.onNext}>{props.nextLabel ?? 'Next'} <Icon name="arrow-right" size={18} /></button>
+                <button className="btn primary big" onClick={props.onNext}>{props.nextLabel ?? 'Next'} <Icon name="arrow-right" size={18} /><KbdHint /></button>
                 {(level.kind === 'proof' || level.kind === 'parsons') && outcome.body && !outcome.studied && (
                   <ShareButton card={{ kind: 'level', ref: levelId, title: level.title, english: englishOf(level) ?? undefined, source: [level.setup, level.header + '\n' + outcome.body + (level.kind === 'proof' && level.after ? '\n' + level.after : '')].filter(Boolean).join('\n') }} />
                 )}
@@ -269,7 +284,7 @@ export function LevelPlayer(props: LevelPlayerProps) {
           />
         )}
         {!outcome && mode === 'review' && showSolution && (
-          <div className="actions"><button className="btn primary" onClick={props.onNext}>{props.nextLabel ?? 'Continue'}</button></div>
+          <div className="actions"><button className="btn primary" onClick={props.onNext}>{props.nextLabel ?? 'Continue'} <KbdHint /></button></div>
         )}
         {progress?.status && progress.status !== 'unseen' && !outcome && mode === 'play' && (
           <p className="already"><Icon name="check-circle" size={16} /> You have already {progress.status === 'solved' ? 'solved' : 'studied'} this level{progress.testedOut ? ' (tested out)' : ''}.</p>

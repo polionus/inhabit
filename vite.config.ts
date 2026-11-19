@@ -18,6 +18,9 @@ export default defineConfig({
             return 'vendor';
           }
           if (id.includes('/src/engine/')) return 'engine';
+          // Long-form text loads with its screen: leave it to the dynamic-import graph.
+          if (/\/src\/content\/(guide|graduate|ideas)\.ts$|\/src\/content\/chapters\/(?!index|meta)/.test(id)) return undefined;
+          if (id.includes('/src/content/lessons/')) return 'lessons';
           if (id.includes('/src/content/')) return 'content';
           return undefined;
         },

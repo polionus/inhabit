@@ -1,7 +1,8 @@
 /** The Guide: long-form reading about Lean (`src/content/guide.ts`). Index and article views. */
 import { useEffect } from 'react';
 import type { GuideArticle } from '../../content/types.ts';
-import { data, getArticle } from '../data.ts';
+import { data } from '../data.ts';
+import { lazyData, getArticle } from '../lazyData.ts';
 import { game, useGame } from '../game.ts';
 import { Markdown } from '../components/Markdown.tsx';
 import { Card, EmptyState, Icon, Pill, ProgressBar, ScreenHeader } from '../components/kit.tsx';
@@ -25,7 +26,7 @@ function ArticleCard({ a, n, read, highlight }: { a: GuideArticle; n: number; re
 
 function GuideIndex() {
   const seen = useGame((s) => s.save.seen);
-  const all = data.guide;
+  const all = lazyData.guide;
   const isRead = (a: GuideArticle) => !!seen[`guide:${a.id}`];
   const readCount = all.filter(isRead).length;
   const firstUnread = all.find((a) => !isRead(a));
@@ -47,7 +48,7 @@ function GuideIndex() {
           Articles about Lean itself will appear here.
         </EmptyState>
       ) : (
-        data.guideSections.map((sec) => {
+        lazyData.guideSections.map((sec) => {
           const items = all.filter((a) => a.section === sec.id);
           if (!items.length) return null;
           return (
@@ -68,11 +69,11 @@ function GuideIndex() {
 function ArticleView({ a }: { a: GuideArticle }) {
   const save = useGame((s) => s.save);
   const read = !!save.seen[`guide:${a.id}`];
-  const all = data.guide;
+  const all = lazyData.guide;
   const i = all.indexOf(a);
   const prev = i > 0 ? all[i - 1] : undefined;
   const next = i >= 0 && i < all.length - 1 ? all[i + 1] : undefined;
-  const section = data.guideSections.find((s) => s.id === a.section);
+  const section = lazyData.guideSections.find((s) => s.id === a.section);
   const end = useReadToEnd(() => game().recordEvent({ type: 'guide-read', articleId: a.id }), !read);
   const related = (a.worlds ?? []).map((id) => data.worlds.find((w) => w.id === id)).filter((w): w is NonNullable<typeof w> => !!w);
   const readNext = (a.next ?? []).map((id) => getArticle(id)).filter((x): x is GuideArticle => !!x);

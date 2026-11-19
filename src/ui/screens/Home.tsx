@@ -1,4 +1,5 @@
 import { data } from '../data.ts';
+import { guideMeta } from '../../content/guideMeta.ts';
 import { useGame } from '../game.ts';
 import { home } from '../../content/site.ts';
 import { dayKey } from '../../state/game.ts';
@@ -149,7 +150,7 @@ function Dashboard() {
   const quests = useQuests();
   const cont = start.kind === 'continue' ? data.findLevel(start.href.replace('#/level/', '')) : undefined;
   const st = cont ? worldStatus(cont.world, save) : null;
-  const unread = data.guide.find((a) => !save.seen[`guide:${a.id}`]);
+  const unread = guideMeta.find((a) => !save.seen[`guide:${a.id}`]);
   const studiedIds = data.worlds.flatMap((w) => w.levels).filter((l) => save.levels[l.id]?.status === 'studied').map((l) => l.id);
   const qDone = quests.filter((q) => q.done).length;
   return (

@@ -1,7 +1,8 @@
 /** Chapter explainer: a blog-style article for one world at `#/chapter/<worldId>`. */
 import { useEffect, useMemo, useRef } from 'react';
-import { chapterFor } from '../../content/chapters/index.ts';
-import { data, getArticle } from '../data.ts';
+import { chapterFor } from '../../content/chapters/full.ts';
+import { data } from '../data.ts';
+import { lazyData, getArticle } from '../lazyData.ts';
 import { useGame } from '../game.ts';
 import { worldUnlocked } from '../../state/progress.ts';
 import { Markdown } from '../components/Markdown.tsx';

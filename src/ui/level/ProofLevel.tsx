@@ -138,6 +138,11 @@ export function ProofLevelView({ run, level }: { run: Run; level: ProofLevel }) 
           hyps={hyps}
           cursor={placeholderRange(run.initialBody)?.from ?? 'end'}
         />
+        {body !== level.starter && (
+          <div className="start-over">
+            <button type="button" className="linkish quiet" title="Back to the starting code. ⌘Z undoes it." onClick={() => editor.current?.replaceAll(level.starter)}>Start over</button>
+          </div>
+        )}
         {level.after && <><div className="after-caption">Lean also checks this:</div><div className="header-ro after"><Lean code={level.after} /></div></>}
       </div>
       <Infoview

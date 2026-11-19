@@ -2,7 +2,7 @@
  * Fenced code blocks in prose (lessons, primers, guide). See the fence convention in
  * src/content/types.ts ("Prose layers"). Shared by verify-mini.ts and verify-lean.ts.
  */
-import { chapterFor } from '../src/content/chapters/index.ts';
+import { chapterFor } from '../src/content/chapters/full.ts';
 import type { GuideArticle, WorldLessons } from '../src/content/types.ts';
 
 export interface ProseBlock {

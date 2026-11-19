@@ -177,3 +177,10 @@ blockquote { margin: .3rem 0 .9rem; padding: .2rem 0 .2rem 1rem; border-left: 3p
 @keyframes pop { 0% { transform: scale(.4); opacity: 0; } 70% { transform: scale(1.18); opacity: 1; } 100% { transform: scale(1); } }
 @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 var(--glow); } 70% { box-shadow: 0 0 0 14px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
 @keyframes shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+
+/* quiet secondary action and keyboard hint */
+.start-over { display: flex; justify-content: flex-end; margin: .35rem 0 0; }
+.linkish.quiet { color: var(--muted); font-size: .8rem; font-weight: 600; }
+.linkish.quiet:hover { color: var(--ink); }
+.kbd-hint { font: 700 .68rem/1 var(--font-ui); padding: .15rem .35rem; border-radius: 5px; background: rgba(0, 0, 0, .18); margin-left: .5rem; opacity: .85; }
+@media (hover: none), (max-width: 759px) { .kbd-hint { display: none; } }

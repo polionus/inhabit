@@ -23,6 +23,11 @@ export const NAV: NavItem[] = [
   { name: 'graduate', label: 'Graduate', to: '#/graduate', icon: 'graduate' },
   { name: 'about', label: 'About', to: href.about(), icon: 'about' },
 ];
+const NAV_GROUPS: { label: string; names: string[] }[] = [
+  { label: 'Learn', names: ['home', 'map', 'review'] },
+  { label: 'Play and build', names: ['arena', 'workshop', 'sandbox'] },
+  { label: 'Reference', names: ['guide', 'codex', 'graduate', 'about'] },
+];
 const TAB_PRIMARY = ['home', 'map', 'arena', 'review'];
 
 /** Which nav entry a route belongs to. */
@@ -30,7 +35,10 @@ export function activeNav(route: Route): string {
   switch (route.name) {
     case 'world':
     case 'level':
+    case 'chapter':
       return 'map';
+    case 'practice':
+      return !route.id || route.id === 'translate' ? 'arena' : 'map';
     case 'share':
       return 'arena';
     case 'notfound':
@@ -58,7 +66,11 @@ function Brand({ compact = false }: { compact?: boolean }) {
 function NavLinks({ active, due, onNavigate }: { active: string; due: number; onNavigate?: () => void }) {
   return (
     <ul className="nav-list">
-      {NAV.map((n) => {
+      {NAV_GROUPS.map((g) => (
+        <li key={g.label} className="nav-group" role="presentation">
+          <span className="nav-group-label" aria-hidden="true">{g.label}</span>
+          <ul className="nav-sub" aria-label={g.label}>
+      {g.names.map((nm) => NAV.find((x) => x.name === nm)!).map((n) => {
         const on = active === n.name;
         return (
           <li key={n.name}>
@@ -78,6 +90,9 @@ function NavLinks({ active, due, onNavigate }: { active: string; due: number; on
           </li>
         );
       })}
+          </ul>
+        </li>
+      ))}
     </ul>
   );
 }

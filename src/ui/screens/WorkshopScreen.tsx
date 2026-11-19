@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import type { TheoremIdea } from '../../content/types.ts';
 import { data, engine } from '../data.ts';
+import { lazyData } from '../lazyData.ts';
 import { game, useGame } from '../game.ts';
 import { useCheck, useDebounced } from '../hooks.tsx';
 import { dataForEverything, hypItems } from '../lean/complete.ts';
@@ -201,7 +202,7 @@ export interface Started { idea: TheoremIdea; statementShown: boolean }
 export const ideaStart = (i: TheoremIdea): string => [i.definitions?.trim(), i.statement.trim() + '\n  sorry'].filter(Boolean).join('\n\n');
 
 function Ideas({ onWork }: { onWork: (s: Started) => void }) {
-  const ideas = data.ideas;
+  const ideas = lazyData.ideas;
   const [open, setOpen] = useState<string | null>(null);
   const [shown, setShown] = useState<Record<string, boolean>>({});
   if (!ideas.length) return <p className="notice">No ideas yet.</p>;

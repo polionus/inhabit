@@ -27,6 +27,8 @@ import type { BodyDiagnostic } from './offsets.ts';
 export interface EditorHandle {
   insert(text: string): void;
   focus(): void;
+  /** Replace the whole document in one undoable transaction. */
+  replaceAll(text: string): void;
   getCursor(): number;
 }
 
@@ -198,6 +200,8 @@ const theme = EditorView.theme({
 
 interface Props {
   value: string;
+  /** Ctrl/Cmd+Enter inside the editor. */
+  onSubmit?: () => void;
   onChange?: (v: string) => void;
   onCursor?: (offset: number) => void;
   diagnostics?: EditorDiag[];
@@ -234,6 +238,12 @@ export const Editor = forwardRef<EditorHandle, Props>(function Editor(props, ref
       if (!v) return;
       const sel = v.state.selection.main;
       v.dispatch({ changes: { from: sel.from, to: sel.to, insert: text }, selection: { anchor: sel.from + text.length }, scrollIntoView: true });
+      v.focus();
+    },
+    replaceAll(text) {
+      const v = view.current;
+      if (!v) return;
+      v.dispatch({ changes: { from: 0, to: v.state.doc.length, insert: text }, selection: { anchor: text.length }, userEvent: 'input.replace', scrollIntoView: true });
       v.focus();
     },
     focus: () => view.current?.focus(),
@@ -302,7 +312,7 @@ export const Editor = forwardRef<EditorHandle, Props>(function Editor(props, ref
       diagTooltip,
       abbrevInput,
       autocompletion({ override: [abbrevCompletion, nameCompletion(() => ({ data: cb.current.completion, hyps: cb.current.hyps }))], activateOnTyping: true, icons: false }),
-      keymap.of([{ key: 'Tab', run: tabKey, shift: () => true }, ...defaultKeymap, ...historyKeymap]),
+      keymap.of([{ key: 'Tab', run: tabKey, shift: () => true }, { key: 'Mod-Enter', run: () => { const f = cb.current.onSubmit; if (!f) return false; f(); return true; } }, ...defaultKeymap, ...historyKeymap]),
       EditorView.contentAttributes.of({ 'aria-label': cb.current.ariaLabel, spellcheck: 'false', autocapitalize: 'off', autocorrect: 'off' }),
       fontComp.current.of(EditorView.theme({ '&': { fontSize: `${cb.current.fontSize ?? 15}px` } })),
       roComp.current.of([EditorState.readOnly.of(!!cb.current.readOnly), EditorView.editable.of(true)]),

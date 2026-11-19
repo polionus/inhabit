@@ -25,7 +25,7 @@ import { ideas } from '../src/content/ideas.ts';
 import { assemble, checkBody, envWithLemmas, fullEnv, levelSession } from '../src/game/env.ts';
 import { worldLessons } from '../src/content/lessons/index.ts';
 import { guide } from '../src/content/guide.ts';
-import { chapterFor } from '../src/content/chapters/index.ts';
+import { chapterFor } from '../src/content/chapters/full.ts';
 import { KNOWN_LANGS, guideBlocks, lessonBlocks, nsOf, words, worldProseBlocks, type ProseBlock } from './prose-blocks.ts';
 
 const args = process.argv.slice(2);
