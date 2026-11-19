@@ -531,7 +531,7 @@ behind "n more". A proof that still contains `sorry` is never shown a green tick
   the capstone skill beyond the nine authored formalize levels.
 
 ### 12.5 Deferred
-Generator families for `calc` and `funext`; user-defined `inductive` types and induction beyond `Nat`;
+Generator families for `calc` and `funext`, and practice for term-mode levels (eq-09, num-05); user-defined `inductive` types and induction beyond `Nat`;
 bots that explain their proofs; ghost replays; any gate on a boss; analytics.
 
 ## 13. Reading and reuse (v4)
