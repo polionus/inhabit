@@ -364,64 +364,6 @@ export const world: World = {
     },
     // 13
     {
-      id: 'fun-13',
-      kind: 'proof',
-      title: 'Nothing is its own opposite',
-      english: 'No proposition is equivalent to its own negation: `¬(P ↔ ¬P)`.',
-      intro:
-        "The engine of Cantor's argument is pure logic: `P ↔ ¬P` is contradictory. Assume `h : P ↔ ¬P`. First show `¬P`: if `P` held, `h` would give `¬P`, applied to `P`, contradiction. Then `h` turns `¬P` back into `P`. This is `iff_not_self` in Lean's library.",
-      header: 'theorem iff_not_self {P : Prop} : ¬(P ↔ ¬P) := by',
-      starter: `  intro h
-  have hn : ¬P := by
-    sorry
-  sorry`,
-      mode: 'tactic',
-      solutions: [
-        `  intro h
-  have hn : ¬P := by
-    intro hp
-    exact (h.mp hp) hp
-  exact hn (h.mpr hn)`,
-      ],
-      hints: [
-        { text: 'For `hn`, assume `P` and aim for `False`. What does `h.mp` do to a proof of `P`?' },
-        { text: '`h.mp hp : ¬P`, a function from `P` to `False`. Apply it to `hp`.' },
-        { text: 'Once you have `hn : ¬P`, `h.mpr hn` is a proof of `P`. Combine them.' },
-        { text: '`exact (h.mp hp) hp` inside `hn`, then `exact hn (h.mpr hn)`.' },
-      ],
-      outro:
-        'To get a contradiction from `P ↔ ¬P` you used `P` and `¬P` against each other. This is Russell-style self-reference, and it is all of Cantor\'s proof. It is `iff_not_self` in core Lean, now in your inventory.',
-      unlocks: { lemmas: ['iff_not_self'] },
-    },
-    // 14
-    {
-      id: 'fun-14',
-      kind: 'proof',
-      title: 'The diagonal set',
-      english: 'If `f a` equals the diagonal set `{x | x ∉ f x}`, we have a contradiction.',
-      intro:
-        "Given `f : α → Set α`, define the *diagonal set* `D = {x | x ∉ f x}`: the elements that do not belong to their own image. Suppose some `a` has `f a = D`. Is `a ∈ f a`? Rewriting with `ha` shows `a ∈ f a ↔ a ∈ D`, and `a ∈ D` unfolds to `a ∉ f a`. Complete the proof.",
-      header:
-        'theorem diagonal_clash {α : Type} (f : α → Set α) (a : α) (ha : f a = {x | x ∉ f x}) : False := by',
-      starter: `  have key : a ∈ f a ↔ a ∈ {x | x ∉ f x} := by
-    sorry
-  sorry`,
-      mode: 'tactic',
-      solutions: [
-        `  have key : a ∈ f a ↔ a ∈ {x | x ∉ f x} := by
-    rw [ha]
-  exact iff_not_self key`,
-      ],
-      hints: [
-        { text: 'Look at `key`: the two sides differ only in `f a` versus the diagonal set. Which hypothesis connects them?' },
-        { text: '`rw [ha]` replaces `f a` by the diagonal set and the sides become identical. Then use the lemma from the previous level.' },
-        { text: '`exact iff_not_self key`: Lean accepts `a ∈ {x | x ∉ f x}` as `¬ (a ∈ f a)` by unfolding.' },
-      ],
-      outro:
-        'The diagonal set is built to disagree with every `f a` about the element `a` itself, so it cannot equal any `f a`. That `a ∈ {x | x ∉ f x}` is accepted as `a ∉ f a` is definitional unfolding at work.',
-      unlocks: { codex: ['diagonal'] },
-    },
-    {
       id: 'fun-14b',
       kind: 'proof',
       title: 'Compose, then compare',
@@ -507,6 +449,64 @@ export const world: World = {
     },
     // 15 boss
     {
+      id: 'fun-13',
+      kind: 'proof',
+      title: 'Nothing is its own opposite',
+      english: 'No proposition is equivalent to its own negation: `¬(P ↔ ¬P)`.',
+      intro:
+        "The engine of Cantor's argument is pure logic: `P ↔ ¬P` is contradictory. Assume `h : P ↔ ¬P`. First show `¬P`: if `P` held, `h` would give `¬P`, applied to `P`, contradiction. Then `h` turns `¬P` back into `P`. This is `iff_not_self` in Lean's library.",
+      header: 'theorem iff_not_self {P : Prop} : ¬(P ↔ ¬P) := by',
+      starter: `  intro h
+  have hn : ¬P := by
+    sorry
+  sorry`,
+      mode: 'tactic',
+      solutions: [
+        `  intro h
+  have hn : ¬P := by
+    intro hp
+    exact (h.mp hp) hp
+  exact hn (h.mpr hn)`,
+      ],
+      hints: [
+        { text: 'For `hn`, assume `P` and aim for `False`. What does `h.mp` do to a proof of `P`?' },
+        { text: '`h.mp hp : ¬P`, a function from `P` to `False`. Apply it to `hp`.' },
+        { text: 'Once you have `hn : ¬P`, `h.mpr hn` is a proof of `P`. Combine them.' },
+        { text: '`exact (h.mp hp) hp` inside `hn`, then `exact hn (h.mpr hn)`.' },
+      ],
+      outro:
+        'To get a contradiction from `P ↔ ¬P` you used `P` and `¬P` against each other. This is Russell-style self-reference, and it is all of Cantor\'s proof. It is `iff_not_self` in core Lean, now in your inventory.',
+      unlocks: { lemmas: ['iff_not_self'] },
+    },
+    // 14
+    {
+      id: 'fun-14',
+      kind: 'proof',
+      title: 'The diagonal set',
+      english: 'If `f a` equals the diagonal set `{x | x ∉ f x}`, we have a contradiction.',
+      intro:
+        "Given `f : α → Set α`, define the *diagonal set* `D = {x | x ∉ f x}`: the elements that do not belong to their own image. Suppose some `a` has `f a = D`. Is `a ∈ f a`? Rewriting with `ha` shows `a ∈ f a ↔ a ∈ D`, and `a ∈ D` unfolds to `a ∉ f a`. Complete the proof.",
+      header:
+        'theorem diagonal_clash {α : Type} (f : α → Set α) (a : α) (ha : f a = {x | x ∉ f x}) : False := by',
+      starter: `  have key : a ∈ f a ↔ a ∈ {x | x ∉ f x} := by
+    sorry
+  sorry`,
+      mode: 'tactic',
+      solutions: [
+        `  have key : a ∈ f a ↔ a ∈ {x | x ∉ f x} := by
+    rw [ha]
+  exact iff_not_self key`,
+      ],
+      hints: [
+        { text: 'Look at `key`: the two sides differ only in `f a` versus the diagonal set. Which hypothesis connects them?' },
+        { text: '`rw [ha]` replaces `f a` by the diagonal set and the sides become identical. Then use the lemma from the previous level.' },
+        { text: '`exact iff_not_self key`: Lean accepts `a ∈ {x | x ∉ f x}` as `¬ (a ∈ f a)` by unfolding.' },
+      ],
+      outro:
+        'The diagonal set is built to disagree with every `f a` about the element `a` itself, so it cannot equal any `f a`. That `a ∈ {x | x ∉ f x}` is accepted as `a ∉ f a` is definitional unfolding at work.',
+      unlocks: { codex: ['diagonal'] },
+    },
+    {
       id: 'fun-15',
       kind: 'proof',
       boss: true,
@@ -527,7 +527,7 @@ export const world: World = {
       ],
       hints: [
         { text: 'The goal is a negation: what do you assume? Then what does surjectivity let you do with a particular set?' },
-        { text: 'Apply `hf` to the diagonal set. Take apart the result and recognise the situation from the previous level.' },
+        { text: 'Apply `hf` to the diagonal set. Take apart the result and recognize the situation from the previous level.' },
         { text: 'You need an equivalence between `a ∈ f a` and `a ∈ {x | x ∉ f x}`, from the equation `ha`.' },
         { text: '`intro hf`, `obtain ⟨a, ha⟩ := hf {x | x ∉ f x}`, then `have key … := by rw [ha]` and `exact iff_not_self key`.' },
       ],
