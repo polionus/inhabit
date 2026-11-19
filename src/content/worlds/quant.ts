@@ -323,6 +323,67 @@ Watch the order. In English, "for every x there is a y" fixes \`x\` first; the \
       outro: `\`∀ x, ∃ y, R x y\` asserts a *function* from x to a suitable y, together with proofs. That is why it is weaker than \`∃ y, ∀ x, R x y\`, and why quantifier order is part of the type.`,
     },
     {
+      id: 'quant-11b',
+      kind: 'proof',
+      title: 'Not everything: find a counterexample',
+      english: 'If not every x satisfies P, then some x fails P.',
+      intro:
+        `Back in Connective Canyon, \`by_contra\` let you assume the opposite of your goal. Use it here, twice: once for the \`∃\`, and once to turn "not every" into a concrete \`x\`. This direction needs classical logic. The other direction did not.`,
+      header:
+        'theorem not_forall_exists (α : Type) (P : α → Prop) : (¬∀ x, P x) → ∃ x, ¬P x := by',
+      starter: '  sorry',
+      mode: 'tactic',
+      solutions: [
+        `  intro h
+  by_contra hne
+  apply h
+  intro x
+  by_contra hx
+  apply hne
+  exists x`,
+        `  intro h
+  by_contra hne
+  apply h
+  intro x
+  by_contra hx
+  exact hne ⟨x, hx⟩`,
+      ],
+      hints: [
+        { text: 'You cannot build an `∃` directly: you have no `x`. Assume the opposite of the goal with `by_contra`, and see what `h` can then refute.' },
+        { text: 'After `by_contra hne`, apply `h` to turn the goal into `∀ x, P x`. Introduce an arbitrary `x`, then use `by_contra` once more.' },
+        { text: 'Now `hx : ¬P x` and the goal is `False`. Which hypothesis refutes an `∃`, and what pair would it need?' },
+      ],
+      outro:
+        `Every step was forced by the shape of the goal. The first \`by_contra\` gave you a hypothesis to work with, and the second gave you the very \`x\` the statement asks for. This is where classical logic enters quantifiers: \`¬∀\` becomes \`∃¬\` only because you may argue by contradiction.`,
+    },
+    {
+      id: 'quant-11c',
+      kind: 'proof',
+      title: 'One counterexample ends it',
+      english: 'If every x satisfies P, and some x fails P, then anything follows.',
+      intro:
+        `Two earlier tools return. \`specialize\` aims a \`∀\` at one particular \`x\`. \`contradiction\` then spots the clash for you. First unpack the \`∃\`, so that you hold a concrete \`x\`.`,
+      header:
+        'theorem forall_clash (α : Type) (P : α → Prop) (Q : Prop) (h : ∀ x, P x) (hne : ∃ x, ¬P x) : Q := by',
+      starter: '  sorry',
+      mode: 'tactic',
+      solutions: [
+        `  obtain ⟨x, hx⟩ := hne
+  specialize h x
+  contradiction`,
+        `  obtain ⟨x, hx⟩ := hne
+  exfalso
+  exact hx (h x)`,
+      ],
+      hints: [
+        { text: 'The goal `Q` has nothing to do with the hypotheses. Look for two hypotheses that cannot both be true.' },
+        { text: 'Unpack `hne` to get a witness `x` and `hx : ¬P x`. Then aim `h` at that same `x`.' },
+        { text: 'After `specialize h x`, you hold `P x` and `¬P x`. Which tactic finds a clash like that on its own?' },
+      ],
+      outro:
+        `\`specialize\` turned a statement about every \`x\` into a statement about the one \`x\` that matters, and the clash became visible. When the goal is unrelated to the hypotheses, the contradiction does all the work.`,
+    },
+    {
       id: 'quant-12',
       kind: 'proof',
       mode: 'tactic',

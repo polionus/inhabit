@@ -476,6 +476,57 @@ The proof starts by splitting. The second line fails: one goal, \`R\`, cannot be
       unlocks: { tactics: ['all_goals', 'try', 'repeat'], codex: ['all_goals', 'try', 'repeat'] },
       outro: `These are conveniences: the long proof in the second solution does the same. They reduce repetition when many goals look alike, and \`try\` is the standard way to say "if this applies". Watch out for \`repeat\`: it acts on the first goal, and stops as soon as that goal fails.`,
     },
+    {
+      id: 'forge-12b',
+      kind: 'proof',
+      title: 'Many goals, one move',
+      english: 'If P, Q, R and S hold, then (P or Q or R or S) and ((P and Q) and R).',
+      intro:
+        `Use the combinators from the last level for real. \`repeat right\` pushes through a chain of \`∨\` until it stops. \`all_goals try constructor\` splits what can be split and leaves the rest. Finish with \`all_goals assumption\`.`,
+      header:
+        'theorem many_goals (P Q R S : Prop) (hp : P) (hq : Q) (hr : R) (hs : S) : (P ∨ Q ∨ R ∨ S) ∧ ((P ∧ Q) ∧ R) := by',
+      starter: '  sorry',
+      mode: 'tactic',
+      solutions: [
+        `  constructor
+  · repeat right
+    exact hs
+  · constructor
+    all_goals try constructor
+    all_goals assumption`,
+      ],
+      hints: [
+        { text: 'Split the outer `∧` first. The two halves need different tools: one is a long `∨`, the other a nested `∧`.' },
+        { text: 'For the `∨` chain, `repeat right` walks to the last disjunct and stops when `right` no longer applies.' },
+        { text: 'For the `∧` half, split once, then `all_goals try constructor` splits only the goals that can be split. Then close the rest in one line.' },
+      ],
+      outro:
+        `\`repeat\` and \`all_goals try\` are the two ways to say "as often as it applies" and "everywhere it applies". They stop quietly when they run out of work, which is what makes them safe to leave in a proof.`,
+    },
+    {
+      id: 'forge-12c',
+      kind: 'proof',
+      title: 'Leave holes, fill them all',
+      english: 'If P, Q and R hold at 2, then some natural number n has P n, Q n and R n.',
+      intro:
+        `\`refine\` from Divisor Dunes writes a proof with holes \`?_\` you fill later. Here it supplies the witness and leaves three goals. They all look alike, so \`all_goals\` from the last level closes them at once.`,
+      header:
+        'theorem exists_all (P Q R : Nat → Prop) (hp : P 2) (hq : Q 2) (hr : R 2) : ∃ n, P n ∧ Q n ∧ R n := by',
+      starter: '  sorry',
+      mode: 'tactic',
+      solutions: [
+        `  refine ⟨2, ?_, ?_, ?_⟩
+  all_goals assumption`,
+        `  exact ⟨2, hp, hq, hr⟩`,
+      ],
+      hints: [
+        { text: 'The goal is an `∃` with a three-part conjunction inside. The witness is the same `2` everywhere.' },
+        { text: 'Write `refine ⟨2, ?_, ?_, ?_⟩`. Each `?_` becomes a new goal, one per part.' },
+        { text: 'After the `refine`, three goals remain, each already in your context. One line with `all_goals` finishes them.' },
+      ],
+      outro:
+        `\`refine\` is \`exact\` with permission to leave gaps. The anonymous constructor flattens, so \`⟨2, ?_, ?_, ?_⟩\` fills the witness and every part of the \`∧\` in one go.`,
+    },
     // 13
     {
       id: 'forge-13',

@@ -425,6 +425,64 @@ example (α : Type) (A : Set α) (a : α) (h : A a) : a ∈ A := h`,
       unlocks: { codex: ['univ', 'mem_empty_iff_false', 'mem_univ', 'mem_diff'], lemmas: ['Set.inter_empty'] },
     },
 
+    {
+      id: 'sets-12b',
+      kind: 'proof',
+      title: 'Outside the complement',
+      english: 'Every element of `(Aᶜ)ᶜ` is an element of `A`.',
+      intro:
+        `Taking the complement twice should give the set back. In Connective Canyon, \`by_contra\` proved \`¬¬P → P\`, and this is the same fact about sets. Assume \`x ∉ A\` and look at what \`hx\` says.`,
+      header:
+        'theorem compl_compl_subset {α : Type} (A : Set α) : (Aᶜ)ᶜ ⊆ A := by',
+      starter: '  sorry',
+      mode: 'tactic',
+      solutions: [
+        `  intro x hx
+  by_contra h
+  exact hx h`,
+      ],
+      hints: [
+        { text: 'After `intro x hx`, `hx : x ∈ (Aᶜ)ᶜ`, which unfolds to `x ∈ Aᶜ → False`. The goal `x ∈ A` has no useful shape.' },
+        { text: 'Assume the opposite of the goal with `by_contra h`. Then `h : x ∉ A`, and `x ∈ Aᶜ` unfolds to exactly that.' },
+        { text: '`hx` is a function waiting for a proof of `x ∈ Aᶜ`. Does `h` fit?' },
+      ],
+      outro:
+        `This is \`¬¬P → P\` with \`x ∈ A\` for \`P\`. The reverse inclusion needs no classical reasoning: it is \`P → ¬¬P\`. So the two sets are equal, but only one direction needed \`by_contra\`.`,
+    },
+    {
+      id: 'sets-12c',
+      kind: 'proof',
+      title: 'Split on membership',
+      english: 'Every element of `A` is in `B` or in `A \\ B`.',
+      intro:
+        `Is \`x\` in \`B\` or not? That is \`by_cases\` from Connective Canyon, which gave you two worlds to check. Then use \`show\` to see \`x ∈ A \\ B\` as the pair it is: in \`A\` and not in \`B\`.`,
+      header:
+        'theorem subset_union_diff {α : Type} (A B : Set α) : A ⊆ B ∪ (A \\ B) := by',
+      starter: '  sorry',
+      mode: 'tactic',
+      solutions: [
+        `  intro x hx
+  by_cases hb : x ∈ B
+  · left
+    exact hb
+  · right
+    show x ∈ A ∧ x ∉ B
+    exact ⟨hx, hb⟩`,
+        `  intro x hx
+  by_cases hb : x ∈ B
+  · left
+    exact hb
+  · right
+    exact ⟨hx, hb⟩`,
+      ],
+      hints: [
+        { text: 'The goal is a union, so it needs a side. Which side depends on a question you cannot answer yet: is `x ∈ B`?' },
+        { text: 'Use `by_cases hb : x ∈ B`. In the first case choose `left`. In the second choose `right`.' },
+        { text: 'In the second case the goal is `x ∈ A \\ B`. Use `show` to write it as a pair, then build the pair from `hx` and `hb`.' },
+      ],
+      outro:
+        `Splitting on a question you cannot decide is the whole point of \`by_cases\`. \`A \\ B\` is defined as the elements in \`A\` and not in \`B\`, so \`show\` cost nothing: it only made that visible.`,
+    },
     // ───────────────────────── 13 boss
     {
       id: 'sets-13',

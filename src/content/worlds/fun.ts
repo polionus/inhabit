@@ -421,6 +421,90 @@ export const world: World = {
         'The diagonal set is built to disagree with every `f a` about the element `a` itself, so it cannot equal any `f a`. That `a ∈ {x | x ∉ f x}` is accepted as `a ∉ f a` is definitional unfolding at work.',
       unlocks: { codex: ['diagonal'] },
     },
+    {
+      id: 'fun-14b',
+      kind: 'proof',
+      title: 'Compose, then compare',
+      english: 'If `f` and `g` agree at every point, then `k ∘ f = k ∘ g`.',
+      intro:
+        `Equal functions are equal at every point, and \`funext\` from earlier in this world is how you say so. After it, use \`change\` from Set Savanna to see the composition applied to \`x\`, then rewrite with the hypothesis.`,
+      header:
+        'theorem comp_congr {α β γ : Type} (f g : α → β) (k : β → γ) (h : ∀ x, f x = g x) : k ∘ f = k ∘ g := by',
+      starter: '  sorry',
+      mode: 'tactic',
+      solutions: [
+        `  funext x
+  change k (f x) = k (g x)
+  rw [h x]`,
+        `  funext x
+  show k (f x) = k (g x)
+  rw [h x]`,
+      ],
+      hints: [
+        { text: 'The goal is an equation between functions. Which tactic reduces it to an equation about one input?' },
+        { text: 'After `funext x`, the goal is `(k ∘ f) x = (k ∘ g) x`. Restate it with `change` so you can see where `f x` sits.' },
+        { text: 'The hypothesis `h x` rewrites `f x`. After the rewrite, both sides match and `rw` closes the goal.' },
+      ],
+      outro:
+        `Pointwise equality gave equality of functions, and the composition unfolded because \`(k ∘ f) x\` is by definition \`k (f x)\`. Notice that \`rw\` closed the goal by itself: after the rewrite both sides were identical.`,
+    },
+    {
+      id: 'fun-14c',
+      kind: 'proof',
+      title: 'Nothing comes from nothing',
+      english: 'If `y` is in the image of the empty set, then `y` is in any set `S`.',
+      intro:
+        `An element of \`f '' ∅\` would come from an element of \`∅\`, and there is none. Unpack the image with \`obtain\`, then use \`exfalso\` from Connective Canyon: the goal does not matter once you hold a contradiction.`,
+      header:
+        'theorem mem_of_mem_image_empty {α β : Type} (f : α → β) (S : Set β) (y : β) (h : y ∈ f \'\' (∅ : Set α)) : y ∈ S := by',
+      starter: '  sorry',
+      mode: 'tactic',
+      solutions: [
+        `  obtain ⟨x, hx, _⟩ := h
+  exfalso
+  exact hx`,
+        `  obtain ⟨x, hx, _⟩ := h
+  contradiction`,
+      ],
+      hints: [
+        { text: 'The goal `y ∈ S` is unrelated to everything you know. Unpack `h` first and look at what it gives you.' },
+        { text: 'An image membership gives `x`, a proof `hx : x ∈ ∅`, and an equation. The element `x ∈ ∅` unfolds to `False`.' },
+        { text: 'Once you hold a proof of `False`, you may discard the goal. Which tactic does that?' },
+      ],
+      outro:
+        `Statements about the empty set are often vacuous: there is nothing to check. Once \`hx : x ∈ ∅\` appeared you held a proof of \`False\`, and from \`False\` anything follows.`,
+    },
+    {
+      id: 'fun-14d',
+      kind: 'proof',
+      title: 'Surjective means the image covers',
+      english: 'If `f` is surjective, then every `S ⊆ β` satisfies `S ⊆ f \'\' (f ⁻¹\' S)`.',
+      intro:
+        `Take \`y\` in \`S\`. Surjectivity gives an \`x\` with \`f x = y\`. Give \`use\` the witness, split the pair that remains, and use \`change\` to see what the first part means. \`rwa\` rewrites and then closes the goal from the context.`,
+      header:
+        'theorem subset_image_preimage {α β : Type} (f : α → β) (hf : Function.Surjective f) (S : Set β) : S ⊆ f \'\' (f ⁻¹\' S) := by',
+      starter: '  sorry',
+      mode: 'tactic',
+      solutions: [
+        `  intro y hy
+  obtain ⟨x, hx⟩ := hf y
+  use x
+  constructor
+  · change f x ∈ S
+    rwa [hx]
+  · exact hx`,
+        `  intro y hy
+  obtain ⟨x, hx⟩ := hf y
+  exact ⟨x, by rw [Set.mem_preimage, hx]; exact hy, hx⟩`,
+      ],
+      hints: [
+        { text: 'Start with `intro y hy`, then use surjectivity at `y` to get a preimage point `x`.' },
+        { text: 'The goal is `∃ x, x ∈ f ⁻¹\' S ∧ f x = y`. `use x` supplies the witness and leaves a pair to build; split it with `constructor`.' },
+        { text: 'The first part is `x ∈ f ⁻¹\' S`, which means `f x ∈ S`. With `hx : f x = y` in hand, rewrite and look for `hy`.' },
+      ],
+      outro:
+        `The image of a preimage is the part of \`S\` that \`f\` actually reaches. Surjectivity says it reaches everything, so nothing is lost. \`rwa\` saved a separate \`exact\` at the end.`,
+    },
     // 15 boss
     {
       id: 'fun-15',

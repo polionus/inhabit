@@ -5,7 +5,7 @@ export const home: HomeCopy = {
   hero: {
     eyebrow: 'A free browser game that teaches Lean 4',
     headline: 'Learn to write proofs a computer can check',
-    lede: '**Lean** is a theorem prover: you write a proof, and it checks every step. In 124 short levels, each with a lesson beside it, you learn to write proofs yourself, then prove a theorem of your own. The Guide and an optional Arena go further.',
+    lede: '**Lean** is a theorem prover: you write a proof, and it checks every step. In 133 short levels, each with a lesson beside it, you learn to write proofs yourself, then prove a theorem of your own. The Guide and an optional Arena go further.',
     startLabel: 'Start level one',
     continueLabel: 'Continue',
     aboutLabel: 'New to Lean? Read the introduction',
@@ -185,7 +185,7 @@ The honest cost: it takes effort. You must spell out steps a human reader would 
     {
       id: 'what-you-do',
       title: 'What you do in the game',
-      body: `The game has 10 worlds and 124 levels, arranged on a map. You start with types and functions, then learn that statements are types and proofs are programs. Next come logic, "for all" and "there exists", and equality. Then the map branches: natural numbers, induction and divisibility on one side; sets and functions, ending with Cantor's theorem, on the other. Both meet in a last world where you formalize a theorem of your own.
+      body: `The game has 10 worlds and 133 levels, arranged on a map. You start with types and functions, then learn that statements are types and proofs are programs. Next come logic, "for all" and "there exists", and equality. Then the map branches: natural numbers, induction and divisibility on one side; sets and functions, ending with Cantor's theorem, on the other. Both meet in a last world where you formalize a theorem of your own.
 
 Levels come in five kinds:
 
