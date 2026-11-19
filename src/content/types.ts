@@ -80,6 +80,12 @@ export interface ProofLevel extends LevelBase {
   extraTactics?: string[];
   /** Constants that may not be used here (e.g. the library lemma being proved). */
   forbidden?: string[];
+  /**
+   * Tactics the solution must use (canonical names, e.g. ['calc']). A complete proof that never uses one
+   * is not accepted; the player sees a calm note naming the tactic the level is about. Every reference
+   * solution must use them (verify-mini checks).
+   */
+  mustUse?: string[];
   /** After solving, reveal the proof term the tactics built (Curry–Howard made visible). */
   showTerm?: boolean;
 }
