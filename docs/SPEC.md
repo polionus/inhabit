@@ -548,3 +548,8 @@ bots that explain their proofs; ghost replays; any gate on a boss; analytics.
 - **Translate grading** accepts logically equivalent statements it can recognize (bundled hypotheses, `¬∃`/`∀¬`,
   flipped `↔`, commuted `∧`/`∨`) with a note on the convention; otherwise it shows both statements side by side and
   lets the learner judge, which is recorded as reviewed, not solved.
+- **Easing in (v4.2).** Levels that introduce new syntax (bullets, `by_cases`, `calc`, `refine`, `fun x hx =>`, anonymous
+  pairs) start from a partial starter that shows the shape and leaves the idea to the player. Warm-ups sit before the
+  biggest cliffs (first tactic, `const` before `swapArgs`, first formalize, image vs preimage). `mustUse` makes a level
+  insist on the tactic it teaches (eq-08 `calc`, logic-12 `by_cases`). Each kind of screen gets a one-time inline tip,
+  skipped for players who have already finished a level of that kind. After a boss, the next chapter is the main action.
