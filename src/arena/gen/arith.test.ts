@@ -28,6 +28,8 @@ describe('arithmetic families', () => {
         const p = generator.generate({ seed: `arith-${i}`, family, target }) as ProofPuzzle;
         expect(p.kind).toBe('proof');
         expect(p.family, p.id).toBe(family);
+        for (const l of lemmasIn(p.solution)) expect(p.forbiddenNames ?? [], p.id).not.toContain(l);
+        for (const h of p.hints) expect(h.includes(p.solution.trim()) || p.solution.trim().split('\n').every((l) => h.includes(l.trim())), `hint leaks the proof: ${p.id}\n${h}`).toBe(false);
         expect(generator.check(p, p.solution).complete, `${p.id}\n${p.header}\n${p.solution}`).toBe(true);
         expect(p.rating).toBeGreaterThanOrEqual(400);
         expect(p.rating).toBeLessThanOrEqual(hi + 150);
@@ -43,6 +45,20 @@ describe('arithmetic families', () => {
       expect(ms).toBeLessThan(150);
     });
   }
+
+  it('rejects bank-lemma bypasses of induction puzzles', () => {
+    let found = false;
+    for (let i = 0; i < 300 && !found; i++) {
+      const p = generator.generate({ seed: `bypass-${i}`, family: 'ind', target: 600 }) as ProofPuzzle;
+      const m = /^theorem puzzle \((\w) (\w) : Nat\) : Nat\.succ \w \+ \w = Nat\.succ \(\w \+ \w\) := by$/.exec(p.header);
+      if (!m) continue;
+      found = true;
+      const r = generator.check(p, '  exact Nat.succ_add _ _');
+      expect(r.complete).toBe(false);
+      expect(r.result.diagnostics.some((d) => d.code === 'name-locked')).toBe(true);
+    }
+    expect(found).toBe(true);
+  });
 
   it('is deterministic', () => {
     for (const family of ARITH_FAMILIES) {
@@ -73,7 +89,7 @@ describe('gates', () => {
         if (!p) continue;
         made++;
         keys.add(p.english);
-        const r = engine.check(arithEnv(), p.header + '\n' + p.solution, { allowedTactics: [...gate.tactics!] });
+        const r = engine.check(arithEnv(), p.header + '\n' + p.solution, { allowedTactics: [...gate.tactics!], forbiddenNames: p.forbiddenNames });
         expect(r.complete, `${p.header}\n${p.solution}`).toBe(true);
         for (const d of r.decls) for (const t of d.usedTactics) expect(gate.tactics!.has(t), `${t} in ${p.solution}`).toBe(true);
         for (const l of lemmasIn(p.solution)) expect(gate.lemmas!.has(l), `${l} in ${p.solution}`).toBe(true);

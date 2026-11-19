@@ -111,6 +111,8 @@ export interface ArithCand {
   /** First hint: the idea, in words. */
   idea: string;
   themes: string[];
+  /** Bank lemmas the solver may not cite (they restate the goal). */
+  forbidden?: string[];
   /** Extra difficulty the line count does not show (case splits, induction). */
   bonus?: number;
 }
@@ -123,6 +125,7 @@ export interface ArithBuilt {
   rating: number;
   hints: string[];
   themes: string[];
+  forbidden?: string[];
   classical: boolean;
 }
 
@@ -159,7 +162,7 @@ function hintsOf(c: ArithCand): string[] {
   const first = c.lines[0].trim();
   const hints = [c.idea];
   if (c.lines.length > 1) hints.push(`Start with \`${first}\`.`);
-  else hints.push(`One line does it: \`${first}\`.`);
+  else hints.push("One step closes this. Which single lemma or tactic matches the goal's shape exactly?");
   if (c.lines.length >= 3) {
     const n = Math.min(c.lines.length - 1, Math.max(2, Math.ceil(c.lines.length / 2)));
     hints.push('The proof can begin like this:\n```lean\n' + c.lines.slice(0, n).join('\n') + '\n```');
@@ -180,6 +183,7 @@ export function buildArith(family: ArithFamily, c: ArithCand): ArithBuilt {
     rating: rateArith(family, c),
     hints: hintsOf(c),
     themes: c.themes,
+    ...(c.forbidden?.length ? { forbidden: c.forbidden } : {}),
     classical: false,
   };
 }
@@ -218,10 +222,16 @@ const unparen = (s: string) => (s.startsWith('(') && s.endsWith(')') ? s.slice(1
 
 export type Attempt = (rng: Rng, target: number, gate: Gate) => ArithBuilt | null;
 
+/** Names a solver may not cite: the puzzle's own restated lemmas, plus bank lemmas the gate has not unlocked. */
+export function forbiddenFor(b: { forbidden?: string[] }, gate: Gate): string[] {
+  const locked = gate.lemmas ? ARITH_LEMMAS.map((l) => l.name).filter((n) => !gate.lemmas!.has(n)) : [];
+  return [...new Set([...(b.forbidden ?? []), ...locked])];
+}
+
 /** Draw candidates until one is near the target, inside the gate, and checks in the engine. */
 export function pickArith(rng: Rng, target: number, attempt: Attempt, gate: Gate, allowed: string[], maxAttempts = 90): ArithBuilt | null {
   const near: ArithBuilt[] = [];
-  const ok = (b: ArithBuilt) => engine.check(arithEnv(), b.header + '\n' + b.solution, { allowedTactics: allowed }).complete;
+  const ok = (b: ArithBuilt) => engine.check(arithEnv(), b.header + '\n' + b.solution, { allowedTactics: allowed, forbiddenNames: forbiddenFor(b, gate) }).complete;
   for (let i = 0; i < maxAttempts; i++) {
     const b = attempt(rng.fork('attempt' + i), target, gate);
     if (!b || !admits(gate, b.solution)) continue;
@@ -242,6 +252,7 @@ export function generateGated(seed: string, family: ArithFamily, target: number,
   const allowed = ARITH_TACTICS[family].filter((t) => tacOk(gate, t));
   const b = pickArith(rng, target, attempt, gate, allowed);
   if (!b) return null;
+  const forbiddenNames = forbiddenFor(b, gate);
   return {
     kind: 'proof',
     id: `${family}.${version}.${seed}.${target}`,
@@ -255,6 +266,7 @@ export function generateGated(seed: string, family: ArithFamily, target: number,
     starter: '  sorry',
     solution: b.solution,
     allowedTactics: allowed,
+    ...(forbiddenNames.length ? { forbiddenNames } : {}),
     hints: b.hints,
     themes: b.themes,
   };

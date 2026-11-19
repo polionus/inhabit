@@ -5,6 +5,8 @@
  */
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { generator } from '../../arena/gen/index.ts';
+import { ARITH_LEMMAS, isArith } from '../../arena/gen/arith.ts';
+import { dataForContext, hypItems } from '../lean/complete.ts';
 import type { ProofPuzzle, Puzzle, QuickPuzzle } from '../../arena/types.ts';
 import { HintLadder } from '../components/HintLadder.tsx';
 import { Infoview } from '../components/Infoview.tsx';
@@ -94,6 +96,12 @@ function ProofView({ puzzle, onDone, allow, compact, initial, onProgress }: Puzz
   const { result: checked, pending } = useCheck(body, () => generator.check(puzzle, body));
   const result = checked?.result ?? null;
   const info = useInfo(result, checked?.bodyOffset ?? 0, body.length, cursor);
+  const completion = useMemo(() => {
+    const forbidden = new Set(puzzle.forbiddenNames ?? []);
+    const lemmas = isArith(puzzle.family) ? ARITH_LEMMAS.filter((l) => !forbidden.has(l.name)) : [];
+    return dataForContext({ allowedTactics: puzzle.allowedTactics, lemmas });
+  }, [puzzle]);
+  const hyps = useMemo(() => hypItems(info.goals?.[0]?.hyps ?? []), [info.goals]);
   const hintObjs = useMemo(() => puzzle.hints.map((text) => ({ text })), [puzzle.hints]);
 
   const end = (how: 'solved' | 'revealed' | 'skipped') => {
@@ -163,6 +171,8 @@ function ProofView({ puzzle, onDone, allow, compact, initial, onProgress }: Puzz
             fontSize={fontSize}
             readOnly={locked}
             ariaLabel="Proof editor"
+            completion={completion}
+            hyps={hyps}
           />
         </div>
         <Infoview

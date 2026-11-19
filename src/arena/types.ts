@@ -66,6 +66,8 @@ export interface ProofPuzzle extends PuzzleBase {
   solution: string;
   /** Tactics the solver may use (canonical names). `[]` for term mode. */
   allowedTactics: string[];
+  /** Lemma names the checker rejects (`name-locked`): bank lemmas that restate the goal, or are not unlocked yet. */
+  forbiddenNames?: string[];
   /** 2–3 hints, from nudge to near-solution, generated from the reference proof. */
   hints: string[];
   /** Short tags for the UI and for stats, e.g. ['implication', 'case split', 'negation']. */

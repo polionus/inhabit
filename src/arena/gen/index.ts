@@ -70,7 +70,7 @@ const ATTEMPT: Record<ProofFamily, (rng: Rng, target: number) => Built | ArithBu
 };
 
 function verifies(family: ProofFamily, b: ArithBuilt, allowed: string[]): boolean {
-  const r = engine.check(familyEnv(family), b.header + '\n' + b.solution, { allowedTactics: allowed });
+  const r = engine.check(familyEnv(family), b.header + '\n' + b.solution, { allowedTactics: allowed, forbiddenNames: b.forbidden });
   return r.complete;
 }
 
@@ -108,6 +108,7 @@ function proofPuzzle(id: string, family: ProofFamily, b: ArithBuilt): ProofPuzzl
     starter: '  sorry',
     solution: b.solution,
     allowedTactics: allowedFor(family, b),
+    ...(b.forbidden?.length ? { forbiddenNames: b.forbidden } : {}),
     hints: b.hints,
     themes: b.themes,
   };
@@ -226,7 +227,7 @@ function fallbackQuick(id: string, seed: string, kinds: QuickKind[]): { puzzle: 
 function check(puzzle: ProofPuzzle, body: string): { complete: boolean; result: CheckResult; bodyOffset: number } {
   const head = (puzzle.setup ? puzzle.setup + '\n' : '') + puzzle.header + '\n';
   const bodyOffset = head.length;
-  let result = engine.check(familyEnv(puzzle.family), head + body, { allowedTactics: puzzle.allowedTactics });
+  let result = engine.check(familyEnv(puzzle.family), head + body, { allowedTactics: puzzle.allowedTactics, forbiddenNames: puzzle.forbiddenNames });
   const axioms = result.decls.filter((d) => d.kind === 'axiom' && d.from >= bodyOffset);
   if (axioms.length) {
     result = {
