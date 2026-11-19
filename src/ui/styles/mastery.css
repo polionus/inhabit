@@ -29,3 +29,10 @@
 .review-passed { margin: .5rem 0 0; }
 .dash-studied { text-decoration: none; color: inherit; }
 .dash-studied .card-head h2 { font-size: 1rem; }
+
+/* Phone width: let the mastery bar shrink and the label wrap. */
+@media (max-width: 640px) {
+  .mastery-line { width: auto; flex-wrap: wrap; gap: .3rem .7rem; }
+  .mastery-line .pbar { flex: 1 1 8rem; width: auto; min-width: 6rem; }
+  .mastery-line span { white-space: normal; }
+}

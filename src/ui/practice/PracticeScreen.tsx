@@ -25,7 +25,7 @@ export function PracticeScreen({ id }: { id: string }) {
 function Empty({ text }: { text: string }) {
   return (
     <div className="page narrow practice">
-      <EmptyState icon="map" title="Nothing to practise here" action={<a className="btn primary" href={href.map()}>Back to the map</a>}>
+      <EmptyState icon="map" title="Nothing to practice here" action={<a className="btn primary" href={href.map()}>Back to the map</a>}>
         {text}
       </EmptyState>
     </div>

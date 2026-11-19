@@ -65,9 +65,9 @@ export function ReviewScreen() {
             </div>
             <div className="actions">
               <button className={`btn big ${ready ? 'primary' : ''}`} disabled={ready === 0} onClick={startSession}><Icon name="play" size={18} /> Start today's session</button>
-              {completedIds.length > 0 && <button className={`btn big ${ready ? 'ghost' : 'outline'}`} onClick={startPractice}>Practise anyway</button>}
+              {completedIds.length > 0 && <button className={`btn big ${ready ? 'ghost' : 'outline'}`} onClick={startPractice}>Practice anyway</button>}
             </div>
-            {completedIds.length > 0 && <p className="muted small practice-note">Practising picks up to 5 finished levels at random. It does not change your review schedule.</p>}
+            {completedIds.length > 0 && <p className="muted small practice-note">Practicing picks up to 5 finished levels at random. It does not change your review schedule.</p>}
           </Card>
         )}
         {reviewsPassed > 0 && <p className="muted small review-passed tnum">{reviewsPassed} reviews passed so far.</p>}

@@ -107,6 +107,7 @@ a.ltile:active { transform: translateY(1px); box-shadow: inset 0 0 0 1px var(--l
 .ltile.next .lt-state { color: var(--primary-ink); background: var(--primary); padding: .35rem .6rem; border-radius: var(--r-pill); box-shadow: inset 0 -2px 0 var(--primary-edge); }
 @media (max-width: 640px) {
   .world-hero { flex-direction: column; gap: 1rem; }
+  .wh-text { align-self: stretch; max-width: 100%; overflow-wrap: anywhere; }
   .world-hero .wtoken { --ws: 96px; }
   .chapter { padding: 1.1rem 1rem 1.2rem; border-radius: var(--r-lg); }
   .ltiles { grid-template-columns: 1fr 1fr; gap: .6rem; }
@@ -458,3 +459,8 @@ input.switch:checked::after { transform: translateX(1.25rem); }
 .about-cta { margin-top: 2.8rem; padding: 1.4rem 0 0; border-top: 1px solid var(--line); }
 .page.about .site-footer { text-align: left; }
 @media (max-width: 520px) { .toc ol { columns: 1; } }
+
+/* Segmented controls with long options (e.g. the lesson setting) wrap instead of overflowing. */
+.seg-field { grid-template-columns: minmax(0, 1fr); min-width: 0; }
+.seg { flex-wrap: wrap; }
+.seg button { white-space: normal; }
