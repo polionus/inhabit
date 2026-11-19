@@ -32,7 +32,7 @@ export function DuelHub() {
       <div className="mode-grid dl-modes">
         <Card as="section" aria-label="Friend, live" className="mode-card">
           <div className="mode-head"><span className="mode-icon"><Icon name="arena" size={22} /></span><h2>Friend, live</h2></div>
-          <p className="muted">Race a friend on the same puzzles, right now. The two browsers connect directly; you will be told exactly what that means before anything connects.</p>
+          <p className="muted">Race a friend on the same puzzles live. The two browsers connect directly—you'll see exactly what that means before anything connects.</p>
           <a className="btn primary block" href="#/arena/duel/host" onClick={() => { nav.format = format; }}>Create a room</a>
         </Card>
         <Card as="section" aria-label="Challenge link" className="mode-card">

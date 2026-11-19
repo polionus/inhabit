@@ -4,27 +4,27 @@ export const world: World = {
   id: 'forge',
   title: 'Formalization Forge',
   tagline: 'State and prove your own theorem',
-  intro: `You can prove things now. This world teaches what comes *before* the proof: turning an idea into a precise Lean statement.
+  intro: `You know how to prove things now. This world teaches what comes *before* the proof: turning a mathematical idea into a precise Lean statement.
 
-You will learn a five-step workflow (Say it, Type it, Define it, State it, Prove it), practice each step on small examples, plan proofs with \`sorry\`, read error messages instead of fearing them, and finish by formalizing and proving a theorem on your own. Every tactic and every lemma you earned is available.`,
+You'll pick up a five-step workflow (Say it, Type it, Define it, State it, Prove it), practice each step on small examples, sketch proof outlines with \`sorry\`, learn to read error messages calmly, and wrap up by formalizing and proving a theorem from scratch. Every tactic and lemma you've earned is at your disposal.`,
   requires: ['fun', 'num'],
   bigIdea:
-    'Formalizing is a design task with a repeatable procedure: choose the types, write the definitions, state hypotheses and conclusion precisely, and only then prove. The statement is a type, and the proof is a term inhabiting it.',
+    'Formalizing is a design task with a repeatable workflow: pick the types, write the definitions, state the hypotheses and conclusion cleanly, and only then prove. The statement is a type, and the proof is a term inhabiting it.',
   levels: [
     // 01
     {
       id: 'forge-01',
       kind: 'choice',
       title: 'Five steps, one theorem',
-      intro: `A formalization is a small project, and every project runs the same five steps:
+      intro: `Formalizing a theorem is a small project, and every project follows the same five steps:
 
-1. **Say it**: the statement in careful English.
-2. **Type it**: what are the objects, and what type does each have?
-3. **Define it**: name any notion the library lacks.
-4. **State it**: hypotheses as arguments, conclusion as the type.
-5. **Prove it**: skeleton first, then fill, reading every error.
+1. **Say it**: write the claim in clear English.
+2. **Type it**: decide what the objects are and what type each one has.
+3. **Define it**: name any concept the library doesn't already have.
+4. **State it**: put the hypotheses in the arguments and the conclusion as the type.
+5. **Prove it**: build the skeleton first, fill in the details, and read every error.
 
-Below, one theorem is taken through all five steps; each comment says which step it belongs to. Read it, then answer.`,
+Below, one theorem walks through all five steps, with comments showing each stage. Read through it, then answer.`,
       code: `-- 1. Say it: for all a, b, c: if a divides b, then a divides b * c.
 -- 2. Type it: a, b and c are natural numbers.
 -- 3. Define it: nothing new; ∣ is already in the library.
@@ -38,25 +38,25 @@ theorem dvd_mul_of_dvd (a b c : Nat) (h : a ∣ b) : a ∣ b * c := by
           text: 'The claim `a ∣ b` only makes sense once `a` and `b` have types, so the types must be fixed before the claim can be written.',
           correct: true,
           feedback:
-            'Yes. A statement is built out of typed objects: change `a b : Nat` to something else and `a ∣ b` means something different, or nothing at all.',
+            'Yes. A statement is built out of typed objects—change `a b : Nat` to another type and `a ∣ b` either means something different or stops making sense.',
         },
         {
           text: 'The order does not matter; the steps are only a checklist.',
           feedback:
-            'You may loop back (writing the statement often shows that a type was wrong), but each step uses the output of the one before. A statement cannot mention objects you have not typed.',
+            'You can always loop back (writing the statement often reveals a type you got wrong), but each step builds on the previous one. You can\'t write a claim about objects you haven\'t typed yet.',
         },
         {
           text: 'Lean needs the types only to speed up the proof in step 5.',
           feedback:
-            'Types are part of the *meaning* of the statement, not a hint to the prover. `n : Nat` and `n : Int` give different theorems.',
+            'Types are part of the *meaning* of the statement, not a performance hint. `n : Nat` and `n : Int` give genuinely different theorems.',
         },
         {
           text: 'Without declared types Lean assumes everything is a `Prop`.',
           feedback:
-            'Lean does not guess. An unknown name is an error, and a name whose type Lean can only half infer often becomes a statement you did not intend.',
+            'Lean doesn\'t guess. An unknown name is an error, and a name whose type Lean can only half infer often turns into a statement you didn\'t intend.',
         },
       ],
-      outro: `The five steps are a procedure you can run on any statement, and when you are stuck you can ask *which step am I on?* Notice what steps 4 and 5 are in type-theory terms: step 4 writes a type, step 5 finds a term that inhabits it.`,
+      outro: `Those five steps work on any statement, and whenever you're stuck you can pause and ask *which step am I on?* Notice what steps 4 and 5 really are in type theory: step 4 writes down a type, and step 5 builds a term that inhabits it.`,
       unlocks: { codex: ['workflow', 'say-it'] },
     },
     // 02
@@ -64,15 +64,15 @@ theorem dvd_mul_of_dvd (a b c : Nat) (h : a ∣ b) : a ∣ b * c := by
       id: 'forge-02',
       kind: 'choice',
       title: 'Type it',
-      intro: `Step 2: decide what *kind of thing* each object is. A quick guide:
+      intro: `Step 2: decide what *kind of thing* each object is. Here's a quick cheat sheet:
 
 - a number: \`n : Nat\`
 - a collection of \`α\`s: \`A : Set α\`
-- a rule sending \`α\`s to \`β\`s: \`f : α → β\`
+- a rule mapping \`α\`s to \`β\`s: \`f : α → β\`
 - a property of \`α\`s: \`P : α → Prop\`
-- a proof you are *given*: a hypothesis \`h : …\`
+- a proof you're *given*: a hypothesis \`h : …\`
 
-Hover over the \`#check\`: \`f '' A\` is a set of \`β\`s, not of \`α\`s. Then choose the binders for the statement below.`,
+Hover over the \`#check\`—notice that \`f '' A\` is a set of \`β\`s, not \`α\`s. Then pick the binders for the statement below.`,
       code: `#check fun (α β : Type) (f : α → β) (A : Set α) => f '' A`,
       question:
         'The statement: "If A is contained in B, then the image of A under f is contained in the image of B." Which binders give every object its right type?',
@@ -81,25 +81,25 @@ Hover over the \`#check\`: \`f '' A\` is a set of \`β\`s, not of \`α\`s. Then 
           text: '`(α β : Type) (f : α → β) (A B : Set α)`',
           correct: true,
           feedback:
-            'Yes. `f` maps elements to elements, `A` and `B` are sets of elements of `α`, and `f \'\' A` lands in `Set β`. Two type variables keep the statement as general as the English.',
+            'Yes. `f` maps elements to elements, `A` and `B` are sets of elements of `α`, and `f \'\' A` lives in `Set β`. Using two type variables keeps the statement as general as the English.',
         },
         {
           text: '`(α β : Type) (f : Set α → Set β) (A B : Set α)`',
           feedback:
-            'Here `f` takes whole sets. But "the image of A under f" is a set *built from* `f` acting on elements; `f \'\' A` only makes sense when `f : α → β`.',
+            'Here `f` takes whole sets. "The image of A under f" is a set *built from* `f` acting on elements, so `f \'\' A` only makes sense when `f : α → β`.',
         },
         {
           text: '`(α β : Type) (f : α → β) (A B : α)`',
           feedback:
-            'Then `A` and `B` are single elements, and `A ⊆ B` has no meaning. A "set of things" is `Set α`, not `α`.',
+            'That makes `A` and `B` single elements, so `A ⊆ B` doesn\'t even make sense. A set of `α`s has type `Set α`, not `α`.',
         },
         {
           text: '`(α : Type) (f : α → α) (A B : Set α)`',
           feedback:
-            'This type-checks, but it only covers functions from a type to itself. The English allows `f` to go between different types, so you have proved less than you meant.',
+            'This type-checks, but it restricts `f` to map a type into itself. The English lets `f` go between two different types, so you\'d be proving less than you meant to.',
         },
       ],
-      outro: `Types are part of the statement, not decoration: \`f : α → β\` and \`f : Set α → Set β\` describe different objects. Everything in a statement is a term with a type, and the statement itself is a term whose type is \`Prop\`.`,
+      outro: `Types are part of the statement itself, not decoration: \`f : α → β\` and \`f : Set α → Set β\` talk about completely different objects. Everything in a statement is a typed term, and the statement as a whole is a term of type \`Prop\`.`,
       unlocks: { codex: ['type-it'] },
     },
     // 03
@@ -108,45 +108,45 @@ Hover over the \`#check\`: \`f '' A\` is a set of \`β\`s, not of \`α\`s. Then 
       kind: 'formalize',
       title: 'State it: hypotheses and conclusion',
       english: 'If f is injective, then the preimage of the image of A is contained in A.',
-      intro: `Step 4: an English "if … then" has two parts. The *hypotheses* are what you are given; the *conclusion* is what you must show. In a \`theorem\` the hypotheses become arguments before the colon; here, in a bare proposition, they become premises of \`→\`.
+      intro: `Step 4: an English "if … then" splits into two parts. The *hypotheses* are what you're given, and the *conclusion* is what you need to prove. In a \`theorem\` header, hypotheses sit as arguments before the colon; here, in a standalone proposition, they become premises of \`→\`.
 
-Mark the "if" and the "then" in the sentence first, then write the proposition. The binders are already set.`,
+Spot the "if" and the "then" in the sentence first, then write the proposition. The binders are already set.`,
       binders: '(α β : Type) (f : α → β) (A : Set α)',
       accept: ['Function.Injective f → f ⁻¹\' (f \'\' A) ⊆ A'],
       mistakes: [
         {
           statement: 'Function.Injective f ∧ f ⁻¹\' (f \'\' A) ⊆ A',
           feedback:
-            'A `∧` *asserts* both parts, so this claims that `f` is injective. The "if" part is something you are given, not something you claim: use `→`.',
+            'Using `∧` *asserts* both parts, so this claims that `f` is injective. The "if" clause is something you\'re given, not something you\'re claiming—use `→`.',
         },
         {
           statement: 'f ⁻¹\' (f \'\' A) ⊆ A → Function.Injective f',
           feedback:
-            'The implication runs the wrong way: this makes the inclusion a hypothesis and injectivity the conclusion. The hypothesis is the "if" part of the English.',
+            'The arrow is pointing backward: this turns the inclusion into a hypothesis and injectivity into the conclusion. The hypothesis is the "if" part of the English.',
         },
         {
           statement: 'f ⁻¹\' (f \'\' A) ⊆ A',
           feedback:
-            'The hypothesis is missing. Without injectivity this is false: a function that sends two points to the same value breaks it.',
+            'The hypothesis is missing. Without injectivity this claim is false—any function that sends two points to the same output breaks it.',
         },
         {
           statement: 'A ⊆ f ⁻¹\' (f \'\' A)',
           feedback:
-            'That is the opposite inclusion (you proved it in the Fjord). It holds for every function, so it does not need, or use, injectivity.',
+            'That\'s the reverse inclusion (which you proved in Function Fjord). It holds for every function, so it neither needs nor uses injectivity.',
         },
         {
           statement: 'Function.Surjective f → f ⁻¹\' (f \'\' A) ⊆ A',
           feedback:
-            'Right shape, wrong hypothesis. Surjectivity says every point of `β` is hit; the inclusion fails when two points of `α` collide, which is exactly what injectivity rules out.',
+            'Right shape, wrong hypothesis. Surjectivity says every point of `β` gets hit, whereas this inclusion fails when two points of `α` collide—which is exactly what injectivity prevents.',
         },
       ],
       hints: [
-        { text: 'Which step are you on? Say it first: what is the "if", and what is the "then"?' },
-        { text: 'The "if" is the single fact `Function.Injective f`. The "then" is an inclusion `_ ⊆ A` between two sets.' },
+        { text: 'Which step are you on? Say it first: what\'s the "if" part, and what\'s the "then" part?' },
+        { text: 'The "if" is `Function.Injective f`, and the "then" is a subset claim `_ ⊆ A` between two sets.' },
         { text: 'For the set on the left, work inside out: first the image of `A` under `f`, then the preimage of that set under `f`.' },
-        { text: 'The shape is `Function.Injective f → (the inclusion)`.' },
+        { text: 'The overall shape is `Function.Injective f → (the inclusion)`.' },
       ],
-      outro: `Hypotheses go in, the conclusion comes out: \`H → C\`, never \`H ∧ C\`. Drop the hypothesis, flip the arrow or reorder the operations and you state something else. In a theorem header the same hypothesis sits before the colon: \`(hf : Function.Injective f) : …\`. Either way a proof is a function from proofs of \`H\` to proofs of \`C\`.`,
+      outro: `Hypotheses go in and the conclusion comes out: \`H → C\`, never \`H ∧ C\`. Drop a hypothesis, flip the arrow, or swap the operations and you've stated a different claim. In a theorem header, the same hypothesis sits before the colon (\`(hf : Function.Injective f) : …\`), and either way a proof is a function from proofs of \`H\` to proofs of \`C\`.`,
       unlocks: { codex: ['hyp-vs-concl'] },
     },
     // 04
@@ -155,9 +155,9 @@ Mark the "if" and the "then" in the sentence first, then write the proposition. 
       kind: 'formalize',
       title: 'State it: odd plus odd',
       english: 'The sum of two odd numbers is even.',
-      intro: `Step 1 is careful reading. "The sum of two odd numbers" hides two things: there are *two* numbers, and the claim is about *all* of them, so each gets its own \`∀\` variable.
+      intro: `Step 1 is reading carefully. "The sum of two odd numbers" hides two details: there are *two* numbers, and the claim covers *all* pairs of them, so each gets its own \`∀\` variable.
 
-Mark every "any", "some" and "if". Then write it with explicit binders \`∀ m n : Nat, …\`. \`Odd\` and \`Even\` are the predicates from the Dunes.`,
+Spot every "any", "some", and "if", then write the claim with explicit binders \`∀ m n : Nat, …\`. \`Odd\` and \`Even\` come from Divisor Dunes.`,
       accept: [
         '∀ m n : Nat, Odd m → Odd n → Even (m + n)',
         '∀ m n : Nat, Odd m ∧ Odd n → Even (m + n)',
@@ -166,35 +166,35 @@ Mark every "any", "some" and "if". Then write it with explicit binders \`∀ m n
       mistakes: [
         {
           statement: '∀ m n : Nat, Odd m → Odd n → Odd (m + n)',
-          feedback: 'Test a small case: 1 + 1 = 2 is even, not odd. The conclusion of the English is "even".',
+          feedback: 'Try a tiny example: 1 + 1 = 2 is even, not odd. The English concludes "even".',
         },
         {
           statement: '∀ m n : Nat, Even (m + n) → Odd m ∧ Odd n',
           feedback:
-            'This is the converse, and it is false: 2 + 2 is even, yet 2 is not odd. The odd numbers are the *hypothesis*.',
+            'That\'s the converse, and it\'s false: 2 + 2 is even, yet 2 isn\'t odd. Being odd is the *hypothesis*.',
         },
         {
           statement: '∃ m n : Nat, Odd m ∧ Odd n ∧ Even (m + n)',
           feedback:
-            '`∃` says an example exists (1 and 1 would do). "The sum of two odd numbers" is a claim about every pair, so it needs `∀`.',
+            '`∃` only says some example exists (1 and 1 would do). "The sum of two odd numbers" is about every pair, so it needs `∀`.',
         },
         {
           statement: '∀ m : Nat, Odd m → Odd m → Even (m + m)',
           feedback:
-            'One variable used twice only covers adding an odd number to itself. Two (possibly different) numbers need two variables.',
+            'Reusing one variable only covers adding an odd number to itself. Two possibly different numbers need two separate variables.',
         },
         {
           statement: '∀ m n : Nat, Odd m ∧ Odd n ∧ Even (m + n)',
           feedback:
-            'Here `∧` asserts that *every* pair of numbers is odd and has an even sum. Conditions you are given go before an arrow, under the `∀`.',
+            'Using `∧` here claims that *every* pair of numbers is odd and has an even sum. Conditions you\'re assuming go before an arrow, under the `∀`.',
         },
       ],
       hints: [
-        { text: 'Say it first: how many numbers are there, and does the sentence talk about some of them or all of them?' },
+        { text: 'Say it first: how many numbers are involved, and does the claim cover some of them or all of them?' },
         { text: 'Two numbers, all of them: `∀ m n : Nat, …`. What are you given about `m` and `n`, and what do you conclude about `m + n`?' },
-        { text: 'Given: `Odd m` and `Odd n`. Conclude: `Even (m + n)`. Join the conditions to the conclusion with arrows.' },
+        { text: 'Given: `Odd m` and `Odd n`. Conclude: `Even (m + n)`. Connect the assumptions to the conclusion with arrows.' },
       ],
-      outro: `Rules of thumb: "any", "every", "the" become \`∀\`, and a condition on the variable becomes \`→\`; "there is", "some" become \`∃\`, with \`∧\`. Each distinct object needs its own variable. The forms \`A → B → C\` and \`A ∧ B → C\` are two ways to feed a function two arguments (currying).`,
+      outro: `Handy rules of thumb: "any", "every", and "the" become \`∀\` with conditions on \`→\`; "there is" and "some" become \`∃\` with conditions on \`∧\`. Give every distinct object its own variable. Both \`A → B → C\` and \`A ∧ B → C\` work—they're just two ways to pass two arguments to a function (currying).`,
     },
     // 05
     {
@@ -202,38 +202,38 @@ Mark every "any", "some" and "if". Then write it with explicit binders \`∀ m n
       kind: 'formalize',
       title: 'State it: if and only if',
       english: 'A is a subset of B if and only if the intersection of A and B equals A.',
-      intro: `"X if and only if Y" is two claims at once: \`X → Y\` and \`Y → X\`. Lean has one connective for it, \`↔\`, and a proof of it is a pair of functions.
+      intro: `"X if and only if Y" packs two claims together: \`X → Y\` and \`Y → X\`. Lean uses one connective for it, \`↔\`, whose proof is a pair of functions.
 
-Before typing, name the two sides: which sets appear on each? Careful with \`∪\` and \`∩\`, and with which letter ends up on the right of \`=\`. The binders are set.`,
+Before you type, check both sides carefully: which sets show up on each? Watch out for \`∪\` versus \`∩\`, and make sure the right letter sits on the right side of \`=\`. The binders are already set.`,
       binders: '(α : Type) (A B : Set α)',
       accept: ['A ⊆ B ↔ A ∩ B = A', 'A ∩ B = A ↔ A ⊆ B'],
       mistakes: [
         {
           statement: 'A ⊆ B → A ∩ B = A',
-          feedback: 'That is one direction only. "If and only if" also needs `A ∩ B = A → A ⊆ B`; use `↔` to say both.',
+          feedback: 'That\'s only one direction. "If and only if" also needs `A ∩ B = A → A ⊆ B`, so use `↔` to capture both.',
         },
         {
           statement: 'A ⊆ B ∧ A ∩ B = A',
           feedback:
-            'A `∧` claims both facts hold for these particular sets. "If and only if" says the two facts are *equivalent*, whatever `A` and `B` are.',
+            'Using `∧` claims both facts hold for these particular sets. "If and only if" says the two facts are *equivalent*, whatever `A` and `B` are.',
         },
         {
           statement: 'A ⊆ B ↔ A ∪ B = A',
           feedback:
-            'Wrong operation. `A ∪ B = A` holds exactly when `B ⊆ A`, not `A ⊆ B`. The English has the intersection.',
+            'Wrong set operation: `A ∪ B = A` holds precisely when `B ⊆ A`, not `A ⊆ B`. The English asks for the intersection.',
         },
         {
           statement: 'A ⊆ B ↔ A ∩ B = B',
           feedback:
-            'Wrong set on the right. `A ∩ B = B` holds exactly when `B ⊆ A`. Test it with `A = {1}` and `B = {1, 2}`.',
+            'Wrong set on the right: `A ∩ B = B` holds precisely when `B ⊆ A`. Test it with `A = {1}` and `B = {1, 2}`.',
         },
       ],
       hints: [
-        { text: 'Which step are you on? Say it: split the sentence at "if and only if". What is each side?' },
-        { text: 'Left side: `A ⊆ B`. Right side: an equation between sets with `∩` in it.' },
-        { text: 'Connect the two sides with `↔`, which you type as `\\iff`.' },
+        { text: 'Which step are you on? Say it out loud: split the sentence at "if and only if". What\'s on each side?' },
+        { text: 'Left side: `A ⊆ B`. Right side: a set equation involving `∩`.' },
+        { text: 'Join the two sides with `↔`, typed as `\\iff`.' },
       ],
-      outro: `\`↔\` bundles both directions into one proposition. A sanity check that catches most mistakes here: test with tiny sets, \`A = {1}\`, \`B = {1, 2}\`, and swap them. Also notice that \`⊆\` is a statement (\`Prop\`) while \`A ∩ B\` is a set: \`=\` joins two sets, \`↔\` joins two statements.`,
+      outro: `\`↔\` packages both directions into a single proposition. A quick sanity check that catches almost every slip here is testing tiny sets—try \`A = {1}\`, \`B = {1, 2}\`, then swap them. Notice too that \`⊆\` produces a proposition (\`Prop\`) while \`A ∩ B\` produces a set: \`=\` compares sets, and \`↔\` compares propositions.`,
     },
     // 06
     {
@@ -241,9 +241,9 @@ Before typing, name the two sides: which sets appear on each? Careful with \`∪
       kind: 'formalize',
       title: 'State it: where the "not" goes',
       english: 'No natural number is both even and odd.',
-      intro: `Where does the "no" go? "No \`x\` has property \`P\`" means "there is no \`x\` with \`P\`": negate the whole \`∃\`. Equivalently, "every \`x\` fails \`P\`", which you proved equivalent in the Quay.
+      intro: `Where does the "no" go? "No \`x\` has property \`P\`" means "there isn't any \`x\` with \`P\`", so you negate the entire \`∃\`. Equivalently, "every \`x\` fails \`P\`", which you proved equivalent in Quantifier Quay.
 
-The danger is negating the wrong piece. Read your Lean back aloud and ask what is *under* the \`¬\`. No binders needed.`,
+The trap is negating the wrong piece. Read your Lean back out loud and check what sits *under* the \`¬\`. No binders needed.`,
       accept: [
         '¬∃ n : Nat, Even n ∧ Odd n',
         '∀ n : Nat, ¬(Even n ∧ Odd n)',
@@ -254,29 +254,29 @@ The danger is negating the wrong piece. Read your Lean back aloud and ask what i
         {
           statement: '∀ n : Nat, ¬Even n ∧ ¬Odd n',
           feedback:
-            'This says every number is *neither* even nor odd, which is false for every `n`. The "not" belongs on the combination "even and odd", not on each part.',
+            'This says every number is *neither* even nor odd, which is false for every `n`. The "not" applies to the combination "even and odd", not to each piece separately.',
         },
         {
           statement: '∀ n : Nat, Even n → Odd n',
-          feedback: 'This says every even number is odd: the "no" has disappeared. The English excludes the overlap.',
+          feedback: 'This says every even number is odd—the "no" vanished completely. The English rules out any overlap.',
         },
         {
           statement: '∃ n : Nat, ¬(Even n ∧ Odd n)',
           feedback:
-            'This says *some* number is not both, which is trivially true (take 0) and says nothing about the others. "No number" is a statement about all of them.',
+            'This only says *some* number isn\'t both, which is trivially true (take 0) and says nothing about the rest. "No number" speaks about every number.',
         },
         {
           statement: '¬∀ n : Nat, Even n ∧ Odd n',
           feedback:
-            'This says only that *not every* number is both even and odd. "No number" is far stronger: it rules out every single one.',
+            'This only says *not every* number is both even and odd. "No number" is much stronger: it rules out every single one.',
         },
       ],
       hints: [
-        { text: 'Say it differently: "there is no number such that …" or "for every number, it is not the case that …". What is inside the "…"?' },
-        { text: 'The thing that must not happen is the *conjunction* `Even n ∧ Odd n`. Put the negation outside it.' },
-        { text: 'Either `¬∃ n : Nat, …` or `∀ n : Nat, ¬(…)`; both are accepted.' },
+        { text: 'Rephrase it first: "there\'s no number such that …" or "for every number, it\'s not true that …". What goes inside the "…"?' },
+        { text: 'What can\'t happen is the *conjunction* `Even n ∧ Odd n`. Put the negation outside it.' },
+        { text: 'Either `¬∃ n : Nat, …` or `∀ n : Nat, ¬(…)` works—both are accepted.' },
       ],
-      outro: `\`¬∃ n, …\`, \`∀ n, ¬(…)\` and \`∀ n, Even n → ¬Odd n\` are three spellings of one claim. The scope of a negation is the commonest formalization bug, along with quantifier order, \`∧\` versus \`→\`, a missing hypothesis and a reversed implication: all five are in your Codex now.`,
+      outro: `\`¬∃ n, …\`, \`∀ n, ¬(…)\`, and \`∀ n, Even n → ¬Odd n\` are three ways to say the same thing. Getting the scope of a negation wrong is the most common formalization bug, right alongside quantifier order, \`∧\` versus \`→\`, missing hypotheses, and flipped implications—all five are now in your Codex.`,
       unlocks: { codex: ['pitfalls'] },
     },
     // 07
@@ -286,9 +286,9 @@ The danger is negating the wrong piece. Read your Lean back aloud and ask what i
       mode: 'term',
       title: 'Define it',
       english: 'Define `IsSquare n`: the number `n` is a square, meaning `n = k * k` for some `k`.',
-      intro: `Step 3: when a notion is not in the library, give it a name with \`def\`. In Lean a property is a *predicate*, a function into \`Prop\`. The right-hand side says what the property means.
+      intro: `Step 3: when a concept isn't in the library, give it a name with \`def\`. In Lean, a property is a *predicate*—a function into \`Prop\`—and the right-hand side defines what it means.
 
-The header is written. Complete the definition: \`n\` is a square when \`n = k * k\` for some \`k\`. The tests below your code check that \`IsSquare 9\` is provable and that \`IsSquare n\` unfolds to \`∃ k, n = k * k\`.`,
+The header is already written. Finish the definition: \`n\` is a square when \`n = k * k\` for some \`k\`. The tests below check that \`IsSquare 9\` is provable and that \`IsSquare n\` unfolds to \`∃ k, n = k * k\`.`,
       header: 'def IsSquare (n : Nat) : Prop :=',
       starter: '  sorry',
       after: `example : IsSquare 9 := ⟨3, rfl⟩
@@ -296,11 +296,11 @@ example (m : Nat) : IsSquare (m * m) := ⟨m, rfl⟩
 example (n : Nat) (h : IsSquare n) : ∃ k, n = k * k := h`,
       solutions: ['  ∃ k, n = k * k'],
       hints: [
-        { text: 'Which step are you on? A definition of a property is a *statement* about `n`. Say it in English first: "there is a `k` such that …".' },
-        { text: 'The body must be a `Prop` that mentions `n`. Which quantifier says "there is a `k`"?' },
-        { text: 'Write `∃ k, ` followed by an equation between `n` and an expression in `k`.' },
+        { text: 'Which step are you on? Defining a property means writing a *statement* about `n`. Say it in English first: "there\'s a `k` such that …".' },
+        { text: 'The body needs to be a `Prop` mentioning `n`. Which quantifier means "there\'s a `k`"?' },
+        { text: 'Write `∃ k, ` followed by an equation relating `n` and `k`.' },
       ],
-      outro: `A definition names a proposition. \`IsSquare 9\` is not a new kind of thing: it *unfolds* to \`∃ k, 9 = k * k\`, which is why \`⟨3, rfl⟩\` proves it. That is also how \`Even\` and \`Odd\` work. Defining before stating keeps statements short; the price is that you may need to \`unfold\` it when proving.`,
+      outro: `A definition simply names a proposition. \`IsSquare 9\` isn't some exotic new object—it *unfolds* straight to \`∃ k, 9 = k * k\`, which is why \`⟨3, rfl⟩\` proves it. That's the exact same way \`Even\` and \`Odd\` work. Defining concepts before stating theorems keeps your statements clean, at the small cost of calling \`unfold\` when you need to look inside.`,
       unlocks: { codex: ['def-predicate'] },
     },
     // 08
@@ -311,11 +311,11 @@ example (n : Nat) (h : IsSquare n) : ∃ k, n = k * k := h`,
       showTerm: true,
       title: 'Use your definition',
       english: 'If f is idempotent (f (f x) = f x for every x), then applying f three times is the same as applying it once.',
-      intro: `Here is a definition of a property of functions, already supplied:
+      intro: `Here's a property of functions, already defined for you:
 
 \`def Idempotent (f : Nat → Nat) : Prop := ∀ x, f (f x) = f x\`
 
-Now steps 4 and 5 with it. The statement mentions \`Idempotent f\` and stays short; in the proof you *unfold* it, exactly as you unfolded \`Function.Surjective\`. The first lines are written. Finish by rewriting.`,
+Now take it through steps 4 and 5. Mentioning \`Idempotent f\` keeps the theorem statement short, and inside the proof you *unfold* it just like you unfolded \`Function.Surjective\`. The opening lines are there; finish with \`rw\`.`,
       setup: 'def Idempotent (f : Nat → Nat) : Prop := ∀ x, f (f x) = f x\n\n',
       header:
         'theorem idem_three (f : Nat → Nat) (h : Idempotent f) : ∀ x, f (f (f x)) = f x := by',
@@ -334,10 +334,10 @@ Now steps 4 and 5 with it. The statement mentions \`Idempotent f\` and stays sho
       ],
       hints: [
         { text: 'After `unfold`, read `h` as a sentence: for every `y`, `f (f y) = f y`. Which `y` helps with `f (f (f x))`?' },
-        { text: 'Take `y := f x`: `h (f x)` says `f (f (f x)) = f (f x)`. Rewrite with it, then see what is left.' },
-        { text: '`rw [h (f x)]` leaves `f (f x) = f x`. One more instance of `h` finishes it.' },
+        { text: 'Pick `y := f x`: `h (f x)` says `f (f (f x)) = f (f x)`. Rewrite with it and see what\'s left.' },
+        { text: '`rw [h (f x)]` leaves `f (f x) = f x`. One more use of `h` closes it.' },
       ],
-      outro: `\`h (f x)\` worked because \`Idempotent f\` *is* a \`∀\` once unfolded: your own definitions behave exactly like the library's. The proof term is a chain of two equations. A definition is a name for a proposition, never a new axiom.`,
+      outro: `\`h (f x)\` worked because \`Idempotent f\` *is* a \`∀\` once unfolded—your own definitions behave identically to the library's. The proof term is a chain of two equations. A definition just gives a proposition a name; it never adds an axiom.`,
     },
     // 09
     {
@@ -346,9 +346,9 @@ Now steps 4 and 5 with it. The statement mentions \`Idempotent f\` and stays sho
       mode: 'tactic',
       title: 'Skeleton first',
       english: 'If A ⊆ B and C ⊆ D, then A ∩ C ⊆ B ∩ D.',
-      intro: `Step 5 starts with a *plan*. \`have h : T := by sorry\` states an intermediate claim and promises to prove it later. Lean checks that the claims fit together even while the holes are open, and warns "declaration uses sorry".
+      intro: `Step 5 starts with a *plan*. Writing \`have h : T := by sorry\` states an intermediate fact and promises to prove it later. Lean checks that all the pieces fit together even while the holes remain, and simply warns "declaration uses sorry".
 
-Below, the skeleton and the final assembly are written. Fill each \`sorry\`, one at a time. At every moment you know exactly what is left.`,
+Below, the outline and final step are already in place. Fill in each \`sorry\` one at a time, so you always know what's left.`,
       header:
         'theorem inter_mono {α : Type} (A B C D : Set α) (hAB : A ⊆ B) (hCD : C ⊆ D) : A ∩ C ⊆ B ∩ D := by',
       starter: `  intro x hx
@@ -372,11 +372,11 @@ Below, the skeleton and the final assembly are written. Fill each \`sorry\`, one
   exact ⟨h3, h4⟩`,
       ],
       hints: [
-        { text: 'Take the holes in order. For each, ask: which hypothesis, or which earlier `have`, already says this?' },
-        { text: '`hx : x ∈ A ∩ C` is a pair. Its two components are `hx.1` and `hx.2`.' },
-        { text: 'A `⊆` hypothesis is a function: `hAB h1 : x ∈ B` when `h1 : x ∈ A`.' },
+        { text: 'Take the holes in order. For each one, ask which hypothesis or earlier `have` already gives you what you need.' },
+        { text: '`hx : x ∈ A ∩ C` is a pair, so its two halves are `hx.1` and `hx.2`.' },
+        { text: 'A `⊆` hypothesis works like a function: `hAB h1 : x ∈ B` whenever `h1 : x ∈ A`.' },
       ],
-      outro: `The skeleton type-checked before a single hole was filled. That is what makes it a planning tool: the shape of the argument is verified first, and each hole is a small independent task. Write the skeleton, check it compiles, then fill in the holes. If a hole turns out to be false, you find out before you have invested in the rest.`,
+      outro: `The skeleton type-checked before you filled a single hole. That's what makes it such a strong planning tool: you verify the shape of your argument first, and each hole becomes a small, self-contained task. Write the outline, check that it compiles, then fill the gaps—if a subgoal turns out to be false, you catch it early.`,
       unlocks: { codex: ['skeleton'] },
     },
     // 10
@@ -386,9 +386,9 @@ Below, the skeleton and the final assembly are written. Fill each \`sorry\`, one
       mode: 'tactic',
       title: 'Read the error: what did Lean expect?',
       english: 'If f is injective and f maps A into the image of B, then A ⊆ B.',
-      intro: `The proof below is plausible but broken. Lean's message has three parts. **Where**: the line and the text it underlines. **Expected**: the type it wanted. **Got**: the type you gave. Read them in that order, then ask which of *your* beliefs about the types was wrong.
+      intro: `The proof below looks reasonable, but it's broken. Lean's error message has three parts: **Where** (the line and underlined text), **Expected** (the type Lean wanted), and **Got** (the type you supplied). Read them in that order, then ask which of *your* assumptions about the types was off.
 
-Run it, read the error, and repair the proof. Do not guess: say out loud what Lean expected and what \`hx\` is.`,
+Run it, read the error, and fix the proof. Don't guess—say out loud what Lean expected and what \`hx\` actually is.`,
       header:
         'theorem image_sub_of_inj {α β : Type} (f : α → β) (A B : Set α) (hf : Function.Injective f) (h : f \'\' A ⊆ f \'\' B) : A ⊆ B := by',
       starter: `  intro x hx
@@ -410,12 +410,12 @@ Run it, read the error, and repair the proof. Do not guess: say out loud what Le
   exact hy`,
       ],
       hints: [
-        { text: 'Which step are you on? Read the error: *where* is it, what was *expected*, what did you *give*?' },
-        { text: '`h` is a statement about membership in `f \'\' A`. What does `hx` say membership in?' },
-        { text: 'To use `h` you need a proof that *something* lies in `f \'\' A`. Which element of `f \'\' A` can you build from `x`, and what is its proof?' },
+        { text: 'Which step are you on? Read the error carefully: *where* is it, what did Lean *expect*, and what did you *give* it?' },
+        { text: '`h` talks about membership in `f \'\' A`. Which set does `hx` talk about?' },
+        { text: 'To call `h`, you need a proof that *something* belongs to `f \'\' A`. What element of `f \'\' A` can you build from `x`, and what proves it\'s in there?' },
         { text: 'The element is `f x`, and `⟨x, hx, rfl⟩ : f x ∈ f \'\' A`. Pass that to `h`.' },
       ],
-      outro: `The mistake was confusing \`x ∈ A\` with \`f x ∈ f '' A\`: a hypothesis about the wrong object. "Expected \`?a ∈ f '' A\`, got \`x ∈ A\`" pointed straight at it. When a type mismatch appears, compare the two types symbol by symbol; the difference is the misunderstanding.`,
+      outro: `The bug was mixing up \`x ∈ A\` with \`f x ∈ f '' A\`—passing a proof about the wrong object. "Expected \`?a ∈ f '' A\`, got \`x ∈ A\`" pointed right at it. Whenever a type mismatch pops up, compare the two types symbol by symbol; the difference is where the misunderstanding lives.`,
       unlocks: { codex: ['read-errors'] },
     },
     // 11
@@ -426,19 +426,19 @@ Run it, read the error, and repair the proof. Do not guess: say out loud what Le
       showTerm: true,
       title: 'Read the error: where is the pattern?',
       english: 'If f a = b and f b = a, then f (f a) = a.',
-      intro: `A second kind of error. \`rw [h]\` rewrites the left-hand side of \`h\` to its right-hand side, and the left-hand side must *literally appear in the goal as it is right now*, after any earlier rewrites. If not, Lean prints the pattern it looked for and the goal it searched.
+      intro: `Here's a second kind of error. \`rw [h]\` replaces the left-hand side of \`h\` with its right-hand side, so that left-hand side has to *literally appear in the current goal* after any earlier rewrites. If it doesn't, Lean prints the pattern it looked for alongside the goal it searched.
 
-Run the proof, compare the pattern with the goal, and fix it. Which rewrite makes the other one possible?`,
+Run the proof, compare the pattern with the goal, and fix it. Which rewrite unlocks the other one?`,
       header:
         'theorem two_steps (f : Nat → Nat) (a b : Nat) (h1 : f a = b) (h2 : f b = a) : f (f a) = a := by',
       starter: '  rw [h2, h1]',
       solutions: ['  rw [h1, h2]', '  calc f (f a) = f b := congrArg f h1\n    _ = a := h2'],
       hints: [
-        { text: 'Read the error: what pattern did `rw` look for, and does it occur in `f (f a) = a`?' },
-        { text: 'The goal contains `f a` inside `f (f a)`. Which hypothesis has `f a` on its left-hand side?' },
-        { text: 'Rewrite with that hypothesis first; the result has a shape the other hypothesis can use.' },
+        { text: 'Read the error: what pattern did `rw` look for, and does it actually appear in `f (f a) = a`?' },
+        { text: 'The goal has `f a` sitting inside `f (f a)`. Which hypothesis has `f a` on its left side?' },
+        { text: 'Rewrite with that hypothesis first; the new goal has a shape the other hypothesis can match.' },
       ],
-      outro: `Rewriting is order-sensitive: the first rewrite created the \`f b\` that the second needed. "Did not find an occurrence of the pattern" always means that the left-hand side is absent *from the current goal*. Print the goal, look for the pattern with your eyes, and decide whether to reorder, change direction with \`←\`, or rewrite elsewhere.`,
+      outro: `Rewriting depends on order: the first rewrite produced the \`f b\` that the second one needed. "Did not find an occurrence of the pattern" always means the left-hand side isn't in the *current* goal. Read the goal, spot the pattern yourself, and decide whether to reorder, flip with \`←\`, or rewrite in a hypothesis instead.`,
     },
     // 12
     {
@@ -447,13 +447,13 @@ Run the proof, compare the pattern with the goal, and fix it. Which rewrite make
       mode: 'tactic',
       title: 'Doing things to every goal',
       english: 'If P, Q and R hold, then (P ∧ Q) ∧ R holds.',
-      intro: `Three small conveniences, never required:
+      intro: `Here are three small conveniences—never required, often handy:
 
 - \`all_goals t\` runs \`t\` on *every* open goal.
 - \`try t\` runs \`t\` and, if it fails, quietly does nothing.
-- \`repeat t\` runs \`t\` again and again until it fails.
+- \`repeat t\` keeps running \`t\` until it fails.
 
-The proof starts by splitting. The second line fails: one goal, \`R\`, cannot be split. Wrap it so the failure is harmless, then close all remaining goals at once.`,
+The proof starts by splitting, and the second line fails because one goal (\`R\`) can't be split. Wrap it so that failure is harmless, then close all remaining goals in one move.`,
       header: 'theorem nested_and (P Q R : Prop) (hp : P) (hq : Q) (hr : R) : (P ∧ Q) ∧ R := by',
       starter: `  constructor
   all_goals constructor
@@ -469,12 +469,12 @@ The proof starts by splitting. The second line fails: one goal, \`R\`, cannot be
   · exact hr`,
       ],
       hints: [
-        { text: 'Read the error on line 2: which goal made `constructor` fail, and why?' },
-        { text: 'You want `constructor` on the goals where it works and nothing on the others. Which combinator means "or do nothing"?' },
-        { text: '`all_goals try constructor` leaves the goals `P`, `Q`, `R`. Then one more `all_goals`.' },
+        { text: 'Read the error on line 2: which goal caused `constructor` to fail, and why?' },
+        { text: 'You want `constructor` on the goals where it applies and nothing on the rest. Which combinator means "or do nothing"?' },
+        { text: '`all_goals try constructor` leaves the goals `P`, `Q`, and `R`. One more `all_goals` finishes them.' },
       ],
       unlocks: { tactics: ['all_goals', 'try', 'repeat'], codex: ['all_goals', 'try', 'repeat'] },
-      outro: `These are conveniences: the long proof in the second solution does the same. They reduce repetition when many goals look alike, and \`try\` is the standard way to say "if this applies". Watch out for \`repeat\`: it acts on the first goal, and stops as soon as that goal fails.`,
+      outro: `These are pure conveniences—the longer proof in the second solution does the exact same thing. They cut down repetition when several goals share a shape, and \`try\` is the standard way to say "if this applies". Just remember that \`repeat\` acts on the first goal and stops as soon as that goal fails.`,
     },
     {
       id: 'forge-12b',
@@ -482,7 +482,7 @@ The proof starts by splitting. The second line fails: one goal, \`R\`, cannot be
       title: 'Many goals, one move',
       english: 'If P, Q, R and S hold, then (P or Q or R or S) and ((P and Q) and R).',
       intro:
-        `Use the combinators from the last level for real. \`repeat right\` pushes through a chain of \`∨\` until it stops. \`all_goals try constructor\` splits what can be split and leaves the rest. Finish with \`all_goals assumption\`.`,
+        `Put the combinators from the last level to real work. \`repeat right\` steps through a chain of \`∨\`s until it can't go further, \`all_goals try constructor\` splits every goal that can be split and leaves the rest alone, and \`all_goals assumption\` closes the remaining goals.`,
       header:
         'theorem many_goals (P Q R S : Prop) (hp : P) (hq : Q) (hr : R) (hs : S) : (P ∨ Q ∨ R ∨ S) ∧ ((P ∧ Q) ∧ R) := by',
       starter: '  sorry',
@@ -496,12 +496,12 @@ The proof starts by splitting. The second line fails: one goal, \`R\`, cannot be
     all_goals assumption`,
       ],
       hints: [
-        { text: 'Split the outer `∧` first. The two halves need different tools: one is a long `∨`, the other a nested `∧`.' },
-        { text: 'For the `∨` chain, `repeat right` walks to the last disjunct and stops when `right` no longer applies.' },
-        { text: 'For the `∧` half, split once, then `all_goals try constructor` splits only the goals that can be split. Then close the rest in one line.' },
+        { text: 'Split the outer `∧` first. The two halves call for different tools: one is a chain of `∨`s, and the other is a nested `∧`.' },
+        { text: 'For the `∨` chain, `repeat right` walks all the way to the last branch and stops once `right` no longer applies.' },
+        { text: 'For the `∧` half, split once, then run `all_goals try constructor` to split only the goals that can be split. Close everything in one line.' },
       ],
       outro:
-        `\`repeat\` and \`all_goals try\` are the two ways to say "as often as it applies" and "everywhere it applies". They stop quietly when they run out of work, which is what makes them safe to leave in a proof.`,
+        `\`repeat\` and \`all_goals try\` are the clean ways to say "as many times as it applies" and "everywhere it applies". Both stop quietly when they run out of work, which makes them safe to keep in a proof.`,
     },
     {
       id: 'forge-12c',
@@ -509,7 +509,7 @@ The proof starts by splitting. The second line fails: one goal, \`R\`, cannot be
       title: 'Leave holes, fill them all',
       english: 'If P, Q and R hold at 2, then some natural number n has P n, Q n and R n.',
       intro:
-        `\`refine\` from Divisor Dunes writes a proof with holes \`?_\` you fill later. Here it supplies the witness and leaves three goals. They all look alike, so \`all_goals\` from the last level closes them at once.`,
+        `\`refine\` from Divisor Dunes lets you write a proof with holes \`?_\` to fill in later. Here it supplies the witness and opens three goals. Since they all have the same shape, \`all_goals\` from the previous level closes all three together.`,
       header:
         'theorem exists_all (P Q R : Nat → Prop) (hp : P 2) (hq : Q 2) (hr : R 2) : ∃ n, P n ∧ Q n ∧ R n := by',
       starter: '  sorry',
@@ -520,12 +520,12 @@ The proof starts by splitting. The second line fails: one goal, \`R\`, cannot be
         `  exact ⟨2, hp, hq, hr⟩`,
       ],
       hints: [
-        { text: 'The goal is an `∃` with a three-part conjunction inside. The witness is the same `2` everywhere.' },
-        { text: 'Write `refine ⟨2, ?_, ?_, ?_⟩`. Each `?_` becomes a new goal, one per part.' },
-        { text: 'After the `refine`, three goals remain, each already in your context. One line with `all_goals` finishes them.' },
+        { text: 'The goal is an `∃` wrapping a three-part conjunction, and the same witness `2` works everywhere.' },
+        { text: 'Write `refine ⟨2, ?_, ?_, ?_⟩`. Each `?_` opens a new goal, one per conjunct.' },
+        { text: 'After `refine`, three goals are left, and every one of them is already in your context. One line with `all_goals` closes them all.' },
       ],
       outro:
-        `\`refine\` is \`exact\` with permission to leave gaps. The anonymous constructor flattens, so \`⟨2, ?_, ?_, ?_⟩\` fills the witness and every part of the \`∧\` in one go.`,
+        `\`refine\` is just \`exact\` with permission to leave gaps. Because the anonymous constructor flattens nested pairs, \`⟨2, ?_, ?_, ?_⟩\` supplies the witness and opens a goal for every part of the \`∧\` in one step.`,
     },
     // 13
     {
@@ -535,11 +535,11 @@ The proof starts by splitting. The second line fails: one goal, \`R\`, cannot be
       boss: true,
       title: 'Boss: your own theorem',
       english: 'The image of a union is the union of the images.',
-      intro: `This time you run all five steps yourself, with only a comment skeleton.
+      intro: `This time you'll run all five steps yourself, with just a comment outline to guide you.
 
-**Say it**: the image of a union is the union of the images. **Type it**: \`f : α → β\`, \`A B : Set α\`. **Define it**: nothing. **State it**: write the equation with \`f '' (A ∪ B)\` on the left, keeping the binders as given. **Prove it**: skeleton first, read every error.
+**Say it**: the image of a union is the union of the images. **Type it**: \`f : α → β\`, \`A B : Set α\`. **Define it**: nothing new. **State it**: write the equation with \`f '' (A ∪ B)\` on the left, keeping the given binders. **Prove it**: start with a skeleton, and read every error.
 
-Below your theorem, a test checks that you stated what was asked.`,
+A test below your theorem checks that you stated what was asked.`,
       header: '-- Final project: write the whole theorem yourself, statement and proof.',
       starter: `-- Say it: the image of a union is the union of the images.
 -- Type it: f sends α to β; A and B are sets of α.
@@ -575,12 +575,12 @@ theorem image_union (α β : Type) (f : α → β) (A B : Set α) :
       exact ⟨x, Or.inr hx, hxy⟩`,
       ],
       hints: [
-        { text: 'Which step are you on? State it first: an equation between two sets of `β`, image of a union on the left. Make the statement compile with `sorry` before proving anything.' },
-        { text: 'Set equality: start with `ext y` and split the `↔`. Membership in an image is an `∃`, and membership in a union is an `∨`.' },
-        { text: 'Forward: take the `∃` apart, then `cases` the `∨` on the witness, and rebuild the `∃` on the side you are in. Backward: `cases` first.' },
-        { text: 'Skeleton: `ext y`, `constructor`, then per direction `intro h`, `obtain`, `cases`, `exact ⟨x, _, hxy⟩` with `Or.inl`/`Or.inr` or `left`/`right`.' },
+        { text: 'Which step are you on? State it first: an equation between two sets of `β`, with the image of a union on the left. Make sure the statement compiles with `sorry` before you start proving.' },
+        { text: 'For set equality, start with `ext y` and split the `↔`. Remember that image membership is an `∃` and union membership is an `∨`.' },
+        { text: 'Forward: unpack the `∃`, run `cases` on the `∨` inside, and rebuild the `∃` on the matching side. Backward: run `cases` first.' },
+        { text: 'Outline: `ext y`, `constructor`, then in each direction `intro h`, `obtain`, `cases`, and `exact ⟨x, _, hxy⟩` using `Or.inl`/`Or.inr` or `left`/`right`.' },
       ],
-      outro: `You ran the whole procedure: said it, typed it, stated it, proved it. The proof used sets, a function, \`∃\` and \`∨\` together, and it is \`Set.image_union\` in Mathlib. Now do it with a statement of your own: the Workshop suggests theorems and keeps yours. When you want automation and a vast library, the Graduate guide shows the way to real Lean.`,
+      outro: `You ran the entire workflow from start to finish: said it, typed it, stated it, and proved it. Your proof brought sets, functions, \`∃\`, and \`∨\` together—and it's \`Set.image_union\` in Mathlib. Now try a statement of your own: the Workshop suggests theorems and saves yours, and when you're ready for automation and a vast library, the Graduate guide shows you the path to real Lean.`,
     },
   ],
   codex: [
@@ -589,31 +589,31 @@ theorem image_union (α β : Type) (f : α → β) (A B : Set α) :
       kind: 'concept',
       name: 'The five-step workflow',
       summary: 'Say it, Type it, Define it, State it, Prove it: the procedure for formalizing any statement.',
-      body: `1. **Say it**: the statement in careful English; mark every "for all", "there exists", "if … then".
-2. **Type it**: give every object a type: \`n : Nat\`, \`A : Set α\`, \`f : α → β\`, \`P : α → Prop\`.
+      body: `1. **Say it**: write the statement in clear English; spot every "for all", "there exists", and "if … then".
+2. **Type it**: assign each object a type: \`n : Nat\`, \`A : Set α\`, \`f : α → β\`, \`P : α → Prop\`.
 3. **Define it**: turn any notion the library lacks into a \`def\`, usually a predicate.
-4. **State it**: hypotheses as arguments, conclusion as the type; read it back in English.
-5. **Prove it**: skeleton first (\`have … := by sorry\`), then fill; read every error.
+4. **State it**: put hypotheses in the arguments and the conclusion as the type, then read it back in English.
+5. **Prove it**: write a skeleton first (\`have … := by sorry\`), then fill the gaps and read every error.
 
-When stuck, ask: *which step am I on?*`,
+Whenever you're stuck, ask: *which step am I on?*`,
       example: `theorem dvd_mul_of_dvd (a b c : Nat) (h : a ∣ b) : a ∣ b * c :=
   Nat.dvd_trans h (Nat.dvd_mul_right b c)`,
-      mathlib: 'The same procedure applies in Mathlib; step 3 starts with searching for an existing definition.',
+      mathlib: 'The same workflow carries straight over to Mathlib, except step 3 starts by searching for an existing definition.',
     },
     {
       id: 'say-it',
       kind: 'concept',
       name: 'Step 1: Say it',
       summary: 'Write the statement in careful English and mark the quantifiers and connectives.',
-      body: `Before any Lean, write the claim as a sentence and mark the logical words:
+      body: `Before writing any Lean, write the claim as a plain sentence and mark the logical words:
 
-- "every", "any", "for all" → \`∀\`, with conditions as \`→\`
-- "some", "there is" → \`∃\`, with conditions as \`∧\`
+- "every", "any", "for all" → \`∀\`, with conditions on \`→\`
+- "some", "there is" → \`∃\`, with conditions on \`∧\`
 - "if … then" → \`→\`; "A and B" → \`∧\`; "A or B" → \`∨\`
 - "not", "no" → \`¬\`
 - "if and only if" → \`↔\`
 
-Then test the sentence on a tiny example. A sentence you cannot test is not yet precise.`,
+Then test your sentence on a tiny example. If you can't test it, it isn't precise enough yet.`,
       example: `#check ∀ n : Nat, 4 ∣ n → Even n`,
     },
     {
@@ -630,21 +630,21 @@ Then test the sentence on a tiny example. A sentence you cannot test is not yet 
 | a relation on \`α\` | \`R : α → α → Prop\` |
 | a fact you may assume | \`h : …\` |
 
-Use type variables (\`α β : Type\`) when the English does not fix the type; this keeps the statement general.`,
+Use type variables (\`α β : Type\`) whenever the English doesn't pin down a specific type—that keeps the statement general.`,
       example: `#check fun (α β : Type) (f : α → β) (A : Set α) => f '' A`,
     },
     {
       id: 'hyp-vs-concl',
       kind: 'concept',
       name: 'Hypotheses versus conclusion',
-      summary: 'What you are given becomes arguments; what you must show is the type after the colon.',
-      body: `In "if H then C", \`H\` is a **hypothesis** and \`C\` the **conclusion**:
+      summary: 'What you\'re given becomes arguments; what you need to show is the type after the colon.',
+      body: `In "if H then C", \`H\` is a **hypothesis** and \`C\` is the **conclusion**:
 
 \`theorem name (x : T) (h : H) : C\`
 
-The arguments before the colon are what you may use; the type after the colon is what you must build. \`(h : H) : C\` and \`: H → C\` are the same statement, and \`intro h\` moves one into the other. A conjunction \`H ∧ C\` is something else: it *claims* \`H\`.
+The arguments before the colon are what you get to use; the type after the colon is what you have to build. \`(h : H) : C\` and \`: H → C\` say the same thing, and \`intro h\` moves between them. A conjunction \`H ∧ C\` is different—it *asserts* \`H\`.
 
-Check: if a hypothesis is missing, is the statement still true?`,
+Quick check: if you drop a hypothesis, is the claim still true?`,
       example: `theorem inj_of_left_inverse (α β : Type) (f : α → β) (g : β → α) (h : Function.LeftInverse g f) : Function.Injective f :=
   Function.LeftInverse.injective h`,
     },
@@ -653,15 +653,15 @@ Check: if a hypothesis is missing, is the statement still true?`,
       kind: 'concept',
       name: 'Common formalization pitfalls',
       summary: 'Five mistakes that account for most wrong statements.',
-      body: `Check each before proving:
+      body: `Check each one before starting a proof:
 
-1. **Quantifier order**: \`∀ x, ∃ y\` is not \`∃ y, ∀ x\`.
-2. **\`∧\` versus \`→\`**: under \`∀\` use \`→\` for conditions; under \`∃\` use \`∧\`.
-3. **Missing hypothesis**: the statement may be false without it.
-4. **Wrong direction**: \`P → Q\` is not \`Q → P\`; for "iff" use \`↔\`.
-5. **Scope of \`¬\`**: say the negated sentence aloud and ask what is under the \`¬\`.
+1. **Quantifier order**: \`∀ x, ∃ y\` isn't the same as \`∃ y, ∀ x\`.
+2. **\`∧\` versus \`→\`**: under \`∀\`, use \`→\` for conditions; under \`∃\`, use \`∧\`.
+3. **Missing hypothesis**: the claim might be false without it.
+4. **Flipped direction**: \`P → Q\` isn't \`Q → P\`; for "iff", use \`↔\`.
+5. **Scope of \`¬\`**: read the negated sentence out loud and check what sits under the \`¬\`.
 
-Also: one variable per object, and test the statement on a small example.`,
+Also: use a separate variable for each distinct object, and test the statement on a tiny example.`,
       example: `#check ∀ x : Nat, ∃ y : Nat, x = y
 #check ∃ y : Nat, ∀ x : Nat, x = y`,
     },
@@ -670,19 +670,19 @@ Also: one variable per object, and test the statement on a small example.`,
       kind: 'concept',
       name: 'Definitions are predicates',
       summary: 'A `def` names a proposition (or any term); using it unfolds to its body.',
-      body: `\`def IsSquare (n : Nat) : Prop := ∃ k, n = k * k\` defines a *predicate*: a function \`Nat → Prop\`. \`IsSquare 9\` is a proposition, which unfolds to \`∃ k, 9 = k * k\`.
+      body: `\`def IsSquare (n : Nat) : Prop := ∃ k, n = k * k\` defines a *predicate*, a function \`Nat → Prop\`. \`IsSquare 9\` is a proposition that unfolds to \`∃ k, 9 = k * k\`.
 
-To **prove** \`IsSquare 9\`, give the witness: \`⟨3, rfl⟩\`. To **use** \`h : IsSquare n\`, take it apart with \`obtain ⟨k, hk⟩ := h\`, or \`unfold IsSquare at h\` first. A definition adds no axioms: it only gives a name.`,
+To **prove** \`IsSquare 9\`, give the witness: \`⟨3, rfl⟩\`. To **use** \`h : IsSquare n\`, unpack it with \`obtain ⟨k, hk⟩ := h\`, or run \`unfold IsSquare at h\` first. A definition doesn't add any axioms—it just gives a proposition a name.`,
       example: `def IsSquare (n : Nat) : Prop := ∃ k, n = k * k
 example : IsSquare 9 := ⟨3, rfl⟩`,
-      mathlib: 'Mathlib often already has the notion (e.g. `IsSquare`, `Even`). Search before you define.',
+      mathlib: 'Mathlib already defines many standard notions (like `IsSquare` and `Even`), so search before writing your own.',
     },
     {
       id: 'skeleton',
       kind: 'concept',
       name: 'Prove it: skeleton first',
       summary: '`have … := by sorry` plans a proof: the shape is checked before the details exist.',
-      body: `Write the proof's *shape* before its details:
+      body: `Write the proof's *shape* before filling in the details:
 
 \`\`\`lean
 theorem demo (P Q R : Prop) (hpq : P → Q) (hqr : Q → R) (hp : P) : R := by
@@ -690,7 +690,7 @@ theorem demo (P Q R : Prop) (hpq : P → Q) (hqr : Q → R) (hp : P) : R := by
   exact hqr hq
 \`\`\`
 
-Lean accepts this with a warning "declaration uses sorry". Each \`sorry\` is a small goal to fill; if one turns out to be false, you find out early. A finished proof has no \`sorry\`.`,
+Lean accepts this with a warning ("declaration uses sorry"). Each \`sorry\` marks a small goal to fill in later, and if one turns out to be false you find out right away. A finished proof has no \`sorry\` left.`,
     },
     {
       id: 'read-errors',
@@ -699,20 +699,20 @@ Lean accepts this with a warning "declaration uses sorry". Each \`sorry\` is a s
       summary: 'Where is it, what did Lean expect, what did it get?',
       body: `Read Lean's message in this order:
 
-1. **Where**: which line, and which piece of text is underlined.
+1. **Where**: which line and which piece of text is underlined.
 2. **Expected**: the type Lean wanted.
 3. **Got**: the type of what you wrote.
 
-Then compare the two types symbol by symbol. The difference is the misunderstanding. For \`rw\`, "did not find the pattern" means the left-hand side is absent from the *current* goal: compare the pattern with the goal printed below it. Unsolved goals list exactly what is left to prove.`,
+Compare the two types symbol by symbol—the difference pinpoints the misunderstanding. For \`rw\`, "did not find an occurrence of the pattern" means the left-hand side isn't in the *current* goal: compare the pattern with the goal printed underneath. Any remaining unsolved goals list exactly what's left to prove.`,
     },
     {
       id: 'all_goals',
       kind: 'tactic',
       name: 'all_goals',
       summary: 'Run a tactic on every open goal.',
-      body: `\`all_goals t\` runs \`t\` on each goal in turn. If \`t\` fails on any of them, the whole \`all_goals\` fails. Use \`all_goals try t\` to skip goals where \`t\` does not apply.
+      body: `\`all_goals t\` runs \`t\` on each open goal in turn. If \`t\` fails on any of them, the whole \`all_goals\` fails; pair it with \`try\` (\`all_goals try t\`) to skip goals where \`t\` doesn't apply.
 
-Typical use: split with \`constructor\`, then close all pieces with \`all_goals assumption\`.`,
+A common pattern is splitting with \`constructor\` and then closing every branch with \`all_goals assumption\`.`,
       example: `example (P Q : Prop) (hp : P) (hq : Q) : P ∧ Q := by
   constructor
   all_goals assumption`,
@@ -722,9 +722,9 @@ Typical use: split with \`constructor\`, then close all pieces with \`all_goals 
       kind: 'tactic',
       name: 'try',
       summary: 'Run a tactic; if it fails, do nothing.',
-      body: `\`try t\` runs \`t\`, and if \`t\` fails the proof continues unchanged. It is the way to say "if this applies, do it".
+      body: `\`try t\` runs \`t\`, and if \`t\` fails the proof simply moves on unchanged. It's the standard way to say "if this applies, do it".
 
-Careful: \`try\` also hides real mistakes. If a line mysteriously does nothing, check whether a \`try\` swallowed an error.`,
+Watch out: \`try\` can also hide real bugs. If a line mysteriously does nothing, check whether a \`try\` quietly swallowed an error.`,
       example: `example (P Q R : Prop) (hp : P) (hq : Q) (hr : R) : (P ∧ Q) ∧ R := by
   constructor
   all_goals try constructor
@@ -735,9 +735,9 @@ Careful: \`try\` also hides real mistakes. If a line mysteriously does nothing, 
       kind: 'tactic',
       name: 'repeat',
       summary: 'Run a tactic again and again until it fails.',
-      body: `\`repeat t\` runs \`t\`, then runs it again on the resulting main goal, until \`t\` fails; it never fails itself. It acts on the *first* goal: after a split, it stops when the first goal cannot be split further.
+      body: `\`repeat t\` runs \`t\` over and over on the main goal until \`t\` fails, and never fails itself. Because it acts on the *first* goal, after a split it stops as soon as that first goal can't be reduced further.
 
-Good for repeated rewriting.`,
+Especially handy for repeated rewriting.`,
       example: `example (f : Nat → Nat) (h : ∀ x, f x = x) : f (f (f 0)) = 0 := by
   repeat rw [h]`,
     },

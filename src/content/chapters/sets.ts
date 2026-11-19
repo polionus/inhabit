@@ -4,7 +4,97 @@ import type { ChapterExplainer } from '../types.ts';
 export const chapter: ChapterExplainer | undefined = {
   worldId: 'sets',
   title: "A set is a question: set theory as logic in disguise",
-  dek: "Lean defines a set as a predicate, so intersection becomes and, union becomes or, and every set identity turns into a logic proof you already know how to write.",
-  body: "## What is a set, if a computer has to check it?\n\nIn school a set is a bag: draw a circle, put some dots inside. That picture is fine for thinking, but a proof checker cannot look at a circle. It needs a definition made of things it already understands. Lean's definition is short enough to surprise you: a set of things of type `α` is a *predicate*, a function that takes an element and answers with a statement.\n\nSo \"the even numbers\" is not a collection waiting to be filled. It is the question \"is `n` even?\", and an element belongs to the set exactly when the answer is a statement you can prove.\n\n## Membership is application\n\nBecause a set is a function, `a ∈ A` means \"apply `A` to `a`\". Set-builder notation goes the other way and turns a question into a set:\n\n```lean\nexample (α : Type) (p : α → Prop) (a : α) (h : p a) : a ∈ {x | p x} := h\n```\n\nThe set `{x | p x}` is the predicate `p`. Membership of `a` is `p a`. So a proof of `p a` is already a proof of membership, and `h` is accepted as it stands. Lean unfolds the definition silently when it compares the two types. You may not notice this in an ordinary proof, but it is why the rest of the chapter works.\n\n## The operations are the connectives you know\n\nOnce membership is application, every set operation turns into a logical connective.\n\n```lean\nexample (α : Type) (A B : Set α) (x : α) (h : x ∈ A ∩ B) : x ∈ A := h.1\nexample (α : Type) (A B : Set α) (x : α) (h : x ∈ A) : x ∈ A ∪ B := Or.inl h\nexample (α : Type) (A : Set α) (x : α) (h : x ∈ A) (h2 : x ∈ Aᶜ) : False := h2 h\n```\n\nThe first line says: `x ∈ A ∩ B` is `x ∈ A ∧ x ∈ B`, a pair, so `.1` takes the first component. The second says: `x ∈ A ∪ B` is `x ∈ A ∨ x ∈ B`, and `Or.inl` picks the left side. The third says: `x ∈ Aᶜ` is `¬ (x ∈ A)`, a function from membership to `False`, so applying it to `h` gives a contradiction. In the same way, `A ⊆ B` is `∀ x, x ∈ A → x ∈ B`, the empty set is `False` and the whole type is `True`.\n\nNothing here needs new tactics. You already know `intro`, `constructor`, `left`, `right` and `rcases` from the logic chapters, and they work on sets as they are.\n\n## Equality of sets: one genuinely new step\n\nTwo sets are equal when they have the same elements. In Lean this is a theorem called set extensionality, and the tactic is `ext`. It turns `A = B` into a statement about an arbitrary element, `x ∈ A ↔ x ∈ B`. After that you are back in pure logic.\n\n## One proof, step by step\n\nLet us show that intersection commutes.\n\n```lean\nexample (α : Type) (A B : Set α) : A ∩ B = B ∩ A := by\n  ext x\n  constructor\n  · rintro ⟨ha, hb⟩\n    exact ⟨hb, ha⟩\n  · rintro ⟨hb, ha⟩\n    exact ⟨ha, hb⟩\n```\n\nThe goal starts as\n\n```text\n⊢ A ∩ B = B ∩ A\n```\n\nAfter `ext x` it becomes\n\n```text\nx : α\n⊢ x ∈ A ∩ B ↔ x ∈ B ∩ A\n```\n\nAn `↔` is a pair of implications, and `constructor` splits it into two goals. The first is `x ∈ A ∩ B → x ∈ B ∩ A`. The tactic `rintro ⟨ha, hb⟩` introduces the hypothesis and takes it apart in the same step, since a membership in an intersection is a conjunction:\n\n```text\nx : α\nha : x ∈ A\nhb : x ∈ B\n⊢ x ∈ B ∩ A\n```\n\nThe goal is again a conjunction, so an anonymous pair builds it, and the parts come in the swapped order: `⟨hb, ha⟩`. The second bullet is the mirror image. This is the proof of `P ∧ Q → Q ∧ P` that you already wrote, with `x ∈` in front of each letter.\n\n## Common mistakes\n\n**Trying to rewrite instead of unfolding.** If you try `rw` to turn `x ∈ A ∩ B` into a conjunction, it may say that no pattern was found. Often you do not need to rewrite: `rintro` and `⟨_, _⟩` already see through the definition. If you want to *see* the logic, `change x ∈ A ∧ x ∈ B` restates the goal in the plain form.\n\n**Forgetting `ext`.** Applying `constructor` directly to `A = B` fails, because an equation is not a pair of implications. The error will say the goal is not an inductive type with the expected shape. Start with `ext x`.\n\n**Mixing up `∩` and `∪` patterns.** A hypothesis in an intersection is *taken apart* with `⟨_, _⟩`, but a hypothesis in a union has two cases and needs `rintro (h | h)`. For goals it is the other way round: to prove a union, pick a side with `left` or `right`.\n\n**Typing `ᶜ`.** The complement symbol is typed `\\^c` in the editor. It is not an exponent.\n\n## The bigger picture\n\nThe lesson of this chapter is that there was no new theory to learn. De Morgan's laws for sets, distributivity, and the statements about the empty set were all logic proofs in disguise. That economy is what makes Lean practical: one kernel, one idea of a proof, and mathematics built on top.\n\nIn real Lean and Mathlib, `Set α` is defined as `α → Prop`, exactly as described here, and lemmas such as `Set.mem_inter_iff`, `Set.mem_union` and `Set.ext` are in the library. Automation such as `simp` handles a lot of the routine unfolding for you, and the game leaves it out so that you meet each step once. The next chapter lifts the same viewpoint from sets to functions: injective and surjective will be quantifier statements, and Cantor's argument will show that some sets are strictly bigger than others.\n\n## A habit worth keeping\n\nWhen a set goal looks unfamiliar, do not think about circles. Ask what the statement says about one arbitrary element, write that out with `ext`, `intro` or `change`, and look at the logic that appears. Union goals become cases, intersection goals become pairs, and subset goals become functions. A statement that was awkward as set theory is usually short as logic. Over the chapter you will see this with De Morgan's laws, with disjointness (two sets share no element, which is `A ∩ B ⊆ ∅`, an implication into `False`), and with distributivity of `∩` over `∪`. In each case the proof has the same rhythm: pick an element, unfold, split into cases or pairs, and rebuild.",
+  dek: "Lean defines a set as a predicate, so intersection turns into 'and', union turns into 'or', and set identities become the logic proofs you already know how to write.",
+  body: `## What a set looks like to a proof checker
+
+In school, you probably pictured a set as a bag: draw a circle on paper and toss some dots inside. That intuition works well in your head, yet a proof checker can't stare at a circle. It needs a definition built out of ingredients it already understands. Lean's definition is short enough to catch you off guard: a set of elements of type \`α\` is a *predicate*—a function that takes an element and returns a proposition.
+
+Under that view, "the even numbers" isn't a bucket waiting to be filled with numbers. It's the question "is \`n\` even?", and a number belongs to the set exactly when you can prove the answer is yes.
+
+## Membership is just function application
+
+Because a set is a function, writing \`a ∈ A\` simply means "apply \`A\` to \`a\`." Set-builder notation runs in the opposite direction, packaging a question into a set:
+
+\`\`\`lean
+example (α : Type) (p : α → Prop) (a : α) (h : p a) : a ∈ {x | p x} := h
+\`\`\`
+
+Here the set \`{x | p x}\` *is* the predicate \`p\`, so saying \`a\` belongs to it is literally \`p a\`. That means a proof \`h\` of \`p a\` already counts as a proof of membership, and Lean accepts \`h\` without a single extra step. Lean unfolds that definition quietly whenever it compares types. You might barely notice it during an everyday proof, yet it's the engine behind everything in this chapter.
+
+## Intersection, union, and complement as logic
+
+Once membership is function application, every set operation translates straight into a logical connective you've already met.
+
+\`\`\`lean
+example (α : Type) (A B : Set α) (x : α) (h : x ∈ A ∩ B) : x ∈ A := h.1
+example (α : Type) (A B : Set α) (x : α) (h : x ∈ A) : x ∈ A ∪ B := Or.inl h
+example (α : Type) (A : Set α) (x : α) (h : x ∈ A) (h2 : x ∈ Aᶜ) : False := h2 h
+\`\`\`
+
+In the first line, \`x ∈ A ∩ B\` means \`x ∈ A ∧ x ∈ B\`—a pair of proofs, so \`.1\` pulls out the first piece. In the second, \`x ∈ A ∪ B\` means \`x ∈ A ∨ x ∈ B\`, and \`Or.inl\` chooses the left side. In the third, \`x ∈ Aᶜ\` means \`¬ (x ∈ A)\`, a function from membership to \`False\`, so handing it \`h\` yields a contradiction. The rest of the vocabulary follows the same pattern: \`A ⊆ B\` is \`∀ x, x ∈ A → x ∈ B\`, the empty set corresponds to \`False\`, and the whole type corresponds to \`True\`.
+
+You don't need any brand-new tactics for this. Everything you learned in the logic chapters—\`intro\`, \`constructor\`, \`left\`, \`right\`, and \`rcases\`—works on sets right out of the box.
+
+## Proving two sets are equal with \`ext\`
+
+There's only one genuinely new move in this chapter. Two sets are equal when they contain the exact same elements. Lean captures that principle as a theorem called set extensionality, and you invoke it with the tactic \`ext\`. Starting from \`A = B\`, \`ext x\` hands you an arbitrary element \`x\` and changes the goal to \`x ∈ A ↔ x ∈ B\`. From there, you're right back in pure logic.
+
+## Proving that intersection commutes
+
+Let's prove that \`A ∩ B\` and \`B ∩ A\` are the same set.
+
+\`\`\`lean
+example (α : Type) (A B : Set α) : A ∩ B = B ∩ A := by
+  ext x
+  constructor
+  · rintro ⟨ha, hb⟩
+    exact ⟨hb, ha⟩
+  · rintro ⟨hb, ha⟩
+    exact ⟨ha, hb⟩
+\`\`\`
+
+The goal begins as an equation between sets:
+
+\`\`\`text
+⊢ A ∩ B = B ∩ A
+\`\`\`
+
+Running \`ext x\` replaces the set equality with a biconditional about one arbitrary element:
+
+\`\`\`text
+x : α
+⊢ x ∈ A ∩ B ↔ x ∈ B ∩ A
+\`\`\`
+
+Since \`↔\` is a pair of implications, \`constructor\` splits it into two subgoals. The first asks for \`x ∈ A ∩ B → x ∈ B ∩ A\`. Because membership in an intersection is a conjunction, \`rintro ⟨ha, hb⟩\` introduces the hypothesis and unpacks both halves in one move:
+
+\`\`\`text
+x : α
+ha : x ∈ A
+hb : x ∈ B
+⊢ x ∈ B ∩ A
+\`\`\`
+
+Now the goal is another conjunction, so an anonymous pair closes it with the two pieces swapped: \`⟨hb, ha⟩\`. The second bullet runs the exact mirror image. Look closely and you'll recognize an old friend: this is the proof of \`P ∧ Q → Q ∧ P\` you wrote chapters ago, just wearing \`x ∈\` in front of every letter.
+
+## Common snags with set goals
+
+**Trying to rewrite instead of letting tactics unfold.** If you try using \`rw\` to turn \`x ∈ A ∩ B\` into a conjunction, Lean may complain that it couldn't find the pattern. Most of the time you don't need a rewrite at all, because \`rintro\` and \`⟨_, _⟩\` already see straight through the definition. If you'd like to *look* at the underlying logic on screen, \`change x ∈ A ∧ x ∈ B\` rewrites the goal into plain form.
+
+**Forgetting \`ext\` before \`constructor\`.** Calling \`constructor\` directly on \`A = B\` won't work, because an equation isn't a pair of implications. Lean will tell you the goal isn't an inductive type with the shape it expects. Start with \`ext x\` to turn the equation into an \`↔\`.
+
+**Mixing up \`∩\` and \`∪\` patterns.** When a hypothesis lives in an intersection, you unpack both sides together with \`⟨_, _⟩\`; when it lives in a union, you split into two cases with \`rintro (h | h)\`. For goals it works in reverse: to prove an intersection you build a pair, and to prove a union you pick a side with \`left\` or \`right\`.
+
+**Typing the complement symbol \`ᶜ\`.** Type \`\\^c\` in the editor to get \`ᶜ\`. It looks a bit like a superscript, though it isn't an exponent.
+
+## One logic underneath all of set theory
+
+The quiet punchline of this chapter is that you didn't have to learn a separate theory of sets. De Morgan's laws, distributivity, and identities about the empty set were all logic proofs in disguise. That kind of economy is what makes Lean so clean to work in: a tiny core logic supports whole branches of mathematics on top.
+
+In real Lean and Mathlib, \`Set α\` is literally defined as \`α → Prop\`, just as you've seen here, backed by library lemmas like \`Set.mem_inter_iff\`, \`Set.mem_union\`, and \`Set.ext\`. Tactics like \`simp\` automate much of the routine unfolding in everyday work; this game keeps them aside for now so you can see each step happen once. In the next chapter, we'll apply the same lens to functions—unpacking injective and surjective into quantifiers and working all the way up to Cantor's theorem about infinite sizes.
+
+## Reading any set goal through a single element
+
+Whenever a set goal looks intimidating, don't picture overlapping circles. Ask what the statement claims about a single arbitrary element, spell that out with \`ext\`, \`intro\`, or \`change\`, and read the logic that surfaces. Union hypotheses turn into case splits, intersections turn into pairs, and subsets turn into functions. A claim that feels clunky in set notation usually shrinks to a few lines of logic. Across this chapter you'll see that pattern again and again—in De Morgan's laws, in disjointness (two sets sharing no element, written \`A ∩ B ⊆ ∅\`, which is just an implication into \`False\`), and in distributing \`∩\` over \`∪\`. Every time, the rhythm stays steady: pick an element, unfold, split into cases or pairs, and put the pieces back together.`,
   guide: ['propositions-as-types','english-to-lean'],
 };

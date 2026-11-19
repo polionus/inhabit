@@ -2,10 +2,10 @@ import type { GuideArticle, GuideSection } from './types.ts';
 
 /** Display order and titles of the Guide's sections. */
 export const guideSections: { id: GuideSection; title: string; blurb: string }[] = [
-  { id: 'lean', title: 'Lean', blurb: 'What Lean is, what it can do, and how to read what it shows you.' },
-  { id: 'theory', title: 'Theory', blurb: 'The type theory underneath: types, propositions, dependent types, induction, equality and the kernel.' },
-  { id: 'practice', title: 'Practice', blurb: 'How to attack a proof, how to state a theorem, and how to write programs in Lean.' },
-  { id: 'ecosystem', title: 'Ecosystem', blurb: 'Mathlib, the community, and what Lean is used for in the world.' },
+  { id: 'lean', title: 'Lean', blurb: 'What Lean is, what it can do, and how to read its statements, goals, and proofs.' },
+  { id: 'theory', title: 'Theory', blurb: 'The ideas underneath Lean: types, propositions, dependent types, induction, equality, and the kernel.' },
+  { id: 'practice', title: 'Practice', blurb: 'How to start a proof, how to turn English into Lean, and how Lean works as a programming language.' },
+  { id: 'ecosystem', title: 'Ecosystem', blurb: 'Mathlib, the people who build it, and where Lean shows up in research and industry.' },
 ];
 
 /** The Guide: long-form reading about Lean. In reading order. */
@@ -14,23 +14,23 @@ export const guide: GuideArticle[] = [
     id: 'what-is-lean',
     section: 'lean',
     title: 'What Lean is',
-    summary: 'Lean is a programming language and a proof assistant at once; this article shows what it means for Lean to check a proof.',
+    summary: 'Lean is both a programming language and a proof assistant; here is how those two halves fit together and what it means for Lean to check a proof.',
     minutes: 5,
     worlds: ['types', 'props'],
     next: ['lean-tour', 'reading-theorems'],
-    body: `Lean is two things that turn out to be one. It is a **programming language**, in which you write functions and run them. It is also a **proof assistant**, a program that checks mathematical proofs written in its language. Both halves use the same machinery: Lean's language is expressive enough that a statement of mathematics and a proof of it are ordinary things inside the language, just as a number and a function are.
+    body: `Lean looks like two separate tools until you see how they're built. On one side, it's a **programming language** where you write functions and run them. On the other, it's a **proof assistant**, a program that checks mathematical proofs written in its syntax. Both sides share the same foundation: Lean's language is rich enough that a mathematical statement and a proof of it are ordinary objects right alongside numbers and functions.
 
-Lean was started by Leonardo de Moura, first at Microsoft Research, and is open source. Lean 4, the current major version, is largely written in Lean itself. Today it is developed by the Lean Focused Research Organization together with a wide community of volunteers and researchers. You can try it without installing anything at live.lean-lang.org.
+Leonardo de Moura started Lean at Microsoft Research, and it has been open source from the beginning. Lean 4, the current major version, is mostly written in Lean itself. Today it's maintained by the Lean Focused Research Organization alongside a large community of researchers and volunteers. You can try it in a browser without installing anything at live.lean-lang.org.
 
 ## What it means to check a proof
 
-A proof on paper is a text that persuades a reader. A proof in Lean is a text that a program verifies. "Verifies" has a precise meaning: Lean starts from a small set of logical rules and confirms that your proof follows from them, step by step, with nothing assumed that you did not state. If one step does not follow, Lean rejects the proof and says where.
+A proof on paper is meant to convince a human reader. A proof in Lean has to satisfy a program. When people say Lean "verifies" a proof, they mean something specific: starting from a small set of logical rules, Lean checks that every step follows from the rules and from the assumptions you explicitly wrote down. If a single step doesn't follow, Lean rejects the proof and points straight to the gap.
 
-The consequence is a different relationship with the reader. A paper proof can say "clearly" or "by a similar argument", and a person will fill the gap. Lean cannot be persuaded. Either the gap is filled in or the proof is not accepted. That sounds severe, and it is, but Lean also does a great deal of the bookkeeping for you, and it tells you at every moment what is still left to prove.
+That changes the feel of writing mathematics. On paper, you can write "clearly" or "by a similar argument" and trust a reader to fill in the details. Lean won't fill in a missing step on faith—either the gap is closed or the proof doesn't go through. At first that strictness feels unforgiving, though Lean gives a lot back: it tracks every assumption for you and shows you, at every line, exactly what's left to prove.
 
 ## A first theorem, line by line
 
-Here is a small theorem. It says that if both \`p\` and \`q\` hold, then \`q\` and \`p\` hold.
+Take a small theorem saying that if both \`p\` and \`q\` hold, then \`q\` and \`p\` hold too:
 
 \`\`\`lean
 theorem and_swap (p q : Prop) (h : p ∧ q) : q ∧ p := by
@@ -38,19 +38,19 @@ theorem and_swap (p q : Prop) (h : p ∧ q) : q ∧ p := by
   exact ⟨hq, hp⟩
 \`\`\`
 
-The first line is the **statement**. The word \`theorem\` begins a declaration, and \`and_swap\` is its name. Then come the assumptions. \`(p q : Prop)\` says that \`p\` and \`q\` are propositions, which are statements that can be true or false. \`(h : p ∧ q)\` says that we have a proof, called \`h\`, that \`p\` and \`q\` both hold. After the colon comes what we want to prove: \`q ∧ p\`.
+The first line is the **statement**. \`theorem\` starts a declaration and \`and_swap\` names it. Next come the assumptions: \`(p q : Prop)\` introduces two propositions (statements that can be true or false), and \`(h : p ∧ q)\` assumes we have a proof, named \`h\`, that both \`p\` and \`q\` hold. Everything after the colon is the conclusion we're trying to prove: \`q ∧ p\`.
 
-Everything after \`:= by\` is the **proof**. The word \`by\` tells Lean that the proof is a sequence of commands, called *tactics*, each of which changes what remains to be proved. The first tactic, \`obtain ⟨hp, hq⟩ := h\`, takes the combined fact \`h\` apart into its two pieces, naming them \`hp\` and \`hq\`. The second, \`exact ⟨hq, hp⟩\`, builds the goal \`q ∧ p\` out of those pieces in the opposite order, using the angle brackets that mean "package these two things together".
+Everything after \`:= by\` is the **proof**. The keyword \`by\` puts Lean into tactic mode, where you write a sequence of commands—*tactics*—that gradually chip away at what remains to be proved. First, \`obtain ⟨hp, hq⟩ := h\` splits the combined fact \`h\` into its two pieces, calling them \`hp\` and \`hq\`. Then \`exact ⟨hq, hp⟩\` builds the goal \`q ∧ p\` in the reverse order, using angle brackets \`⟨...⟩\` to bundle two proofs into a pair.
 
-When the last tactic runs, nothing remains to prove and Lean accepts the theorem. If you delete the second line, Lean reports an error saying that goals are left unsolved, and shows you which.
+Once the last tactic runs, nothing is left to prove and Lean accepts the theorem. If you delete that second line, Lean flags an error for unsolved goals and shows you exactly what's still missing.
 
-## What happens inside
+## Inside the proof checker
 
-The tactics are a convenient way to write the proof, but they are not what Lean trusts. Behind the scenes the tactics assemble a *proof term*, an expression in Lean's core language, and a small program called the **kernel** checks that this term really has the type that the theorem states. The kernel is the only part of Lean that has to be right for a proof to be sound. The article on the kernel returns to this, and the article on tactics and terms shows both ways of writing the same proof.
+Tactics are a comfortable way to write proofs, but Lean doesn't actually trust them. Behind the scenes, your tactics assemble a *proof term*—a raw expression in Lean's core language—and a small program called the **kernel** checks that this term really matches the theorem's statement. The kernel is the only piece of Lean that has to be bug-free for a proof to be sound. Later articles unpack how the kernel works and compare tactic proofs with writing proof terms directly.
 
-## Lean as a programming language
+## Running code and proving facts about it
 
-The same language runs programs. This definition and evaluation need no proof at all:
+The very same language runs ordinary programs. You can define a function, evaluate it, and prove a fact about it in the same file:
 
 \`\`\`lean-real
 def double (n : Nat) : Nat := n + n
@@ -62,32 +62,30 @@ theorem double_eq (n : Nat) : double n = 2 * n := by
   omega
 \`\`\`
 
-The command \`#eval\` runs the expression and prints \`42\`. Because programs and proofs live in one language, you can write a program and then prove a theorem about it, in the same file, about the very function you just defined. The theorem \`double_eq\` above is one: it says that \`double n\` equals \`2 * n\` for every \`n\`, and its proof unfolds the definition and lets the \`omega\` tactic finish the arithmetic.
+The \`#eval\` command runs \`double 21\` and prints \`42\`. Because code and proofs live together, \`double_eq\` can talk directly about the exact \`double\` function you just defined—unfolding its definition and letting the \`omega\` tactic handle the arithmetic. That unity is why Lean shows up in both pure mathematics and software verification, two worlds we'll revisit later in the Guide.
 
-This combination is the reason Lean is used both for mathematics and for verifying software. The later articles on programming and on Lean in the world return to both uses.
+## Where Lean stops helping
 
-## What Lean does not do
+Lean guarantees that your proof proves the statement you wrote down. It can't tell whether you wrote down the statement you *meant*. If your theorem is weaker than you intended, or accidentally true for a trivial reason, Lean will accept a proof of it without complaint. Saying what you mean accurately is half the craft, and the article on translating English into Lean focuses on that skill.
 
-Lean checks that a proof proves the statement you wrote. It cannot check that the statement is the one you meant. If you state a theorem that is weaker than you intended, or true for a boring reason, Lean will accept its proof just as readily. Learning to state things precisely is half of the craft, and the article on translating English into Lean is about exactly that.
-
-Lean is also not a magic prover. It will find some proofs on its own, through automation, but for most interesting theorems a person writes the argument and Lean checks it. The game you are playing teaches that writing: how to read what Lean shows you, how to choose the next step, and why the steps are justified.`,
+Lean also isn't an automatic theorem prover that solves hard math on command. Its automation can knock out routine steps, especially arithmetic and algebraic cleanup, yet for most interesting theorems you still supply the mathematical idea while Lean checks every detail. This game trains that side of the craft: reading what Lean shows you, choosing the next move, and seeing why each move is valid.`,
   },
   {
     id: 'lean-tour',
     section: 'lean',
     title: 'What Lean can do: a tour',
-    summary: 'A survey of Lean\'s capabilities, each with a small example, an honest limit, and a note on whether this game teaches it.',
+    summary: 'A tour of Lean\'s capabilities—interactive proving, compiled programs, type classes, automation, and Mathlib—along with honest limits and what this game covers.',
     minutes: 7,
     next: ['reading-theorems', 'lean-programming', 'mathlib-community'],
-    body: `Lean is a large system, and the game covers one part of it. This article lists what Lean can do, with a small example of each and a plain statement of its limits. For each capability it also says whether the game teaches it or only points to it. Examples marked as real Lean use features the game's engine leaves out.
+    body: `Lean does a lot more than this game puts on screen. Below is a quick map of its main capabilities, with a small example of each, an honest look at where it gets hard, and a note on how far this game takes you. Code blocks marked as real Lean use features that the game's built-in engine leaves out.
 
-## Proving theorems interactively
+## Interactive theorem proving
 
-This is the part the game teaches in full. You state a theorem, and then build its proof with tactics while Lean shows the remaining goals. It works for logic, number theory, algebra, analysis and much else. The limit is effort: writing a formal proof takes longer than writing a paper proof, because everything a reader would skip must be spelled out.
+This is the heart of the game. You state a theorem, then build its proof step by step with tactics while Lean keeps track of the remaining goals. The same workflow scales from basic logic to number theory, algebra, and analysis. The catch is effort: formalizing a proof takes more work than writing one on paper, because every detail a human reader would gloss over has to be spelled out explicitly.
 
 ## Writing and running programs
 
-Lean has \`def\` for functions, pattern matching, recursion, and \`#eval\` to run them.
+Lean supports ordinary functional programming with \`def\`, pattern matching, recursion, and \`#eval\` to run expressions right in your editor:
 
 \`\`\`lean-real
 def fib : Nat → Nat
@@ -98,11 +96,11 @@ def fib : Nat → Nat
 #eval fib 20
 \`\`\`
 
-This prints \`6765\`. Lean compiles programs to native code, so they are not toys, though its ecosystem of ready-made software libraries is much smaller than that of mainstream languages. The game touches this with \`def\` and \`#eval\` only; the programming article says more.
+That prints \`6765\`. Lean compiles programs to native code, so they run fast enough for real tools—Lean's own compiler is written in Lean—though its ecosystem of everyday software libraries is still much smaller than what you'd find in Python or Rust. In this game you'll only see \`def\` and \`#eval\` briefly; the programming article goes deeper.
 
-## Defining your own types and structures
+## Custom types and structures
 
-You can introduce new types of data. A \`structure\` bundles named fields; an \`inductive\` type lists the ways to build a value.
+You can define your own data types. A \`structure\` bundles named fields, while an \`inductive\` type lists the exact ways a value can be constructed:
 
 \`\`\`lean-real
 structure Point where
@@ -113,13 +111,11 @@ deriving Repr
 #eval ({ x := 1, y := 2 } : Point)
 \`\`\`
 
-Printing a value of the new type needs the \`deriving Repr\` line, which asks Lean to generate a way to display it.
+Adding \`deriving Repr\` asks Lean to generate a printing routine so \`#eval\` knows how to display a \`Point\`. In the game, you'll work with built-in inductive types like \`Nat\`, \`And\`, and \`Or\` and learn how they behave, without needing to declare new ones yourself.
 
-The game uses \`inductive\` types as a concept, since \`Nat\`, \`And\` and \`Or\` are all defined this way, but it never asks you to declare your own.
+## Type classes and shared notation
 
-## Type classes and notation
-
-A **type class** is a way to say that a type supports an operation, so that one symbol can work on many types. The \`+\` you write between numbers is shared by natural numbers, integers and real numbers because each has an instance of the class for addition.
+A **type class** specifies an operation that many different types can support, letting one symbol work across all of them. You can write \`+\` on natural numbers, integers, and real numbers because each type registers an instance of the addition class.
 
 \`\`\`lean-real
 structure Rect where
@@ -135,11 +131,11 @@ instance : Shape Rect where
 #eval Shape.area (Rect.mk 3 4)
 \`\`\`
 
-This prints \`12\`. Type classes are the largest piece of real Lean that the game leaves out, because it hard-wires \`+\` on natural numbers. They are what makes Mathlib's general algebra work, and the cost is that error messages sometimes mention instances you did not write.
+This prints \`12\`. Type classes are the biggest piece of real Lean that the game sets aside—here \`+\` is fixed to natural numbers so you can focus on proving. In Mathlib, type classes are what let one theorem about groups or rings apply to dozens of concrete structures at once. The trade-off is that error messages sometimes talk about missing instances you never explicitly wrote.
 
-## Automation
+## Built-in and Mathlib automation
 
-Lean can find some proofs itself. The core language includes \`simp\` (rewriting with a library of simplification facts), \`omega\` (linear arithmetic over integers and natural numbers), \`decide\` (checking decidable statements by computation) and, in recent versions, \`grind\` (a more general solver).
+Lean can close many routine goals on its own. Core Lean includes \`simp\` (rewriting with a curated database of simplification rules), \`omega\` (linear arithmetic over natural numbers and integers), \`decide\` (checking finite, computable statements directly), and in newer versions \`grind\` (a broader solver).
 
 \`\`\`lean-real
 theorem lt_succ (a b : Nat) (h : a < b) : a + 1 ≤ b := by omega
@@ -147,11 +143,11 @@ theorem lt_succ (a b : Nat) (h : a < b) : a + 1 ≤ b := by omega
 example : 2 ^ 10 = 1024 := by decide
 \`\`\`
 
-The Mathlib library adds \`ring\` (equalities in commutative rings), \`linarith\` (linear inequalities), \`norm_num\` (numeric calculation), and more. The separate Aesop package, which Mathlib builds on, provides \`aesop\`, a general proof search. Automation is powerful for routine goals and unhelpful when the idea of a proof is missing. The game withholds it on purpose, so that you learn what the automation is doing for you. The Graduate screen lists these tactics and when to reach for each.
+Mathlib adds \`ring\` for commutative-ring equalities, \`linarith\` for linear inequalities, \`norm_num\` for numeric calculations, and several more, while the companion Aesop package provides \`aesop\` for general proof search. Automation shines on tedious bookkeeping and stalls when a proof genuinely needs a fresh idea. This game holds those tactics back on purpose so you can see what they're actually automating; the Graduate screen introduces them once you're ready.
 
-## Metaprogramming
+## Writing your own tactics
 
-Lean's tactics are programs written in Lean, and you can write your own. The simplest way is a \`macro\`, which rewrites one piece of syntax into another.
+Because Lean's tactics are ordinary Lean programs, users can build new ones. The lightest option is a \`macro\`, which expands custom syntax into existing tactics:
 
 \`\`\`lean-real
 macro "my_triv" : tactic => \`(tactic| first | rfl | trivial)
@@ -159,41 +155,41 @@ macro "my_triv" : tactic => \`(tactic| first | rfl | trivial)
 example : 2 + 2 = 4 := by my_triv
 \`\`\`
 
-Larger tactics are written with the full programming interface to Lean's elaborator, in Lean. This is how Mathlib's tactics are made, and it is one reason the system can be extended without changing its trusted core. The game only mentions it, and notes that tactics are programs that build proof terms.
+More ambitious tactics talk directly to Lean's elaborator using Lean's metaprogramming API. That's how Mathlib's tactics are built, and it lets the community extend Lean's proof tools without touching the trusted kernel. The game won't ask you to write tactics, though it does explain how tactics assemble proof terms under the hood.
 
 ## The Mathlib library
 
-Mathlib is a community-built library of formalized mathematics: algebra, topology, analysis, number theory, combinatorics, and more. It is the reason you can state a theorem about real numbers or groups and have the definitions ready. It is large, and it changes constantly, which means code that compiles today may need small repairs against a later version. The game's names for sets, functions and divisibility follow Mathlib's, so they carry over.
+Mathlib is a massive, community-maintained library of formalized mathematics covering algebra, topology, analysis, number theory, combinatorics, and much more. It means you can state a theorem about groups or continuous functions without spending months rebuilding the foundations first. Because Mathlib evolves quickly, code written against today's version occasionally needs small updates later on. Our game follows Mathlib's naming for sets, functions, and divisibility so the habits you pick up transfer cleanly.
 
-## Verified software
+## Verifying real software
 
-Because Lean is also a programming language, you can prove that a program does what it should. Amazon Web Services, for example, uses Lean to verify parts of Cedar, its policy language for access control. Verification demands more specification work than testing does, and proofs about programs can be long. The article on Lean in the world gives more detail. The game teaches the proof side, not the software side.
+Since programs and proofs share one language, teams can prove properties about actual software. Amazon Web Services, for instance, uses Lean to verify parts of Cedar, its authorization policy language. Formal verification takes more upfront specification work than testing, and program proofs can get long, so teams usually aim it at high-stakes core logic. The final article in the Guide looks closer at these real-world projects; the game itself sticks to mathematical proofs.
 
-## What the game covers
+## Where this game fits
 
-The game teaches interactive proving in depth: terms and types, propositions as types, tactics, induction, sets, functions, and formalizing your own statement. It shows \`def\` and \`#eval\` briefly. It leaves out type classes, automation, metaprogramming and Mathlib itself, and the Graduate screen points to where each of those begins.`,
+Here you'll learn interactive proving from the ground up: terms and types, propositions as types, tactics, induction, sets, functions, and turning English claims into Lean statements, with a short detour into \`def\` and \`#eval\`. Type classes, heavy automation, metaprogramming, and Mathlib live outside the game, and the Graduate screen maps out where to pick each one up next.`,
   },
   {
     id: 'reading-theorems',
     section: 'lean',
     title: 'Reading a Lean theorem',
-    summary: 'How to take a theorem statement apart: binders, implicit arguments, the arrows and quantifiers, and the naming conventions of the library.',
+    summary: 'How to unpack an unfamiliar Lean statement from left to right: binders, implicit arguments, arrows, quantifiers, and library naming conventions.',
     minutes: 5,
     worlds: ['props', 'quant'],
     next: ['goal-view', 'tactics-and-terms'],
-    body: `Before you can prove a theorem you have to read it, and Lean statements follow a regular shape. Once you know the shape, an unfamiliar statement from the library becomes legible.
+    body: `Before you can prove a theorem, you have to read what it actually says. Fortunately, Lean declarations follow a steady pattern—once you know the layout, even a dense theorem from a library becomes much easier to parse.
 
-## The anatomy of a declaration
+## The parts of a theorem declaration
 
-Every theorem has the form
+Every theorem has the same skeleton:
 
 \`\`\`text
 theorem name (binders) : statement := proof
 \`\`\`
 
-The **name** is how you refer to the theorem later. The **binders** introduce the objects and assumptions the statement is about. The **statement** is what is claimed. The **proof** follows \`:=\`, either a term directly or \`by\` followed by tactics.
+The **name** is how you'll refer to the theorem later. The **binders** introduce the objects and assumptions in play. The **statement** after the colon is the claim itself, and the **proof** after \`:=\` is either a direct proof term or \`by\` followed by tactics.
 
-Here is a concrete one:
+Take a concrete example:
 
 \`\`\`lean
 theorem swap_args {α : Type} (p q : α → Prop) (h : ∀ x, p x ∧ q x) : ∀ x, q x ∧ p x := by
@@ -201,35 +197,37 @@ theorem swap_args {α : Type} (p q : α → Prop) (h : ∀ x, p x ∧ q x) : ∀
   exact ⟨(h x).2, (h x).1⟩
 \`\`\`
 
-Read it left to right. For any type \`α\`, and any two properties \`p\` and \`q\` of elements of \`α\`: if every \`x\` has both properties, then every \`x\` has them in the other order. Here \`α\` is a type and \`p\` and \`q\` are predicates, meaning functions that send each element to a statement about it. The assumption \`h\` is a proof of "for all \`x\`, \`p x\` and \`q x\`".
+Read it from left to right. Given any type \`α\` and any two predicates \`p\` and \`q\` on \`α\` (functions that send each element of \`α\` to a statement about it): if every \`x\` satisfies both \`p x\` and \`q x\`, then every \`x\` satisfies \`q x\` and \`p x\`. The hypothesis \`h\` holds the proof of "for all \`x\`, \`p x\` and \`q x\`".
 
-## Binders: round and curly
+## Parentheses, braces, and square brackets
 
-There are two kinds of binder you will see constantly. A round binder \`(p q : α → Prop)\` is **explicit**: when you use the theorem you pass these arguments yourself. A curly binder \`{α : Type}\` is **implicit**: Lean works out the value from the other arguments. In \`swap_args\`, you never write \`α\`, because it can be read off from \`p\`.
+You'll see two kinds of binders all the time in this game, and a third in real Lean.
 
-If you need to see implicit arguments, an \`@\` in front of the name makes them all explicit, so \`@swap_args\` takes \`α\` as its first argument. You rarely need this, but it helps to know that implicit arguments are ordinary arguments that Lean fills in.
+Binders in **parentheses**, like \`(p q : α → Prop)\`, are **explicit**: whenever you apply the theorem, you pass those arguments yourself. Binders in **braces**, like \`{α : Type}\`, are **implicit**: Lean figures out their values from the surrounding arguments. When you use \`swap_args\`, you don't pass \`α\`, because Lean can read it straight off the type of \`p\`.
 
-A square-bracket binder \`[ ... ]\` is a third kind, used for type classes. You will meet it in real Lean and Mathlib, but not in the game.
+If you ever want to supply implicit arguments by hand, putting \`@\` in front of a theorem's name makes every argument explicit—so \`@swap_args\` expects \`α\` first. You won't need \`@\` often, yet it's a useful reminder that implicit arguments are just ordinary arguments Lean fills in for you.
 
-## Reading the symbols
+In real Lean and Mathlib, you'll also see **square brackets** \`[ ... ]\` for type-class instances. The game leaves those out so declarations stay uncluttered.
 
-Three pieces of notation carry most of the meaning.
+## Arrows, "for all", and "there exists"
 
-The arrow \`→\` means "implies" when it sits between statements, and "function from … to …" when it sits between types. These are one and the same, which the article on propositions as types explains. The arrow is right-associative, so \`A → B → C\` means \`A → (B → C)\`. That reads as "given \`A\` and \`B\`, get \`C\`", and it is why a theorem with two assumptions can be written either with two binders or with one arrow after the colon.
+Three symbols carry most of the logical structure in Lean statements.
 
-The symbol \`∀\` means "for all". \`∀ x, p x\` says that \`p x\` holds whatever \`x\` is. Lean usually infers the type of \`x\`, and you can write it with \`∀ x : Nat, p x\`.
+The arrow \`→\` means "implies" between propositions and "function from … to …" between types—which, as the article on propositions as types explains, turn out to be the same thing. Arrows associate to the right, so \`A → B → C\` is shorthand for \`A → (B → C)\`. You can read that as "given \`A\` and \`B\`, produce \`C\`", which is why a theorem with two assumptions can put them either in binders before the colon or behind arrows after it.
 
-The symbol \`∃\` means "there exists". To prove \`∃ n : Nat, n + n = 4\` you supply a witness and a proof that it works:
+The symbol \`∀\` means "for all". Writing \`∀ x, p x\` says that \`p x\` holds for every \`x\`. Lean usually infers the type of \`x\` from context, though you can always write it out as \`∀ x : Nat, p x\`.
+
+The symbol \`∃\` means "there exists". To prove \`∃ n : Nat, n + n = 4\`, you hand over a specific witness and a proof that it satisfies the property:
 
 \`\`\`lean
 theorem two_plus_two : ∃ n : Nat, n + n = 4 := ⟨2, rfl⟩
 \`\`\`
 
-The pair \`⟨2, rfl⟩\` gives the witness \`2\`, and then \`rfl\` proves \`2 + 2 = 4\`, because both sides compute to the same number.
+Inside the angle brackets, \`2\` is the witness and \`rfl\` proves \`2 + 2 = 4\` by computing both sides to \`4\`.
 
-## Where assumptions go
+## Binders before the colon or arrows after it
 
-A theorem's assumptions can sit before the colon, as binders, or after it, as arrows. These two statements say the same thing:
+Assumptions can sit before the colon as named binders or after it as arrows. These two theorems say the exact same thing:
 
 \`\`\`lean
 theorem mp1 (p q : Prop) (hp : p) (hpq : p → q) : q := hpq hp
@@ -237,37 +235,37 @@ theorem mp1 (p q : Prop) (hp : p) (hpq : p → q) : q := hpq hp
 theorem mp2 (p q : Prop) : p → (p → q) → q := fun hp hpq => hpq hp
 \`\`\`
 
-Use binders when you want names for the assumptions inside the proof. Use arrows when the statement should be a single proposition, for instance inside another statement. The tactic \`intro\` moves an assumption from after the colon to before it.
+Binders are convenient when you want names ready inside the proof right away. Arrows are handy when you want the whole claim to live as a single proposition after the colon, such as inside a larger formula. And \`intro\` bridges the two styles by moving an assumption from after the colon into your hypotheses.
 
-## Naming conventions
+## Decoding library names
 
-Library names are not arbitrary. They are built from a namespace and a description of the statement. \`Nat.add_comm\` lives in the \`Nat\` namespace and says that addition is commutative. Common patterns include:
+Library theorem names aren't random—they combine a namespace with a compact description of the statement. \`Nat.add_comm\`, for example, lives in the \`Nat\` namespace and states that addition commutes. A handful of suffixes and connectors show up everywhere:
 
-- \`_comm\`, \`_assoc\`, \`_refl\`, \`_symm\`, \`_trans\` for the algebraic properties;
-- \`_left\` and \`_right\` for which side of an operation or connective is meant, as in \`And.left\`;
-- \`_iff\` for a theorem stated as an equivalence;
-- \`_of_\` before the hypotheses, so \`lt_of_le_of_ne\` reads "less than, given less-or-equal and not-equal";
+- \`_comm\`, \`_assoc\`, \`_refl\`, \`_symm\`, \`_trans\` for standard algebraic and relational properties;
+- \`_left\` and \`_right\` to pick out one side of an operation or connective, like \`And.left\`;
+- \`_iff\` for theorems phrased as an \`↔\` equivalence;
+- \`_of_\` to introduce hypotheses, so \`lt_of_le_of_ne\` reads "less than, given less-or-equal and not-equal";
 - \`_eq\` and \`_ne\` for equalities and inequalities.
 
-Once you know these, you can often guess a name correctly, and when you cannot, the search tools in Lean and Mathlib work with the same vocabulary.
+Once these patterns click, you'll start guessing theorem names on the first try—and when a guess misses, search tools in Lean and Mathlib use the same vocabulary.
 
-## Checking what you are reading
+## Asking Lean with #check and #print
 
-You can ask Lean about any name with \`#check\`, which prints the statement, or \`#print\`, which prints the definition. In the game's Sandbox, \`#check Nat.add_comm\` shows you the statement without opening a file. Reading a statement carefully, with its binders in order, is the first step of every proof, and it is a skill worth practicing on library theorems as well as on your own.`,
+You never have to guess a declaration's signature from memory. \`#check\` prints a name's type or theorem statement, and \`#print\` shows its definition. Try \`#check Nat.add_comm\` in the game's Sandbox to inspect it directly. Taking a moment to read a statement carefully—binders first, conclusion second—is the habit that unlocks both your own theorems and the library.`,
   },
   {
     id: 'goal-view',
     section: 'lean',
     title: 'The goal view',
-    summary: 'How to read the state Lean shows you, including multiple goals and case tags, and how to read an error message.',
+    summary: 'How to read the proof state Lean updates at every line—hypotheses, multiple goals, case tags, and the three error messages you\'ll meet first.',
     minutes: 5,
     worlds: ['props', 'logic'],
     next: ['tactics-and-terms', 'how-to-attack-a-proof'],
-    body: `When you write a proof in Lean, the most important window is not the one holding your code. It is the **goal view**, which in the real editor is called the *infoview*. It shows exactly where you stand in the proof, at whatever line your cursor is on.
+    body: `When you write a proof in Lean, the code editor is only half the picture. Just as important is the **goal view** (called the *infoview* in VS Code), which shows your exact situation at whichever line your cursor is on.
 
-## Hypotheses and the goal
+## Above and below the turnstile
 
-Here is a goal state:
+Here's a typical goal state:
 
 \`\`\`text
 p q : Prop
@@ -276,15 +274,15 @@ hpq : p → q
 ⊢ q
 \`\`\`
 
-Everything above the symbol \`⊢\`, called the turnstile, is a **hypothesis**: something you may use. Each line has a name, a colon, and a type. \`p q : Prop\` says that \`p\` and \`q\` are propositions. \`hp : p\` says you have a proof of \`p\`, named \`hp\`. \`hpq : p → q\` says you have a proof that \`p\` implies \`q\`.
+Everything above the turnstile symbol \`⊢\` is a **hypothesis**—a variable or fact already in scope. Each line gives a name, a colon, and a type. Here \`p q : Prop\` introduces two propositions, \`hp : p\` gives you a proof of \`p\`, and \`hpq : p → q\` gives you a proof that \`p\` implies \`q\`.
 
-The line with \`⊢\` is the **goal**, what you are trying to prove. A proof is finished when you have produced something of the goal's type, and a tactic proof is finished when no goals remain. Reading this state, you can see the proof: \`hpq\` turns a proof of \`p\` into a proof of \`q\`, and you have a proof of \`p\`, so \`exact hpq hp\` closes the goal.
+The line starting with \`⊢\` is the **goal**, what you still need to prove. You finish a proof when you build a term of the goal's type, and a tactic proof ends once no goals are left. Looking at the state above, the move jumps out: \`hpq\` turns a proof of \`p\` into a proof of \`q\`, and you've got \`hp : p\` sitting right above it, so \`exact hpq hp\` closes the goal.
 
-This is why reading the state is the main skill. Almost every step of a proof is a response to what the state looks like. A beginner often types tactics and hopes. An experienced user reads the state, says in words what is needed, and then picks the tactic that does it.
+Reading this panel well is the single most useful skill in Lean. Rather than typing tactics by trial and error, look at the state, describe in plain English what's missing, and pick the tactic that matches.
 
-## How tactics change the state
+## Watching tactics reshape the state
 
-Each tactic transforms the state, and you can watch it happen. If the goal is \`p → q\`, the tactic \`intro h\` moves the left side into the hypotheses:
+Every tactic transforms the goal state, and you can watch it update as you move your cursor line by line. When the goal is \`p → q\`, running \`intro h\` pulls the assumption onto the list above the turnstile:
 
 \`\`\`text
 before:   ⊢ p → q
@@ -292,11 +290,11 @@ after:    h : p
           ⊢ q
 \`\`\`
 
-If the goal is \`p ∧ q\`, the tactic \`constructor\` replaces it with two goals, one for each half. If a hypothesis is \`h : p ∧ q\`, then \`obtain ⟨hp, hq⟩ := h\` replaces it with two hypotheses. You can predict the new state before running the tactic, and the game's predict levels train exactly this.
+When the goal is \`p ∧ q\`, \`constructor\` splits it into two separate goals, one for \`p\` and one for \`q\`. Going the other way, if you have a hypothesis \`h : p ∧ q\`, \`obtain ⟨hp, hq⟩ := h\` unpacks it into two separate hypotheses. With a bit of practice you'll know what the next state will look like before you even run the tactic—which is what the game's predict puzzles help build.
 
-## More than one goal
+## Working through multiple goals
 
-Sometimes the state has several goals. Lean lists them one after another and works on the first. Each can carry a **case tag**, a label saying where it came from:
+A single tactic often creates several subgoals at once. Lean lists them in order and focuses on the first one. Each goal can carry a **case tag** reminding you where it came from:
 
 \`\`\`text
 case left
@@ -312,11 +310,11 @@ hq : q
 ⊢ q
 \`\`\`
 
-These two goals came from \`constructor\` on \`p ∧ q\`; the tags \`left\` and \`right\` name the two halves. Notice that each goal has its own copy of the hypotheses. When you close the first goal, the second becomes the current one. Writing a dot \`·\` before a tactic block focuses on the first goal, which keeps proofs tidy and makes errors easier to locate.
+These two goals came from running \`constructor\` on \`p ∧ q\`, so Lean labels them \`left\` and \`right\`. Notice that each subgoal carries its own list of hypotheses. Once you close the first goal, the second moves to the front. Putting a focusing dot \`·\` before the tactics for each subgoal keeps multi-branch proofs clean and pins any error to the exact branch that failed.
 
-## Reading an error message
+## Three error messages you'll meet early
 
-Error messages in Lean have a consistent structure. A message says where, what went wrong, and often what Lean expected and what it found. Suppose you write this proof of \`p ∧ q\` but give only the first half:
+Lean's error messages follow a predictable layout: they tell you where something went wrong, what kind of problem occurred, and usually what Lean expected versus what it saw. Suppose you start proving \`p ∧ q\` and only prove the first half:
 
 \`\`\`text
 theorem e1 (p q : Prop) (hp : p) : p ∧ q := by
@@ -324,7 +322,7 @@ theorem e1 (p q : Prop) (hp : p) : p ∧ q := by
   exact hp
 \`\`\`
 
-Lean reports:
+Lean answers:
 
 \`\`\`text
 error: unsolved goals
@@ -334,9 +332,9 @@ hp : p
 ⊢ q
 \`\`\`
 
-The message says that a goal is still open, shows it, and the case tag \`right\` tells you that it is the second half of the conjunction. The fix is another line proving \`q\`, or, in this case, noticing that the theorem as stated needs a proof of \`q\` that is not available.
+That tells you a goal is still open, displays it, and uses the \`right\` tag to show it's the second half of the conjunction. Either you still need another line proving \`q\`, or—as in this broken statement—you forgot to include a hypothesis that could ever prove \`q\`.
 
-A mismatch error looks different. If you try \`exact h\` where \`h : a = b\` but the goal is \`b + 1 = a + 1\`, Lean reports:
+A second familiar error is a type mismatch. If you try \`exact h\` with \`h : a = b\` when the goal is \`b + 1 = a + 1\`, Lean prints:
 
 \`\`\`text
 error: Type mismatch
@@ -347,36 +345,36 @@ but is expected to have type
   b + 1 = a + 1
 \`\`\`
 
-Read it as two statements to compare: what you gave, and what was needed. Most mismatches come down to the wrong direction of an equation, a missing step, or a goal that was not what you thought it was. The wording of messages varies a little between Lean versions, but the structure stays the same.
+Compare those two lines side by side: what you handed Lean versus what it asked for. Most mismatches trace back to a flipped equation, a missing intermediate step, or a goal that didn't look quite the way you assumed. Exact phrasing shifts slightly across Lean versions, though this side-by-side layout stays the same.
 
-A third common error comes from \`rw\`, which rewrites using an equation. If the left side of the equation does not appear in the goal, Lean says that it did not find an occurrence of the pattern and quotes the pattern it was looking for. The cure is to compare that pattern with the goal, character by character.
+A third common error comes from \`rw\`. If the left-hand side of your equation doesn't appear anywhere in the goal, Lean tells you it couldn't find the pattern and prints the expression it searched for. Compare that quoted pattern against the goal character by character—often a tiny difference in parentheses or argument order is the whole reason it missed.
 
-## A habit worth building
+## Reading the state before you type
 
-Before you type a tactic, say in words what the goal needs and what you have. After you type it, look at the new state and check that it is what you predicted. When the state surprises you, that is the useful moment: you have learned something about how Lean sees the problem. And when you cannot see how to proceed, read the hypotheses again. The answer is very often already listed above the turnstile.`,
+Before typing a tactic, try saying in words what the goal asks for and what you already have above the turnstile. After typing it, check whether the new state matches what you expected. Whenever the goal view surprises you, pause—that's usually the fastest way to see how Lean is interpreting your statement. And when you feel stuck, re-read your hypotheses from top to bottom; the piece you need is often already sitting there.`,
   },
   {
     id: 'tactics-and-terms',
     section: 'lean',
     title: 'Tactics and terms: two ways to write one proof',
-    summary: 'The same theorem proved as a term and with tactics, and what a tactic actually does behind the scenes.',
+    summary: 'The same theorem proved directly as a term and step by step with tactics, plus what tactics actually build behind the scenes.',
     minutes: 5,
     worlds: ['props'],
     next: ['types-everywhere', 'propositions-as-types'],
-    body: `Lean offers two styles for writing a proof, and they are not rivals. A **term** is an expression that directly has the type of the theorem. A **tactic proof** is a sequence of commands that builds such an expression step by step. Both end in the same thing, and understanding how they relate is one of the most clarifying ideas in Lean.
+    body: `Lean gives you two ways to write a proof, and they work together rather than competing. A **term** is a single expression whose type matches the theorem's statement. A **tactic proof** is a script of commands that constructs that expression piece by piece. Both produce the exact same result, and seeing how they connect makes Lean feel far less mysterious.
 
-## One theorem, two proofs
+## One theorem, two styles
 
-Take the claim that \`p ∧ q\` implies \`q ∧ p\`. As a term:
+Consider the claim that \`p ∧ q\` implies \`q ∧ p\`. Written directly as a term:
 
 \`\`\`lean
 theorem and_swap_term (p q : Prop) : p ∧ q → q ∧ p :=
   fun h => ⟨h.2, h.1⟩
 \`\`\`
 
-This reads as a function. Given a proof \`h\` of \`p ∧ q\`, it returns a proof of \`q ∧ p\`, packaged from the second component \`h.2\` and the first component \`h.1\`. There is nothing to run; the expression after \`:=\` is the proof.
+This is just a function: hand it a proof \`h\` of \`p ∧ q\`, and it hands back a proof of \`q ∧ p\` built from the second component \`h.2\` and the first component \`h.1\`. Nothing needs to run or search—the expression after \`:=\` already is the proof.
 
-As a tactic proof:
+Now look at the same theorem written with tactics:
 
 \`\`\`lean
 theorem and_swap_tac (p q : Prop) : p ∧ q → q ∧ p := by
@@ -387,15 +385,15 @@ theorem and_swap_tac (p q : Prop) : p ∧ q → q ∧ p := by
   · exact hp
 \`\`\`
 
-This reads as a conversation with the goal. Introduce the assumption. Take it apart. Split the goal in two. Close each half with the matching fact. Lean shows the goal after each step, which is the main practical advantage of tactics: you see where you are.
+Here the proof reads like a back-and-forth conversation with Lean: bring the assumption into scope, unpack its two parts, split the goal into two subgoals, and close each one with the matching piece. Because Lean updates the goal view after every line, you always know where you stand, which is the main reason people reach for tactics on anything longer than a one-liner.
 
-## What a tactic really does
+## How a tactic fills holes in a term
 
-A tactic is a small program, written in Lean, that works on the proof in progress. The proof in progress is a **metavariable**, a hole of known type that is waiting for a term. A tactic fills the hole, perhaps with a term that contains new holes, and those new holes become the new goals.
+Under the hood, a tactic is a small Lean program editing a proof in progress. An unfinished proof contains **metavariables**—typed holes waiting to be filled by terms. Each tactic plugs one hole with a partial expression, possibly leaving smaller holes inside it, and those new holes appear as your next goals.
 
-When you wrote \`intro h\`, the tactic filled the hole with \`fun h => ?_\`, a function whose body is a new hole of the right type. When you wrote \`constructor\` on a conjunction, it filled the hole with a pair whose two components were two new holes. When no holes remain, the whole thing is a finished term, and that term is what the kernel checks.
+When you run \`intro h\`, Lean fills the hole with \`fun h => ?_\`, a function whose body is a fresh hole of the conclusion's type. When you run \`constructor\` on a conjunction, it fills the hole with a pair containing two new holes. Once every hole is filled, you're left with a complete term, and that term is what Lean's kernel checks.
 
-You can see the term. Real Lean can print the proof it constructed:
+In real Lean, you can inspect the term your tactics built with \`#print\`:
 
 \`\`\`lean-real
 theorem and_swap (p q : Prop) (h : p ∧ q) : q ∧ p := by
@@ -405,48 +403,48 @@ theorem and_swap (p q : Prop) (h : p ∧ q) : q ∧ p := by
 #print and_swap
 \`\`\`
 
-The output is the proof term:
+Lean prints out the assembled proof term:
 
 \`\`\`text
 theorem and_swap : ∀ (p q : Prop), p ∧ q → q ∧ p :=
 fun p q h => And.casesOn h fun hp hq => ⟨hq, hp⟩
 \`\`\`
 
-The tactic \`obtain\` became \`And.casesOn\`, the way of using a conjunction by unpacking its parts, and \`exact\` supplied the pair. Several game levels have a reveal that shows you the term your tactics built.
+The tactic \`obtain\` turned into \`And.casesOn\` (the built-in eliminator that unpacks a conjunction), and \`exact\` supplied the reversed pair. Several levels in this game include a term reveal so you can watch your own tactics compile into terms like this.
 
-## When each style fits
+## Choosing between terms and tactics
 
-Terms are short and direct when the proof is one step of application: using a known theorem on known arguments, or building a function. Writing \`hpq hp\` to apply an implication is clearer than any tactic.
+Terms shine when a proof is short and direct—applying a lemma to a couple of arguments, or writing a compact function. Writing \`hpq hp\` to use an implication is cleaner and faster to read than a multi-line tactic block.
 
-Tactics are better when the proof has structure that unfolds over time: many cases, rewriting, induction, or hypotheses that change as you go. The goal view only exists for tactics, and that visible state is worth a lot while you are learning.
+Tactics earn their keep once a proof starts branching or evolving: case splits, chains of rewrites, induction, or intermediate facts that accumulate as you go. They also give you the goal view, which is invaluable while you're still mapping out an argument.
 
-Real proofs mix them freely. Inside a tactic block you can write \`exact\` followed by any term. Inside a term you can write \`by\` and start a tactic block for one part. The game trains both, because the term view explains what tactics mean, and the tactic view makes longer proofs manageable.
+In practice, Lean users blend both freely. Inside a \`by\` block you can hand any term to \`exact\`, and inside a term you can drop into \`by\` for a tricky sub-piece. Learning both styles pays off: terms show you what tactics really mean, while tactics keep larger proofs manageable.
 
-## Why it matters for trust
+## Why the kernel still stays in charge
 
-The fact that tactics only build terms has a consequence for trust. The tactics themselves can be complicated, and automation tactics such as \`simp\` and \`omega\` can be very complicated. But whatever they do, they must end by producing a term, and the kernel checks that term independently. A bug in a tactic can make it fail or produce a term the kernel rejects. It cannot make Lean accept a false theorem, so long as the kernel itself is correct. The article on the kernel develops this point.
+Because tactics only assemble terms, you don't have to trust them. Even heavyweight automation like \`simp\` or \`omega\` has to finish by handing a concrete proof term to the kernel, which checks it independently from scratch. A bug in a tactic can make it crash, loop, or generate an invalid term that the kernel rejects, yet it can't trick Lean into accepting a false theorem as long as the kernel itself is sound. The article on the kernel digs deeper into this safety boundary.
 
-It also gives a way to think about what a tactic proof says. It is not a series of commands to a machine in the sense of a program that does work. It is a recipe for constructing evidence, and the final evidence is an expression you could have written by hand. Seeing a tactic proof as a way of building a term connects the first half of the game, where you wrote terms, to the second, where you mostly write tactics.
+This also clarifies what a tactic script really is: a recipe for building a piece of evidence you could, in principle, have written by hand. Keeping that connection in mind bridges the early part of the game, where you write terms directly, with the later worlds where tactics take center stage.
 
-## Reading advice
+## Reading mixed proofs in a library
 
-When you meet a proof in a library, look at its shape. A line starting with \`fun\` or an application is a term. A block after \`by\` is tactics. If you want to know what a tactic block produces, print the theorem. If you want to know what a term does, imagine the goal view at each step: what type does each sub-expression have, and what is it being used for? That habit makes both styles readable.`,
+When you open a library file, the opening token tells you which style you're looking at: \`fun\` or a lemma application signals a term, while \`by\` opens a tactic block. If a tactic proof puzzles you, \`#print\` reveals the underlying term; if a dense term puzzles you, trace it as if the goal view were open, asking what type each sub-expression has and what hole it's filling. That habit makes both styles comfortable to read.`,
   },
   {
     id: 'types-everywhere',
     section: 'theory',
     title: 'Types, and why everything has one',
-    summary: 'Terms and their types, function types, Type and Prop, and a short note on universes.',
+    summary: 'Why every expression in Lean carries a type, how function types and Prop work, and what the universe ladder prevents.',
     minutes: 5,
     worlds: ['types'],
     next: ['propositions-as-types', 'dependent-types'],
-    body: `In Lean, every expression has a **type**, and you cannot write an expression without one. The number \`7\` has type \`Nat\`, the natural numbers. The expression \`"hello"\` has type \`String\`. The expression \`fun n => n + 1\` has type \`Nat → Nat\`, the type of functions from natural numbers to natural numbers. A thing that has a type is called a **term**, and the relationship is written with a colon: \`7 : Nat\`.
+    body: `In Lean, every expression has a **type**, and there's no such thing as an untyped value. The number \`7\` has type \`Nat\` (the natural numbers), \`"hello"\` has type \`String\`, and \`fun n => n + 1\` has type \`Nat → Nat\`, the type of functions from natural numbers to natural numbers. Any expression with a type is called a **term**, and we write that relationship with a colon: \`7 : Nat\`.
 
-This is the whole foundation of Lean. Types play the role that sets play in school mathematics, with one difference that matters. In set theory, an element can belong to many sets at once, and membership is a statement you can prove or disprove. In type theory, a term has exactly one type, and the type is part of what the term is. Asking whether \`7 : Nat\` is not a statement to prove; it is something Lean works out when it reads the expression.
+This single rule is Lean's foundation. Types fill roughly the same role that sets fill in school mathematics, with one big difference. In set theory, an object can belong to many sets at once, and membership is a claim you prove or disprove. In type theory, every term carries its type as part of its identity. Asking whether \`7 : Nat\` isn't a theorem you prove—it's something Lean checks automatically as it reads your code.
 
-## Function types
+## Functions as ordinary values
 
-If \`A\` and \`B\` are types, then \`A → B\` is the type of functions that take an \`A\` and return a \`B\`. You build a function with \`fun\`, and use one by writing it next to its argument:
+Whenever \`A\` and \`B\` are types, \`A → B\` is the type of functions that accept an \`A\` and return a \`B\`. You build a function with \`fun\` and call it by placing it next to its argument:
 
 \`\`\`lean
 def double (n : Nat) : Nat := n + n
@@ -456,17 +454,17 @@ def twice (f : Nat → Nat) (x : Nat) : Nat := f (f x)
 theorem twice_double (x : Nat) : twice double x = x + x + (x + x) := rfl
 \`\`\`
 
-The function \`double\` has type \`Nat → Nat\`. The function \`twice\` takes a function as its first argument and a number as its second, and applies the function two times. Its type is \`(Nat → Nat) → Nat → Nat\`. Functions are ordinary terms, and can be passed around like numbers.
+Here \`double\` has type \`Nat → Nat\`, while \`twice\` takes a function first and a number second, applying that function two times—giving it the type \`(Nat → Nat) → Nat → Nat\`. Functions are ordinary terms, so you can pass them into other functions or return them just like numbers.
 
-The arrow associates to the right, so \`Nat → Nat → Nat\` means \`Nat → (Nat → Nat)\`: a function that takes one number and returns a function waiting for the second. This is called **currying**. It means that applying a function to only some of its arguments is meaningful: \`twice double\` is a function of type \`Nat → Nat\` that doubles twice.
+Because the arrow groups to the right, \`Nat → Nat → Nat\` means \`Nat → (Nat → Nat)\`: a function that takes one number and hands back a function waiting for the second. That convention is called **currying**, and it means partial application works out of the box—\`twice double\` is a valid term of type \`Nat → Nat\` that doubles its input twice.
 
-The proof of \`twice_double\` is \`rfl\`, because both sides evaluate to the same number once the definitions are unfolded. The article on equality says more about when that works.
+Notice that \`twice_double\` is proved by \`rfl\` alone, because unfolding both definitions reduces the two sides to the exact same expression. The article on equality explains when computation is enough and when it isn't.
 
-## A type is a term too
+## Types have types, all the way up
 
-Types themselves have types. The type \`Nat\` is a term, and its type is \`Type\`. The type \`Type\` is also a term, of type \`Type 1\`, and so on upward. These levels are called **universes**, and the reason for them is to avoid a paradox: if \`Type\` had type \`Type\`, you could build the analogue of Russell's paradox, and Lean's logic would become inconsistent. Keeping a ladder of universes avoids this. In practice you meet the ladder rarely. Lean usually infers the level, and the first levels are all you need to know about for the game: \`Nat : Type\`, and \`Type : Type 1\`.
+Types are terms too, so they need types of their own. \`Nat\` has type \`Type\`, \`Type\` has type \`Type 1\`, \`Type 1\` has type \`Type 2\`, and so on up an infinite ladder of **universes**. That ladder exists to block a paradox: if \`Type\` had type \`Type\`, you could build a type-theoretic version of Russell's paradox and break Lean's logic completely. In day-to-day proving you rarely notice the ladder, because Lean infers the levels automatically. For this game, knowing \`Nat : Type\` and \`Type : Type 1\` is plenty.
 
-You can ask Lean about the type of anything with \`#check\`:
+You can check the type of any expression with \`#check\`:
 
 \`\`\`text
 #check 7               -- 7 : Nat
@@ -475,47 +473,47 @@ You can ask Lean about the type of anything with \`#check\`:
 #check fun n : Nat => n + 1   -- fun n => n + 1 : Nat → Nat
 \`\`\`
 
-Comments in Lean start with two dashes. The right-hand sides above are what Lean prints in reply.
+Comments start with two dashes \`--\`; the comments on the right show what Lean replies.
 
-## Prop: the type of statements
+## Prop: the sort for mathematical statements
 
-Besides \`Type\`, there is a second basic sort called \`Prop\`, the type of **propositions**: statements that can be true or false. Examples are \`2 + 2 = 4\`, \`∀ n : Nat, n + 0 = n\`, and \`p → q\` for any propositions \`p\` and \`q\`. These are terms of type \`Prop\`.
+Alongside \`Type\`, Lean has a second basic sort called \`Prop\`, the type of **propositions**—statements that can be true or false, such as \`2 + 2 = 4\`, \`∀ n : Nat, n + 0 = n\`, or \`p → q\`.
 
-A proposition is itself a type, and a proof of it is a term of that type. This is the central idea of the next article, and the reason the game is called Inhabit: to prove a proposition is to produce something of that type, to *inhabit* it. For now, the thing to notice is that \`Prop\` is just another sort of type, with the rule that all proofs of the same proposition are treated as equal. Only whether a proposition is provable matters, not which proof was given.
+A proposition is itself a type, and a proof of it is a term of that type. That's the main subject of the next article, and it's also why this game is called Inhabit: proving a proposition means producing a value that *inhabits* it. What sets \`Prop\` apart from \`Type\` is that Lean treats any two proofs of the same proposition as equal. All that matters is whether a statement has a proof, never which particular proof you built.
 
-## Why insist on types
+## What strict typing buys you
 
-Types give Lean three things. First, they catch nonsense early. \`7 + "hello"\` is rejected as soon as it is read, before anything is computed, because \`"hello"\` does not have type \`Nat\`. Second, they guide the machine. When you write \`x + y\` with \`x : Nat\`, Lean knows \`y\` must be a \`Nat\` too and can often fill in details you leave out, such as which numeric type a literal \`2\` belongs to. Third, they are the language in which statements are written, as the next articles show.
+Insisting on types helps in three ways. First, it catches nonsense immediately: \`7 + "hello"\` fails as soon as Lean parses it, because \`"hello"\` isn't a \`Nat\`. Second, types guide Lean's inference—when you write \`x + y\` and Lean knows \`x : Nat\`, it immediately knows \`y\` should be a \`Nat\` too and fills in omitted details like the type of a numeral \`2\`. Third, types double as the language for stating theorems, as the next two articles show.
 
-The convention in Lean is to read a type as an answer to the question "what kind of thing is this?", and to expect every definition to answer it. When you meet an error that says a term "has type X but is expected to have type Y", that is the checker doing its basic job, and the fix is to find out why the two differ.
+Think of a type as the answer to "what kind of thing is this?" Whenever Lean reports that an expression "has type X but is expected to have type Y", the type checker is just doing its job, and your task is to see why those two descriptions don't match.
 
-## Universe levels in one paragraph
+## A quick note on universe levels
 
-Real Lean lets you write definitions that work at every universe level, with notation like \`Sort u\` and \`Type u\`, where \`u\` is a variable standing for a level. The standard library does this everywhere, so that a theorem about lists applies to lists of numbers and to lists of types alike. The game keeps to the first levels and does not ask you to work with \`u\`. When you read library code and meet \`universe u\`, you can treat it as bookkeeping: the same definition, available at every level.`,
+In real Lean, definitions often work across every universe level at once using variables like \`Sort u\` and \`Type u\`. Standard library definitions do this constantly so one \`List\` type works for lists of numbers and lists of types alike. This game stays on the lowest levels and never asks you to mention \`u\`. If you see \`universe u\` while browsing Mathlib, you can read it as routine bookkeeping saying the definition works at any level.`,
   },
   {
     id: 'propositions-as-types',
     section: 'theory',
     title: 'Propositions as types',
-    summary: 'The Curry–Howard correspondence, told carefully: each logical connective matches a way of building types.',
+    summary: 'The Curry–Howard correspondence in plain terms: how every logical connective matches a type construction, and where Prop adds a twist.',
     minutes: 6,
     worlds: ['props', 'logic'],
     next: ['dependent-types', 'inductive-types'],
-    body: `The idea that gives Lean its character is that **a proposition is a type, and a proof of it is a term of that type**. This is called the Curry–Howard correspondence, after two logicians who noticed it in different forms, and it is not a metaphor. Lean really does treat a proof of \`p\` as a thing of type \`p\`.
+    body: `The core idea that gives Lean its distinctive flavor is simple to state: **a proposition is a type, and a proof of it is a term of that type**. Logicians call this the Curry–Howard correspondence, after Haskell Curry and William Alvin Howard, who noticed the pattern in different settings. In Lean it isn't a loose analogy—a proof of \`p\` literally is a value whose type is \`p\`.
 
-## Starting with implication
+## Implication is a function
 
-Start with the simplest case. A function from \`A\` to \`B\` is a rule that turns any \`A\` into a \`B\`. A proof of "if \`p\` then \`q\`" is a rule that turns any proof of \`p\` into a proof of \`q\`. These are the same thing. So the type \`p → q\`, which is the function type, is also the statement "\`p\` implies \`q\`", and a function of that type is a proof of it.
+Start with the cleanest example. A function from \`A\` to \`B\` is a rule that turns any value of type \`A\` into a value of type \`B\`. A proof of "if \`p\` then \`q\`" is a rule that turns any proof of \`p\` into a proof of \`q\`. Those two ideas match down to the last detail, so Lean uses the exact same arrow \`p → q\` for both function types and implication, and a proof of \`p → q\` is literally a function:
 
 \`\`\`lean
 theorem mp (p q : Prop) (hp : p) (hpq : p → q) : q := hpq hp
 \`\`\`
 
-Here \`hpq\` is a function, \`hp\` is its argument, and \`hpq hp\` is the function applied. Modus ponens, the rule that from \`p\` and \`p → q\` you may conclude \`q\`, is function application. No special rule of logic was needed.
+Here \`hpq\` is a function, \`hp\` is its argument, and \`hpq hp\` is ordinary function application. Modus ponens—the classical rule saying that from \`p\` and \`p → q\` you may conclude \`q\`—doesn't even need to be added as a separate logical rule. Calling a function already does the job.
 
-## The dictionary
+## Connectives and their matching types
 
-Each logical connective corresponds to a way of building types, and each has two sides: how to *prove* it, and how to *use* it.
+Every logical connective pairs up with a way of forming types, and each one comes with two moves: how to *build* a proof of it, and how to *use* a proof you already have.
 
 | Statement | Corresponding type | To prove it | To use a proof of it |
 |---|---|---|---|
@@ -528,96 +526,98 @@ Each logical connective corresponds to a way of building types, and each has two
 | \`∀ x, p x\` | dependent function | \`fun x => ...\` | apply it to a value |
 | \`∃ x, p x\` | dependent pair | \`⟨w, hw⟩\` | take it apart |
 
-The last two rows involve types that depend on values; the next article explains them. Two lines of the table deserve a comment. \`False\` is a type with no terms, so you can never prove it, and the rule that from \`False\` anything follows is simply that a function out of an empty type is easy to write: it has nothing to handle. And \`¬p\` is not a new idea: it is defined as \`p → False\`, meaning that a proof that \`p\` is false is a way to turn any proof of \`p\` into a proof of absurdity.
+The bottom two rows involve types that depend on values, which we'll unpack in the next article. Two middle rows are worth pausing on right now. \`False\` is simply an empty type with zero constructors, so you can never construct a value of it—and the old rule "from a contradiction, anything follows" is just the fact that writing a function out of an empty type requires zero cases. Meanwhile, \`¬p\` isn't a primitive symbol at all; it's defined as \`p → False\`, meaning a proof of "not \`p\`" is a function that turns any hypothetical proof of \`p\` into a contradiction.
 
-## Three small proofs
+## Seeing the table in three short proofs
 
-Each row can be seen in a proof. A conjunction is a pair:
+You can watch the table come alive in three one-line term proofs. Because a conjunction is a pair, swapping \`p ∧ q\` just flips its two fields:
 
 \`\`\`lean
 theorem and_comm' (p q : Prop) : p ∧ q → q ∧ p :=
   fun h => ⟨h.2, h.1⟩
 \`\`\`
 
-A disjunction is a value tagged with which side it came from, and using it means handling both cases:
+A disjunction is a value tagged with whether it came from the left or right, so using it means handling both branches:
 
 \`\`\`lean
 theorem or_comm' (p q : Prop) : p ∨ q → q ∨ p :=
   fun h => h.elim (fun hp => Or.inr hp) (fun hq => Or.inl hq)
 \`\`\`
 
-Negation chains: if \`p\` implies \`q\` and \`q\` is impossible, then \`p\` is impossible.
+And negation chains like ordinary function composition—if \`p\` implies \`q\` and \`q\` is impossible, then \`p\` is impossible too:
 
 \`\`\`lean
 theorem not_of_imp (p q : Prop) (hpq : p → q) (hnq : ¬q) : ¬p :=
   fun hp => hnq (hpq hp)
 \`\`\`
 
-In the last one, \`¬p\` unfolds to \`p → False\`, so the proof is a function that takes \`hp : p\`, passes it to \`hpq\` to get a proof of \`q\`, and gives that to \`hnq\` to reach \`False\`.
+Since \`¬p\` unfolds to \`p → False\`, that last proof takes a hypothetical \`hp : p\`, feeds it into \`hpq\` to get \`q\`, and passes that to \`hnq\` to reach \`False\`.
 
-## What is gained
+## Why unifying logic and types pays off
 
-The correspondence makes proof-checking and type-checking the same job. To check a proof, Lean checks that a term has the type of the statement. It needs no separate engine for logic; the type checker already there for programs does everything. It also explains why the tactics for logic look the way they do. \`intro\` builds a function, \`constructor\` builds a pair, \`apply\` uses a function whose result type matches your goal.
+Treating propositions as types turns proof-checking into type-checking. Lean doesn't need one engine for running programs and a separate engine for verifying logic—the same type checker verifies both. It also demystifies why logic tactics behave the way they do: \`intro\` writes a \`fun\`, \`constructor\` packs a pair, and \`apply\` calls a function whose output matches your current goal.
 
-It also explains why proofs can be given names and reused. A proof is a term, so a theorem is a definition whose type happens to be a proposition, and using a theorem is just applying a function.
+Better yet, theorems become ordinary reusable values. A theorem is just a named definition whose type happens to live in \`Prop\`, and applying a theorem in a later proof is nothing more than calling a function.
 
-## Care with the claim
+## Two nuances: proof irrelevance and classical logic
 
-The correspondence has one wrinkle, and it is worth stating plainly. Lean's logic has a special sort, \`Prop\`, with the rule that any two proofs of the same proposition are considered equal. This is called **proof irrelevance**. For a pair of numbers, \`(1, 2)\` and \`(2, 1)\` are different, and a program cares which one it gets. For a proof of \`p ∧ q\`, only the fact that it exists matters. This is why Lean separates \`Prop\` from \`Type\`: statements are for proving, and data is for computing, even though both are terms with types.
+There are two subtle places where Lean bends the pure correspondence, and both are worth knowing upfront.
 
-Another point of care concerns classical logic. In the pure correspondence, a proof of \`p ∨ q\` must say which side holds. The law of excluded middle, \`p ∨ ¬p\` for any \`p\`, cannot be proved that way, since it would require deciding every statement. Lean adds it as an axiom in its standard library, and the article on the kernel explains what that means for what you may trust.`,
+First, Lean puts propositions in their own sort, \`Prop\`, where any two proofs of the same statement are treated as equal—a rule called **proof irrelevance**. For data, \`(1, 2)\` and \`(2, 1)\` are distinct pairs and a program cares which one it gets. For a proof of \`p ∧ q\`, only the fact that a proof exists matters. Keeping \`Prop\` separate from \`Type\` lets Lean erase proofs at runtime while keeping data computable.
+
+Second, in pure constructive type theory, proving \`p ∨ q\` requires telling the reader which side holds. You can't prove the law of excluded middle (\`p ∨ ¬p\` for every \`p\`) that way, because doing so would require a general method to decide every mathematical statement. Lean adds classical choice as an axiom in its standard library so mathematicians can use proof by contradiction and case splits on \`p ∨ ¬p\`. The article on the kernel explains what that axiom costs and how Lean tracks it.`,
   },
   {
     id: 'dependent-types',
     section: 'theory',
     title: 'Dependent types',
-    summary: 'Types that mention values, how this makes "for all" and "there exists" ordinary constructions, and why that lets Lean state real mathematics.',
+    summary: 'Types that mention values—how they turn "for all" and "there exists" into functions and pairs, and why that unlocks real mathematics.',
     minutes: 6,
     worlds: ['types', 'quant'],
     next: ['inductive-types', 'equality'],
-    body: `So far a type like \`Nat → Nat\` has been a fixed thing. **Dependent types** are types whose description mentions a value. That one extension is what lets Lean express quantifiers and, with them, almost all of mathematics.
+    body: `Up to now, types like \`Nat → Nat\` have stayed completely fixed—they didn't refer to any specific values. **Dependent types** relax that restriction by letting a type mention a value. That single step is what lets Lean express quantifiers and state almost all of modern mathematics.
 
-## A function whose result type depends on its input
+## When a return type depends on the input
 
-Consider a function that takes a type and returns something of that type. An example is the identity function: for any type \`α\`, a function \`α → α\`. The type of the whole thing has to mention \`α\` twice, once to say what \`α\` is, and again in what follows:
+Think about the identity function: for any type \`α\`, it takes a value of type \`α\` and hands it right back. Its type has to name \`α\` first so it can refer to \`α\` again in the rest of the signature:
 
 \`\`\`lean
 def myId (α : Type) (a : α) : α := a
 \`\`\`
 
-The type of \`myId\` is \`(α : Type) → α → α\`. Here the type of the *second* argument, \`a : α\`, depends on the value of the *first* argument. This is a **dependent function type**, sometimes called a Π-type. Writing \`(x : A) → B x\` means: a function that takes \`x\` of type \`A\` and returns something of type \`B x\`, where the result type is allowed to change with \`x\`. When \`B\` does not mention \`x\`, this is the ordinary function type \`A → B\`. So ordinary functions are a special case.
+The type of \`myId\` is \`(α : Type) → α → α\`. Notice that the type of the *second* argument, \`a : α\`, depends on the actual value passed for the *first* argument. This is a **dependent function type**, often called a Π-type. In general, \`(x : A) → B x\` describes functions that accept \`x : A\` and return a value of type \`B x\`, where the output type can vary with \`x\`. Whenever \`B\` doesn't mention \`x\`, that collapses back to the familiar arrow \`A → B\`, making ordinary functions just a special case.
 
-## "For all" is a dependent function
+## "For all" as a dependent function
 
-Now take a statement such as \`∀ n : Nat, n + 0 = n\`. Read it as a type. For each natural number \`n\`, there is a proposition \`n + 0 = n\`. A proof of the whole statement is a function that, given \`n\`, produces a proof of that proposition for that \`n\`. The result type depends on the input: for \`n = 3\` it is \`3 + 0 = 3\`, and for \`n = 8\` it is \`8 + 0 = 8\`.
+Now look at a mathematical statement like \`∀ n : Nat, n + 0 = n\` through the lens of types. Each natural number \`n\` produces its own proposition \`n + 0 = n\`. A proof of the universal claim is a function that takes any \`n\` and returns a proof of that specific equation—for \`n = 3\` it returns a proof of \`3 + 0 = 3\`, and for \`n = 8\` it returns a proof of \`8 + 0 = 8\`:
 
 \`\`\`lean
 theorem add_zero_all : ∀ n : Nat, n + 0 = n := fun n => rfl
 \`\`\`
 
-That is exactly a dependent function type, with \`Prop\` as the sort of its results. So \`∀\` is not new machinery; it is the dependent arrow, written with a different symbol when the result is a proposition. And \`→\` between propositions is the case where the proposition on the right does not use the proof on the left. This is why the tactic \`intro\` works for both: it introduces the argument of a function, whether the argument is a number \`n\` or a proof \`h : p\`.
+That's literally a dependent function whose output type lives in \`Prop\`. So \`∀\` doesn't introduce new logical machinery; it's just the dependent function arrow written with mathematical notation when the result is a proposition. And \`p → q\` is the simpler case where \`q\` never mentions the proof of \`p\`. That's why \`intro\` works identically on both \`∀\` and \`→\`—in both cases, you're just naming the input of a function.
 
-## "There exists" is a dependent pair
+## "There exists" as a dependent pair
 
-The second construction is a **dependent pair**: a pair whose second component's type depends on the first component's value. A proof of \`∃ n : Nat, n * n = 49\` is a pair: a witness \`n\`, and a proof that \`n * n = 49\` for that particular \`n\`.
+The companion idea is a **dependent pair**, where the type of the second component depends on the value in the first. A proof of \`∃ n : Nat, n * n = 49\` pairs up a concrete witness \`n\` with a proof that \`n * n = 49\` holds for that exact \`n\`:
 
 \`\`\`lean
 theorem square_forty_nine : ∃ n : Nat, n * n = 49 := ⟨7, rfl⟩
 \`\`\`
 
-Compare with \`∧\`. A proof of \`p ∧ q\` is a pair where the second component's type, \`q\`, does not depend on the first. For \`∃\`, the second type is \`p w\` where \`w\` is the first component. The same angle brackets build both, and the tactic \`use 7\` supplies the first component and leaves you the second.
+Compare that with \`∧\`. In a proof of \`p ∧ q\`, the second component always has type \`q\`, regardless of what's in the first slot. In a proof of \`∃ x, p x\`, the second slot has type \`p w\`, customized to the witness \`w\` you chose. Lean uses the same angle brackets \`⟨...⟩\` to build both, and in tactic mode \`use 7\` fills in the witness and leaves you to prove the property for \`7\`.
 
-Using an existence proof means taking the pair apart: \`obtain ⟨w, hw⟩ := h\` gives you a name \`w\` for the witness and \`hw\` for the fact that it works. You are not told what \`w\` is, only that it exists, so you can only use the properties \`hw\` provides. This is how the mathematician's "let \`w\` be such a number" is written.
+To use an existence hypothesis \`h : ∃ x, p x\`, you unpack the pair with \`obtain ⟨w, hw⟩ := h\`. That gives you a name \`w\` for the witness and a proof \`hw : p w\`. You don't learn which concrete value \`w\` is—only that it exists and satisfies \`hw\`—which matches the mathematician's "let \`w\` be such a number".
 
-## Quantifier order is a type difference
+## Why quantifier order changes the type
 
-Because the types are explicit, the difference between \`∀ n, ∃ m, ...\` and \`∃ m, ∀ n, ...\` is visible as a difference between two types. In the first, a function gives a witness \`m\` for each \`n\`, and \`m\` may depend on \`n\`. In the second, a single \`m\` works for all \`n\`. Lean treats the two as different types and demands the proof you actually wrote. The article on translating English describes how this bears on formalizing.
+Because quantifiers are types, the famous difference between \`∀ n, ∃ m, ...\` and \`∃ m, ∀ n, ...\` shows up directly as two incompatible types. The first is a function that picks a possibly different witness \`m\` for each \`n\`; the second is a single pair whose one fixed witness \`m\` has to work for every \`n\`. Lean won't let you slide between them—you have to prove the exact order you wrote down, a trap we revisit in the article on translating English into Lean.
 
-## Why this reaches real mathematics
+## Stating real math and invariants
 
-With dependent types, you can state things such as "for every natural number there is a larger prime", "for every function from a set to its subsets, some subset is missed", or "for every \`ε\` there is a \`δ\`". The language needs no extra constructs for these: predicates are functions into \`Prop\`, and quantifiers are dependent functions and pairs over them. The game's final theorem, Cantor's, uses exactly this: statements about all functions and all subsets.
+With dependent types on board, Lean can express statements like "for every natural number there's a larger prime", "every map from a set to its subsets misses some subset", or the \`ε\`–\`δ\` definition of continuity. Nothing extra has to be bolted onto the language: predicates are functions into \`Prop\`, and quantifiers are dependent functions and pairs over them. Cantor's theorem at the end of this game uses exactly this setup.
 
-Dependent types also let programs express invariants. A classic example is a list that carries its length in its type:
+Dependent types also let everyday programs encode invariants directly in their types. The classic example is a vector—a list that tracks its own length:
 
 \`\`\`lean-real
 inductive Vec (α : Type) : Nat → Type where
@@ -630,25 +630,25 @@ def Vec.head {α : Type} {n : Nat} : Vec α (n + 1) → α
 #eval (Vec.cons 5 Vec.nil).head
 \`\`\`
 
-The type \`Vec α n\` is the type of lists of length \`n\`. The function \`head\` takes a \`Vec α (n + 1)\`, a list that is certainly nonempty, so there is no empty case to handle and no error to raise. The type has ruled it out. The program prints \`5\`.
+Here \`Vec α n\` is the type of lists of length \`n\`. Because \`head\` demands a \`Vec α (n + 1)\`, it can only ever be called on a nonempty list—there's no empty case to handle and no runtime crash to guard against, and \`#eval\` cleanly prints \`5\`.
 
-## What it costs
+## The trade-off for all this power
 
-Dependent types make type checking harder, because the checker must sometimes decide whether two values that appear in types are equal, which means evaluating them. That is part of why Lean has two kinds of equality, the subject of a later article. It also means that error messages can mention types with large expressions in them. The reward is a language in which a statement, a program and a proof can all be written without leaving it.`,
+All of this expressiveness comes with a price. Type checking gets harder because Lean sometimes has to evaluate expressions inside types to decide whether two types match—one of the reasons Lean distinguishes two kinds of equality, covered later in this section. Error messages can also grow verbose when large computed expressions show up inside a type. Even so, the payoff is huge: statements, programs, and proofs all live smoothly inside one unified language.`,
   },
   {
     id: 'inductive-types',
     section: 'theory',
     title: 'Inductive types',
-    summary: 'How Nat, And, Or and False are all defined by constructors, and why recursion and induction are one principle.',
+    summary: 'How Nat, And, Or, and False are all defined by their constructors, and why recursion and induction turn out to be the same principle.',
     minutes: 6,
     worlds: ['logic', 'nat'],
     next: ['equality', 'kernel-and-trust'],
-    body: `Nearly everything in Lean that is not a function type or a sort is an **inductive type**. An inductive type is defined by listing its **constructors**, the only ways to build a value of that type. The type has no other values, and that closed-world rule is what makes it possible to reason about it.
+    body: `Almost everything in Lean that isn't a function type or a sort is an **inductive type**. You define an inductive type by listing its **constructors**—the complete set of ways to build a value of that type. No other values exist, and that closed list is what makes case analysis and induction possible.
 
-## The natural numbers
+## Building the natural numbers from two constructors
 
-The natural numbers are defined with two constructors. In Lean's library, the definition reads roughly like this:
+The natural numbers come from just two constructors. In Lean's library, the definition looks roughly like this:
 
 \`\`\`text
 inductive Nat where
@@ -656,9 +656,9 @@ inductive Nat where
   | succ (n : Nat) : Nat
 \`\`\`
 
-There is a number \`zero\`, and for any number \`n\` there is a number \`succ n\`, its successor. Every natural number is built by applying \`succ\` some number of times to \`zero\`. The numeral \`3\` is shorthand for \`succ (succ (succ zero))\`. Nothing else is a natural number, which is the sense in which the definition is closed.
+There's a base number \`zero\`, and for any number \`n\` there's its successor \`succ n\`. Every natural number is just \`zero\` wrapped in \`succ\` some finite number of times—\`3\` is shorthand for \`succ (succ (succ zero))\`. Nothing else belongs to \`Nat\`.
 
-You can write the same kind of definition for your own type. Here is a copy of the natural numbers, with addition defined by recursion on the second argument and a function back to Lean's own numbers to check it:
+You can define your own copy of the natural numbers the exact same way, write addition by recursing on the second argument, and convert back to Lean's \`Nat\` to test it:
 
 \`\`\`lean-real
 inductive MyNat where
@@ -676,11 +676,11 @@ def MyNat.toNat : MyNat → Nat
 #eval (MyNat.add (.succ (.succ .zero)) (.succ .zero)).toNat
 \`\`\`
 
-This prints \`3\`. The function \`add\` is defined by cases on the constructors of its second argument: one equation for each.
+That evaluates to \`3\`. Notice how \`add\` has one equation for each constructor of its second argument.
 
-## Logic is inductive too
+## Logic is built from inductive types too
 
-The connectives of logic are inductive types, with constructors that say how to prove them.
+Lean's logical connectives use the exact same mechanism—their constructors specify how to prove them:
 
 \`\`\`text
 structure And (a b : Prop) : Prop where
@@ -693,19 +693,19 @@ inductive Or (a b : Prop) : Prop where
 inductive False : Prop
 \`\`\`
 
-\`And\` has one constructor taking two proofs, so a proof of \`p ∧ q\` is exactly a pair. \`Or\` has two constructors, one for each side, so a proof of \`p ∨ q\` is a proof of one side with a label. \`False\` has no constructors at all, so there is nothing to build, which is why it is unprovable. The existential \`∃\` has one constructor taking a witness and a proof, so it is a dependent pair. Equality, too, is inductive, with one constructor \`rfl\` saying that anything equals itself.
+\`And\` has a single constructor taking two proofs, so a proof of \`p ∧ q\` is simply a pair. \`Or\` has two constructors, one per side, so a proof of \`p ∨ q\` carries a tag saying which side was proved. \`False\` has zero constructors, so there's no way to build a proof of it. Existentials \`∃\` have one constructor bundling a witness with its proof, and even equality \`=\` is an inductive type with one constructor, \`rfl\`, saying that anything equals itself.
 
-## Constructors say how to build; recursors say how to use
+## Constructors build values; recursors take them apart
 
-An inductive type comes with a second piece, its **recursor**, which says how to use a value of the type. For \`Or\`, using a proof means giving a case for each constructor: what to do if it came from the left, and what to do if it came from the right. That is the rule \`Or.elim\`, and it is what the tactic \`cases\` does. For \`And\`, using a proof means giving a function of both components, which is what \`obtain ⟨a, b⟩\` does. For \`False\`, with no constructors, there are no cases to give, so from it anything follows.
+Every inductive definition automatically generates a companion rule called its **recursor**, which tells you how to consume a value of that type. To use a proof of \`Or\`, you provide one branch for \`inl\` and one branch for \`inr\`—that's \`Or.elim\`, and it's what the \`cases\` tactic invokes. To use a proof of \`And\`, you supply a function expecting both components, which is what \`obtain ⟨a, b⟩\` sets up. And since \`False\` has zero constructors, handling all its cases takes zero work, which is why anything follows from \`False\`.
 
-The pattern is uniform: to prove a statement about all values of an inductive type, it is enough to prove it for each constructor. That is the induction principle, and Lean derives it from the definition.
+The pattern never changes: because values can only come from the listed constructors, proving a claim for every constructor proves it for the entire type. Lean derives that principle automatically from the definition.
 
-## Recursion and induction are the same thing
+## Why recursion and induction are the same rule
 
-For \`Nat\`, the recursor is called \`Nat.rec\`. In one form it builds data: given a value for \`zero\` and a way to get the value for \`succ n\` from the value for \`n\`, it produces a value for every \`n\`. In another form it proves statements: given a proof for \`zero\` and a way to get a proof for \`succ n\` from the proof for \`n\`, it proves the statement for every \`n\`. These are the same rule with different result types, one in \`Type\` and one in \`Prop\`. A recursive definition and a proof by induction are the same construction, which is why they look alike.
+For \`Nat\`, the recursor is \`Nat.rec\`. Aim it at \`Type\` and it defines recursive functions: give a value for \`zero\` and a way to compute the value for \`succ n\` from the value for \`n\`, and you get a function defined on every natural number. Aim the exact same rule at \`Prop\` and it proves theorems by induction: give a proof for \`zero\` and a way to turn a proof for \`n\` into a proof for \`succ n\`, and you get a proof for every natural number. Writing a recursive function and writing an inductive proof are two faces of the same construction, which is why their syntax looks almost identical.
 
-Here is induction at work, in the shape the game teaches:
+Here's induction in action, in the form you use throughout the game:
 
 \`\`\`lean
 theorem zero_add_again (n : Nat) : 0 + n = n := by
@@ -714,111 +714,111 @@ theorem zero_add_again (n : Nat) : 0 + n = n := by
   | succ k ih => rw [Nat.add_succ, ih]
 \`\`\`
 
-The base case is \`0 + 0 = 0\`, which holds by computation. The step case assumes \`ih : 0 + k = k\` and must prove \`0 + (k + 1) = k + 1\`; rewriting with the defining equation of addition and then with \`ih\` finishes it. The tactic \`induction\` applied the recursor, which produced exactly those two goals.
+The base case \`0 + 0 = 0\` simplifies immediately by computation. The step case gives you the inductive hypothesis \`ih : 0 + k = k\` and asks for \`0 + (k + 1) = k + 1\`, which falls to rewriting with addition's recursive rule and then \`ih\`. Behind the scenes, \`induction\` just applied \`Nat.rec\` to generate those two goals.
 
-## Why "inductive" and why it is safe
+## How Lean keeps inductive types safe
 
-Lean checks that an inductive definition is legitimate: that the type being defined appears in its constructors only in allowed places, so that values are built from smaller values and never circularly. This check, called positivity, is what ensures that recursion terminates and that no paradox sneaks in. It is part of what the kernel enforces.
+Not every recursive declaration makes sense—some self-referential definitions would sneak a logical paradox into the system. Lean's kernel enforces a rule called **strict positivity**, ensuring that the type being defined only appears in safe positions inside its constructors so every value is genuinely built from smaller pieces. That check guarantees termination for structural recursion and keeps the logic consistent.
 
-## What you can do with this
+## Seeing tactics through constructors
 
-Once you read a type as "its constructors", many tactics become predictable. \`constructor\` applies a constructor to the goal. \`cases\` and \`rcases\` split a hypothesis along the constructors of its type. \`induction\` does the same for a type whose constructors contain the type itself. \`injection\` and \`contradiction\` use the fact that different constructors give different values: \`succ n = zero\` is impossible, because no value is built both ways. When a proof puzzles you, asking "what are the constructors?" usually shows the next step.`,
+Once you start reading every type as its list of constructors, tactics stop feeling arbitrary. \`constructor\` picks a constructor to build the goal. \`cases\` and \`rcases\` split a hypothesis along the constructors that could have built it, and \`induction\` does the same while also handing you an inductive hypothesis for recursive fields. \`injection\` and \`contradiction\` rely on constructors being distinct—\`succ n = zero\` is impossible because two different constructors never produce the same value. Whenever a goal stalls you, asking "what are the constructors here?" usually points straight to the next line.`,
   },
   {
     id: 'equality',
     section: 'theory',
     title: 'Two kinds of equality',
-    summary: 'Definitional equality, which Lean computes, and propositional equality, which you prove; why n + 0 = n is free and 0 + n = n is not.',
+    summary: 'Definitional equality, which Lean checks by computing, versus propositional equality, which you prove—and why n + 0 = n is free while 0 + n = n needs induction.',
     minutes: 5,
     worlds: ['eq', 'nat'],
     next: ['kernel-and-trust', 'how-to-attack-a-proof'],
-    body: `Lean distinguishes two meanings of "the same", and the difference explains many things that puzzle beginners.
+    body: `Lean has two distinct notions of "the same", and understanding the split clears up some of the most common early surprises.
 
 ## Definitional equality: same by computation
 
-Two terms are **definitionally equal** when Lean can reduce them to the same thing by unfolding definitions and computing. \`2 + 2\` and \`4\` are definitionally equal: addition on natural numbers is a function, and evaluating it on \`2\` and \`2\` gives \`4\`. Lean's checker decides this by itself, with no input from you, and it treats definitionally equal terms as interchangeable everywhere. It does not need a proof, because there is nothing to prove: they are one term written two ways.
+Two expressions are **definitionally equal** when Lean can reduce them to the same form just by unfolding definitions and evaluating. For example, \`2 + 2\` and \`4\` are definitionally equal: addition on natural numbers is a computable function, and running it on \`2\` and \`2\` produces \`4\`. Lean checks this silently on its own and treats definitionally equal expressions as completely interchangeable. You don't need to prove they're equal—to the checker, they're already two spellings of the same thing.
 
-The proof term \`rfl\`, short for reflexivity, shows two sides are the same by this route:
+The proof term \`rfl\` (short for reflexivity) settles any equation whose two sides are definitionally equal:
 
 \`\`\`lean
 theorem two_plus_two : 2 + 2 = 4 := rfl
 \`\`\`
 
-The claim \`2 + 2 = 4\` is accepted because, to check that \`rfl : 4 = 4\` has type \`2 + 2 = 4\`, Lean notes that \`2 + 2\` reduces to \`4\`.
+Lean accepts this because \`rfl\` proves \`4 = 4\`, and \`2 + 2\` computes straight to \`4\`.
 
-## Propositional equality: a statement to prove
+## Propositional equality: a claim you have to prove
 
-The statement \`a = b\` is a proposition, an inductive type like any other, whose only constructor is \`rfl : a = a\`. When you write a theorem like \`a + b = b + a\`, you ask for a *proof* of this proposition. It is not true by computation, because \`a\` and \`b\` are variables and the computation cannot proceed. Lean needs a proof, and the proof is built from lemmas, from \`rw\`, from induction.
+The equality symbol \`a = b\` itself forms a proposition—an inductive type whose single constructor is \`rfl : a = a\`. When you state \`a + b = b + a\`, you're asking for a *proof* of that proposition. Lean can't settle it by computing, because \`a\` and \`b\` are abstract variables, so evaluation gets stuck. Instead, you have to build a proof out of lemmas, rewrites, and induction.
 
-A theorem that is only propositionally true cannot be settled by \`rfl\`. If you try, Lean reports that it cannot see the two sides as the same. The tool that connects the two kinds is the *rewriting* tactic \`rw\`: given a proof \`h : a = b\`, it replaces \`a\` by \`b\` in the goal, using the substitution property of equality. A proof by \`rw\` is a chain of propositional steps, with definitional equality quietly closing whatever remains.
+If an equation is only propositionally true, \`rfl\` fails and Lean tells you it can't unify the two sides. The bridge between the two worlds is \`rw\`: given a proof \`h : a = b\`, \`rw [h]\` substitutes \`b\` for \`a\` inside the goal. A typical \`rw\` proof takes a few propositional steps and then lets definitional equality quietly close what's left:
 
 \`\`\`lean
 theorem rewrite_example (a b : Nat) (h : a = b) : a + 1 = b + 1 := by
   rw [h]
 \`\`\`
 
-After the rewrite the goal reads \`b + 1 = b + 1\`, and \`rw\` closes it by \`rfl\`.
+Once \`rw [h]\` changes the goal to \`b + 1 = b + 1\`, \`rw\` automatically calls \`rfl\` and finishes the proof.
 
 ## Why \`n + 0 = n\` is free
 
-Addition of natural numbers is defined by recursion on the second argument:
+Natural-number addition is defined by recursion on its *second* argument:
 
 \`\`\`text
 n + 0      = n
 n + succ m = succ (n + m)
 \`\`\`
 
-The first equation is a definition, so \`n + 0\` reduces to \`n\` however little we know about \`n\`. The statement \`n + 0 = n\` is therefore a definitional equality, and \`rfl\` proves it for every \`n\`:
+Because the first clause matches whenever the right-hand argument is \`0\`, \`n + 0\` reduces directly to \`n\` even when we know nothing about \`n\`. That makes \`n + 0 = n\` a definitional equality, so \`rfl\` proves it in one word:
 
 \`\`\`lean
 theorem add_zero_free (n : Nat) : n + 0 = n := rfl
 \`\`\`
 
-## Why \`0 + n = n\` is not
+## Why \`0 + n = n\` isn't
 
-Now try the mirror image. The definition recurses on the second argument, and here that argument is the variable \`n\`. The computation is stuck: Lean cannot unfold \`0 + n\` without knowing whether \`n\` is \`zero\` or \`succ\` of something. So \`0 + n\` does not reduce to \`n\`, and \`rfl\` fails.
+Now flip the order. Addition inspects its *second* argument, which here is the unknown variable \`n\`. Evaluation stalls immediately: Lean can't tell whether \`n\` is \`zero\` or \`succ k\`, so \`0 + n\` won't reduce to \`n\` and \`rfl\` rejects it.
 
-The statement is nevertheless true, and a proof exists, but it needs induction, because the proof must handle each constructor of \`n\` separately. The two cases are \`0 + 0 = 0\`, which computes, and \`0 + (k + 1) = k + 1\` assuming \`0 + k = k\`. Induction is the right tool because the equation is propositional.
+Of course \`0 + n = n\` is still true—it just requires a proof by induction, breaking \`n\` into its two constructors. For \`0\`, \`0 + 0 = 0\` computes outright; for \`succ k\`, the step reduces to \`0 + (k + 1) = k + 1\`, which follows from the inductive hypothesis \`0 + k = k\`.
 
-Two statements that look equally obvious to a person, \`n + 0 = n\` and \`0 + n = n\`, differ in kind for Lean. The difference depends on how addition was defined. Had we defined it by recursion on the first argument, the roles would swap. This is one of the first places where you see that Lean cares about how things are built, not only about what they mean.
+To a human reader, \`n + 0 = n\` and \`0 + n = n\` look equally obvious. To Lean, they belong to different categories, purely because addition was written to recurse on its second input. Had someone defined addition on its first input instead, the two equations would trade places. It's one of the clearest reminders that Lean pays attention to *how* a function is defined, not just what mathematical function it represents.
 
-## Other tools for equality
+## Other tools for working with equality
 
-A few more tools use the same idea. The lemma \`congrArg\` says that if \`a = b\` then \`f a = f b\`, for any function \`f\`. The tactic \`symm\` turns \`a = b\` into \`b = a\`, and \`calc\` chains several steps, \`a = b\`, \`b = c\`, \`c = d\`, to conclude \`a = d\`. These are all propositional manipulations, and each produces a proof term you could write by hand.
+Several everyday tools manipulate propositional equalities. \`congrArg\` lets you apply any function \`f\` to both sides of \`a = b\` to get \`f a = f b\`. The tactic \`symm\` flips a goal \`a = b\` into \`b = a\`, and \`calc\` lays out multi-step chains—\`a = b\`, \`b = c\`, \`c = d\`—in readable algebraic style. Under the hood, each one builds a standard proof term.
 
-## Why the distinction is worth having
+## Why Lean keeps both kinds
 
-It would be simpler to have one kind of equality, but a simple design has a cost. If every equation needed an explicit proof, then checking that \`2 + 2 = 4\` would require a proof, and a type like \`Vec α (2 + 2)\` could not be recognized as \`Vec α 4\` without rewriting. Letting the checker compute definitional equalities keeps types and proofs readable. If every equation were decided by computation, checking would sometimes never end, since some equations cannot be settled by running a program. Lean splits the work: what computation settles, the checker settles, and everything else is a theorem.
+Having just one kind of equality might sound cleaner, yet either extreme breaks down. If every equality had to be proved explicitly, you couldn't even treat \`2 + 2\` as \`4\` inside a type like \`Vec α (2 + 2)\` without writing proof boilerplate everywhere. On the other hand, if the checker tried to decide every mathematical equality automatically by computation, type checking could loop forever—some equalities can't be decided mechanically at all. Lean splits the job down the middle: what evaluation settles, the checker handles for free; everything deeper is a theorem you prove.
 
-You will notice the split most in error messages. When \`rw\` complains that it did not find a pattern, or \`rfl\` complains that two sides are not the same, ask whether the equation is definitional or propositional. That question usually names the missing step.`,
+You'll feel this boundary most clearly in error messages. Whenever \`rfl\` refuses to close a goal or \`rw\` can't find the pattern you expected, ask whether the step you have in mind is definitional or propositional. Nine times out of ten, that question tells you what's missing.`,
   },
   {
     id: 'kernel-and-trust',
     section: 'theory',
     title: 'The kernel: why you can trust a proof',
-    summary: 'What Lean\'s small trusted core checks, what tactics and automation are allowed to get wrong, which axioms exist, and what no proof checker can promise.',
+    summary: 'What Lean\'s small trusted kernel checks, why buggy tactics can\'t sneak in a false theorem, which axioms Lean uses, and what no proof checker can promise.',
     minutes: 6,
     worlds: ['props', 'logic'],
     next: ['how-to-attack-a-proof', 'lean-in-the-world'],
-    body: `When Lean accepts a theorem, what exactly has been checked, and by what? The answer has a layered structure, and knowing it tells you how much to trust a Lean proof and where the remaining risk lies.
+    body: `When Lean puts a green checkmark next to a theorem, what exactly got checked, and which pieces of software are you trusting? Lean's architecture separates the clever parts from the trusted parts, and knowing where that line sits tells you how much confidence a Lean proof earns—and where the real risks still live.
 
-## A small core and a large periphery
+## A small kernel and an untrusted periphery
 
-Lean has a **kernel**, a small program whose only job is to check that a term has the type it claims. It implements the core rules of the type theory: how types are formed, how terms are typed, when two terms are definitionally equal, and what counts as a valid inductive definition. Everything else in Lean is built on top: the parser, the elaborator that fills in implicit arguments, the tactic framework, the automation, the editor support. None of those parts is trusted. They produce terms, and the kernel checks each term from scratch.
+At the center of Lean sits the **kernel**, a relatively small program with one job: check whether a proof term actually has the type claimed by the theorem. It implements only the core rules of Lean's type theory—how types are formed, how terms are typed, when two expressions are definitionally equal, and whether an inductive type is well-formed.
 
-This design is sometimes called the *de Bruijn criterion*: the proof checker should be small enough that people can read and review it, while everything clever lives outside it and produces certificates for it to check. In Lean, the certificate is a proof term. A proof of a big theorem can be an enormous term, and the kernel's check of it is a mechanical process: no search, no guessing.
+Everything else lives outside the kernel: the parser, the elaborator that infers implicit arguments, the tactic engine, automation like \`simp\` and \`omega\`, and editor tooling. None of those layers is trusted. Their only role is to construct a raw proof term and hand it over, and the kernel checks that term from scratch.
 
-## What tactics and automation may get wrong
+This design follows what logicians call the *de Bruijn criterion*: keep the checker small enough for humans to audit closely, and let complex tools outside it produce verifiable certificates. Even when a big theorem generates an enormous proof term, checking it in the kernel is purely mechanical—there's no search and no guesswork.
 
-A tactic can be wrong in several ways, and none of them lets a false statement in.
+## What happens when a tactic gets it wrong
 
-A tactic can fail, and you get an error. It can succeed but produce a very long term. It can be slow. Or it can have a bug that makes it produce an ill-typed term, in which case the kernel rejects the term and the theorem is not accepted. What a tactic cannot do, however buggy, is make the kernel accept a term of the wrong type. Automation such as \`simp\`, \`omega\` and \`grind\` is the same: it is a program that tries to build a proof term, and the kernel checks what it builds.
+Because tactics sit outside the trusted core, a buggy tactic can't smuggle in a false theorem. Plenty of things can still go wrong with a tactic—it can fail with an error, crawl slowly, or output a bloated proof term. If a bug makes it emit an invalid proof term, the kernel simply rejects the term and refuses to accept the theorem. Heavyweight automation like \`simp\`, \`omega\`, and \`grind\` follows the exact same rule: they search for a proof term, and the kernel has the final word on whatever they build.
 
-This is also why you can use a library without reading its proofs. A theorem in Mathlib was checked by the same kernel when the library was compiled, and its statement is exactly what \`#check\` shows. You rely on the statement, not on the person who proved it.
+That separation is also why you can safely import theorems from Mathlib without reading their proofs. Every theorem in the library passed the same kernel check when Mathlib was built, and \`#check\` displays its exact statement. You're trusting the kernel and the statement, not the author's infallibility.
 
-## Axioms
+## The three standard axioms and #print axioms
 
-The kernel's rules include some statements that are assumed rather than proved, called **axioms**. Lean's standard library uses three beyond the basic rules, and you can ask which ones any theorem depends on:
+Every logical system starts from a few unproved foundations called **axioms**. Beyond the core type-theory rules, Lean's standard library includes three axioms, and \`#print axioms\` lets you see exactly which ones any theorem relies on:
 
 \`\`\`lean-real
 theorem em_demo (p : Prop) : p ∨ ¬p := Classical.em p
@@ -826,65 +826,65 @@ theorem em_demo (p : Prop) : p ∨ ¬p := Classical.em p
 #print axioms em_demo
 \`\`\`
 
-Lean replies:
+Lean answers:
 
 \`\`\`text
 'em_demo' depends on axioms: [propext, Classical.choice, Quot.sound]
 \`\`\`
 
-These three are:
+Here's what each one says:
 
-- **\`propext\`**, propositional extensionality: if two propositions imply each other, they are equal.
-- **\`Quot.sound\`**, which comes with the quotient construction and is the basis of function extensionality (\`funext\`): two functions that agree at every input are equal.
-- **\`Classical.choice\`**, the axiom of choice, from which the law of excluded middle follows.
+- **\`propext\`** (propositional extensionality): if two propositions imply each other, they're equal.
+- **\`Quot.sound\`**: justifies quotient types and gives us function extensionality (\`funext\`), saying that two functions with the same output on every input are equal.
+- **\`Classical.choice\`**: the axiom of choice, which implies the law of excluded middle (\`p ∨ ¬p\`).
 
-A proof that avoids all three is called **constructive**: it works without assuming that every statement is decided. For example, a proof of \`p ∨ q\` in that style tells you which side holds. Proofs that use the law of excluded middle are **classical**, and give up that information. Most of Mathlib is classical, and that is the standard setting for working mathematicians. The game's logic world shows the difference: \`by_cases\` and \`by_contra\` typically rely on the classical axioms, while \`constructor\`, \`intro\` and \`cases\` do not. The \`#print axioms\` command is how you check which kind a given proof is.
+A proof that uses none of these three is **constructive**—a constructive proof of \`p ∨ q\`, for instance, actually hands you which side is true. Proofs that invoke excluded middle are **classical** and give up that computational witness. Almost all of Mathlib works classically, matching everyday mathematics. You see the distinction in the game's logic world: \`by_cases\` and \`by_contra\` lean on classical reasoning, whereas \`constructor\`, \`intro\`, and \`cases\` stay constructive. Running \`#print axioms\` lets you verify which axioms a theorem actually touched.
 
-A theorem that uses \`sorry\`, the placeholder for an unfinished proof, shows an extra axiom, \`sorryAx\`, which flags that it is incomplete:
+If a proof still contains \`sorry\`—the placeholder for an unfinished branch—Lean flags it with an extra axiom called \`sorryAx\`:
 
 \`\`\`text
 'bad' depends on axioms: [sorryAx]
 \`\`\`
 
-The tactic \`native_decide\`, which evaluates a statement using compiled code rather than the kernel, adds a further axiom \`Lean.ofReduceBool\`, and so expands what you trust to include the compiler. If you want the most conservative check, look at the axioms list.
+Similarly, the \`native_decide\` tactic evaluates a decision procedure using compiled code instead of the kernel, which adds \`Lean.ofReduceBool\` and extends your trust to Lean's compiler. Whenever you want the strictest audit of a result, \`#print axioms\` tells the whole story.
 
-## What the kernel does not guarantee
+## Three things the kernel can't guarantee
 
-Three limits are worth stating plainly.
+Even with a solid kernel, three caveats always apply.
 
-**The statement may not say what you meant.** Lean checks that you proved the theorem you wrote. If the formal statement is weaker than the claim you had in mind, or accidentally trivial, the proof is still valid and still not what you wanted. This is the main practical risk in formalization, and reviewing statements and definitions matters more than reviewing proofs. The article on translating English into Lean discusses the common traps.
+**Your statement might not say what you meant.** Lean only verifies the formal statement on the page. If a missing hypothesis makes your theorem vacuously true, or a weak definition misses the real concept, Lean happily checks the proof anyway. In serious formalization projects, reviewing definitions and theorem statements matters far more than reading proofs.
 
-**The kernel could have a bug.** It is small and open to review, and independent re-implementations of the checker exist, which reduces the chance, but it is software. Soundness of the type theory itself is a mathematical result that is established on paper, relative to assumptions about stronger systems, and not something Lean proves of itself. Gödel's second incompleteness theorem rules out a system proving its own consistency in full generality.
+**The kernel is still software.** It's small, open source, and checked by independent external type checkers written in other languages—all of which keeps the risk very low—yet bugs in software are never strictly zero. And by Gödel's second incompleteness theorem, Lean can't prove its own consistency from inside itself; soundness is a meta-mathematical result studied on paper.
 
-**Declarations outside the core trust.** If you declare your own \`axiom\`, Lean will use it without proof. A tactic that adds axioms, like \`sorry\` or \`native_decide\`, shows up in \`#print axioms\`, which is why that command is the way to check what a result depends on.
+**Custom axioms bypass the checker.** Anyone can write an \`axiom\` declaration in a file and assume anything without proof. Fortunately, any custom axiom—just like \`sorry\` or \`native_decide\`—shows up immediately in \`#print axioms\`.
 
-## The right amount of trust
+## Knowing what a checkmark really means
 
-None of this is a reason to distrust Lean. A Lean-checked proof has been verified to a standard that no refereeing process on paper can match, and the places where it could fail are few and well known. The sensible habit is to know them: read the statement, check the axioms, and treat a proof as evidence about the statement you actually wrote.`,
+None of those caveats undermines how strong a Lean proof is. Computer-checked verification catches subtle gaps that human refereeing misses all the time, and the few remaining failure modes are transparent and easy to inspect. Build the habit of checking three things—read the definitions, read the statement, and run \`#print axioms\`—and you'll know with clear eyes exactly what Lean has certified.`,
   },
   {
     id: 'how-to-attack-a-proof',
     section: 'practice',
     title: 'How to attack a proof',
-    summary: 'A working method for starting and continuing a proof, with a table from the shape of the goal or hypothesis to the tactic to try.',
+    summary: 'A practical routine for starting and advancing a proof, plus quick-reference tables mapping goal and hypothesis shapes to the right tactic.',
     minutes: 6,
     worlds: ['props', 'logic', 'quant', 'forge'],
     next: ['english-to-lean', 'lean-programming'],
-    body: `Faced with a blank proof, beginners often ask what the trick is. For most of the proofs in this game there is no trick, only a method. The method is to let the shape of the goal and the shapes of your hypotheses tell you what to do.
+    body: `Staring at an empty \`by\` block, it's tempting to think there's a clever trick you're supposed to spot right away. For most proofs in this game—and a surprising fraction of real Lean proofs—there's no trick at all. You just let the outermost symbol of the goal and the shapes of your hypotheses tell you the next move.
 
-## The method in five moves
+## Five moves to get unstuck
 
-**Read the goal.** Say in words what you must show. Is it an implication, a conjunction, a "for all", an equation? The outermost symbol of the goal tells you what to do first.
+**Read the goal first.** Say out loud what the line after \`⊢\` is asking for. Is it an implication, a conjunction, a "for all", or an equation? That outer connective almost always dictates your opening step.
 
-**Introduce.** If the goal is \`p → q\`, then \`intro hp\` assumes \`p\` and leaves \`q\`. If it is \`∀ x, p x\`, then \`intro x\` picks an arbitrary \`x\`. Introduce everything you can before thinking further; it costs nothing and gives you material.
+**Introduce what you can.** If the goal starts with \`p → q\`, run \`intro hp\` to assume \`p\` and focus on \`q\`. If it starts with \`∀ x, p x\`, run \`intro x\` to pick an arbitrary \`x\`. Introducing early costs nothing and puts more ingredients above the turnstile.
 
-**Split.** If the goal is a conjunction, \`constructor\` gives two goals. If it is an equivalence, \`constructor\` gives the two directions. If it is a disjunction, choose a side with \`left\` or \`right\`, but only when you know which side is true. If it is an existence claim, supply a witness with \`use\`.
+**Break the goal down.** For \`p ∧ q\` or \`p ↔ q\`, \`constructor\` splits the job into two smaller goals. For \`p ∨ q\`, pick a side with \`left\` or \`right\` once you can see which side is provable. For \`∃ x, p x\`, supply a witness with \`use\`.
 
-**Use what you have.** Look at each hypothesis. A conjunction can be taken apart with \`obtain\`. A disjunction can be split with \`cases\`. An implication or a "for all" can be applied or specialized to a particular value. An equation can rewrite the goal with \`rw\`.
+**Unpack your hypotheses.** Scan above the turnstile. Split an \`∧\` or \`∃\` hypothesis with \`obtain\`, branch on an \`∨\` hypothesis with \`cases\`, feed inputs into an implication or \`∀\` hypothesis, or rewrite with an equation using \`rw\`.
 
-**Work backwards or forwards.** Working backwards means \`apply\`: if you have \`h : p → q\` and the goal is \`q\`, then \`apply h\` changes the goal to \`p\`. Working forwards means \`have\`: derive a new fact \`have hq : q := h hp\` and add it to the hypotheses. Use whichever direction makes the gap smaller. When you are stuck, write down the statement of the gap as a \`have\` with \`sorry\`, and then prove it as its own goal.
+**Move backward or forward.** Working backward uses \`apply\`: if you have \`h : p → q\` and your goal is \`q\`, \`apply h\` shifts the goal back to \`p\`. Working forward uses \`have\`: derive an intermediate fact like \`have hq : q := h hp\` to add it to your hypotheses. Pick whichever direction shrinks the gap faster. When you can see a stepping stone but don't want to prove it yet, write \`have ... := by sorry\` and fill it in once the rest of the skeleton fits.
 
-## A table to keep nearby
+## Quick reference: goals and hypotheses
 
 | The goal looks like | Try |
 |---|---|
@@ -911,11 +911,11 @@ None of this is a reason to distrust Lean. A Lean-checked proof has been verifie
 | \`h : a = b\` | \`rw [h]\` or \`rw [← h]\` |
 | \`h : False\` or a contradiction | \`contradiction\` or \`exfalso\` |
 
-The table covers the game's tactics, and the same habits transfer to real Lean. It is a list of reflexes, not a decision procedure: when two rows apply, either order usually works, and one of them is shorter.
+These tables cover the game's tactics, and the same instincts carry straight over to real Lean. Treat them as reflexes rather than a rigid algorithm: when two rows both apply, either order usually works, though one often keeps the proof shorter.
 
-## A worked example
+## Walking through an injectivity proof
 
-Let us prove that the composition of two injective functions is injective. A function is **injective** when different inputs give different outputs, or equivalently when equal outputs force equal inputs.
+Take the claim that composing two injective functions gives an injective function. Recall that a function is **injective** when equal outputs force equal inputs (equivalently, distinct inputs always map to distinct outputs):
 
 \`\`\`lean
 theorem compose_inj {α β γ : Type} (f : α → β) (g : β → γ)
@@ -927,108 +927,106 @@ theorem compose_inj {α β γ : Type} (f : α → β) (g : β → γ)
   exact h
 \`\`\`
 
-The goal is \`Function.Injective (g ∘ f)\`, which unfolds to a "for all" over \`a\` and \`b\` followed by an implication. So the first move is to introduce: \`intro a b h\` names two inputs and the hypothesis \`h\` that they have equal outputs. The goal is now \`a = b\`.
+The goal \`Function.Injective (g ∘ f)\` unfolds to \`∀ a b, (g ∘ f) a = (g ∘ f) b → a = b\`. Following the table, \`intro a b h\` brings the two inputs and the equation \`(g ∘ f) a = (g ∘ f) b\` into scope, leaving \`a = b\`.
 
-We have \`hf : Function.Injective f\`, which says that \`f a = f b\` implies \`a = b\`. The goal is the conclusion of that implication, so working backwards, \`apply hf\` turns the goal into \`f a = f b\`. The same reasoning with \`hg\` turns it into \`g (f a) = g (f b)\`. That is exactly \`h\`, since \`(g ∘ f) a\` is by definition \`g (f a)\`, and \`exact h\` finishes.
+Now look at the hypotheses. \`hf\` turns \`f a = f b\` into \`a = b\`, which matches our goal, so working backward with \`apply hf\` changes the goal to \`f a = f b\`. Doing the same with \`apply hg\` changes it to \`g (f a) = g (f b)\`. Since \`(g ∘ f) a\` is definitionally \`g (f a)\`, that's literally \`h\`, so \`exact h\` closes the proof. Every line was prompted straight from the shapes on screen.
 
-Notice how little cleverness was needed. Each step was dictated by a symbol in the goal or a shape in a hypothesis.
+## What to try when the table runs out
 
-## When you are stuck
+When none of the standard moves fits right away, try one of these:
 
-If no row of the table applies, try one of these.
+- **Unfold definitions.** Use \`unfold\` or \`show\` to expose what a name actually means. Goals like \`A ⊆ B\` become much friendlier once you see them as \`∀ x, x ∈ A → x ∈ B\`.
+- **Check your lemmas.** Look through the Inventory and the Codex—if a step feels like a standard fact, there's probably already a lemma for it.
+- **Switch direction.** If backward steps with \`apply\` stall, derive a helpful forward fact with \`have\`; if forward steps pile up without reaching the target, work backward from the goal.
+- **Test a smaller case.** Sketch the argument on \`0\` or a tiny concrete example to see what the general step needs.
+- **Sketch with \`sorry\`.** Temporarily put \`sorry\` on a hard subgoal, finish the surrounding structure, and come back with a clearer view. Experienced Lean users do this constantly.
 
-- **Write out the definitions.** Use \`unfold\` or \`show\` to replace a defined notion with its meaning. Many proofs become routine once \`A ⊆ B\` is seen as "for all \`x\`, if \`x ∈ A\` then \`x ∈ B\`".
-- **Look for a lemma.** The Inventory and the Codex list what is available. A step that feels like a known fact usually is one.
-- **Change direction.** If working backwards stalls, state a forward fact with \`have\`; if forwards stalls, apply something to the goal.
-- **Shrink the problem.** Prove a special case, or the statement for \`0\`, to see what the general proof needs.
-- **Use \`sorry\` as a placeholder.** Leave the hard step as \`sorry\`, check that the rest of the proof fits around it, and come back. This is how experienced users work.
+## Read the goal aloud first
 
-## Reading before writing
-
-The most reliable improvement for most learners is to slow down at the first step and read the goal view aloud. The method above is nothing more than a way of making that reading productive: every row of the table is an answer to "what is this symbol, and what does Lean give me for it?"`,
+If you build just one habit from this article, make it pausing to read the goal view in plain English before typing. The tables above are really just a bridge from that reading to Lean syntax: spot the outer symbol, check what you already have, and take the step that matches.`,
   },
   {
     id: 'english-to-lean',
     section: 'practice',
     title: 'From English to Lean',
-    summary: 'How to turn a mathematical sentence into a Lean statement, and the traps that make a statement say something else.',
+    summary: 'How to translate a mathematical sentence into a faithful Lean statement, and the four traps that quietly change its meaning.',
     minutes: 6,
     worlds: ['quant', 'forge'],
     next: ['lean-programming', 'mathlib-community'],
-    body: `Writing a proof is only half of formalization. The other half is writing the statement, and here Lean cannot help you, because it will accept a proof of whatever you wrote. This article describes a way of translating English into Lean, and the mistakes that most often make the translation wrong.
+    body: `Proving a theorem is only half of formalization. The other half is writing the statement itself—and here Lean can't save you, because it will cheerfully verify whatever you type. What follows is a dependable workflow for turning English into Lean, along with the four mistakes that most often bend a statement out of shape.
 
-## The method
+## Five steps from English to a statement
 
-The Workshop in this game follows five steps, and the first four are about the statement.
+The Workshop in this game walks through five steps, and four of them happen before you prove a single line:
 
-1. **Say it.** Write the claim in careful English, and mark every "for all", "there exists" and "if … then".
-2. **Type it.** Decide what kind of thing each object is: a natural number, a set of numbers, a function between two types.
-3. **Define it.** If the claim uses a notion that Lean does not have, write a definition.
-4. **State it.** Put the objects in as binders, the conditions as hypotheses, and the conclusion after the colon.
+1. **Say it clearly.** Rewrite the claim in plain, unambiguous English, spelling out every "for all", "there exists", and "if … then".
+2. **Assign types.** Decide what kind of object each variable is: a natural number, a set of numbers, a function between two types.
+3. **Define missing concepts.** If the claim uses a notion Lean doesn't already have, write a definition for it.
+4. **State it.** Put the objects in as binders, the assumptions as hypotheses, and the conclusion after the colon.
 5. **Prove it.**
 
-Take the sentence "the sum of two even numbers is even". Marking quantifiers: "for all numbers \`m\` and \`n\`, if \`m\` is even and \`n\` is even, then \`m + n\` is even". Typing: \`m\` and \`n\` are natural numbers. Definitions: \`Even\` is available. Statement:
+Try that on "the sum of two even numbers is even". First, unpack the hidden quantifiers: "for all natural numbers \`m\` and \`n\`, if \`m\` is even and \`n\` is even, then \`m + n\` is even". Next, assign types: \`m\` and \`n\` are \`Nat\`, and \`Even\` is already defined. That leads straight to the declaration:
 
 \`\`\`text
 theorem even_add' (m n : Nat) (hm : Even m) (hn : Even n) : Even (m + n) := by
   sorry
 \`\`\`
 
-Read the statement back in English and it is the sentence we began with: two natural numbers, both even, and the sum is even. The proof is a separate job, and Lean will keep the \`sorry\` flagged until it is filled. The habit that protects you is reading the statement back. After you write it, translate it into English word for word and compare with the original.
+Now read your Lean statement back into English word for word: two natural numbers, both even, whose sum is even. That matches the original sentence. Leaving \`sorry\` as a placeholder keeps the unfinished proof flagged while you verify the statement itself. Translating your Lean back into English is the best safeguard you have.
 
-## Trap one: quantifier order
+## Trap one: swapping quantifier order
 
-The statements \`∀ n, ∃ m, n < m\` and \`∃ m, ∀ n, n < m\` differ only in the order of two quantifiers, and mean very different things. The first says that every number has something larger. The second says that one number is larger than every number, which is false. In the first, \`m\` may depend on \`n\`. In the second it may not.
+\`∀ n, ∃ m, n < m\` and \`∃ m, ∀ n, n < m\` use the exact same pieces in a different order, yet they make completely different claims. The first says every number has something bigger above it—true, because \`m\` can depend on \`n\`. The second claims a single number \`m\` is bigger than every number—false, because \`m\` has to be fixed in advance.
 
 \`\`\`lean
 theorem forall_exists_succ : ∀ n : Nat, ∃ m : Nat, m = n + 1 :=
   fun n => ⟨n + 1, rfl⟩
 \`\`\`
 
-English hides this difference because the word order is flexible: "every student has a favorite book" and "there is a book that every student favors" overlap in ordinary speech. Always decide the dependency first, and write the quantifiers in that order.
+Everyday English blurs this distinction: "every student has a favorite book" and "there is a book every student favors" can sound nearly identical in casual speech. Before writing quantifiers in Lean, decide which variable is allowed to depend on which, and put the quantifiers in that exact order.
 
-## Trap two: implication under an existential
+## Trap two: putting an implication under ∃
 
-Consider "there is a number \`n\` such that, if \`n\` is \`1\`, then \`n\` is \`2\`". As Lean, \`∃ n : Nat, n = 1 → n = 2\`. This is true, and trivially: take \`n = 0\`, then the hypothesis \`0 = 1\` is false and the implication holds without any content.
+Look at \`∃ n : Nat, n = 1 → n = 2\`, which reads "there is a number \`n\` such that if \`n = 1\`, then \`n = 2\`". That's vacuously true: just pick \`n = 0\`. Then the premise \`0 = 1\` is false, so the implication goes through with zero mathematical content:
 
 \`\`\`lean
 theorem vacuous_exists : ∃ n : Nat, n = 1 → n = 2 :=
   ⟨0, by intro h; contradiction⟩
 \`\`\`
 
-What most people mean when they write something like this is a conjunction, "there is a number \`n\` such that \`n\` is \`1\` and \`n\` is \`2\`", written \`∃ n, n = 1 ∧ n = 2\`, which is false. The rule of thumb: under \`∃\`, a claim about the witness is nearly always a conjunction; under \`∀\`, a condition on the variable is nearly always an implication. Swapping them gives statements that are either trivially true or false for a boring reason.
+What someone usually meant was a conjunction—\`∃ n, n = 1 ∧ n = 2\`, "there is a number that is both \`1\` and \`2\`", which is false. Keep this rule of thumb handy: under \`∃\`, extra conditions on the witness are almost always joined with \`∧\`; under \`∀\`, restrictions on the variable are almost always written with \`→\`. Mixing them up produces statements that are either vacuously true or trivially false.
 
-## Trap three: forgotten hypotheses
+## Trap three: dropped or contradictory hypotheses
 
-A statement can be false because a condition from the English was dropped. "For all natural numbers \`a\` and \`b\`, \`a - b + b = a\`" is false in Lean, because subtraction on natural numbers stops at zero: \`2 - 5\` is \`0\`, and \`0 + 5\` is \`5\`, not \`2\`. The English sentence silently assumed \`b ≤ a\`, and a faithful translation needs it as a hypothesis. When a proof refuses to work, a missing hypothesis is the first suspect, and a counterexample for small numbers is the quickest test.
+A translation can turn false simply because a silent condition from English got left out. "For all natural numbers \`a\` and \`b\`, \`a - b + b = a\`" is false in Lean, because natural-number subtraction truncates at zero: \`2 - 5\` evaluates to \`0\`, so \`(2 - 5) + 5\` is \`5\`, not \`2\`. The English sentence quietly assumed \`b ≤ a\`, and Lean needs that condition written explicitly as a hypothesis. Whenever a proof hits a brick wall, check for a missing hypothesis first by plugging in small test numbers.
 
-The opposite mistake is including a hypothesis that makes the statement vacuous. If your assumptions contradict each other, anything follows, and the proof proves nothing. A way to guard against this is to check that the hypotheses are satisfiable, by exhibiting an example that meets them.
+The mirror-image mistake is writing contradictory hypotheses. If your assumptions can't all hold at once, anything follows from them and your theorem says nothing useful. A quick sanity check is to make sure you can name at least one concrete example that satisfies every hypothesis.
 
-## Trap four: the wrong definition
+## Trap four: definitions that miss edge cases
 
-If a notion is not in Lean's library, you write it yourself, and the definition has to capture the intended meaning. "\`n\` is prime" means that \`n\` is greater than \`1\` and its only divisors are \`1\` and \`n\`. Leave out \`n > 1\` and \`1\` counts as prime. Define "even" as \`n % 2 = 0\` and you have a good definition; define it as \`∃ r, n = r + r\` and you have another that is equivalent, and sometimes more convenient for proofs. A definition is correct when you can explain, in English, why each part is there.
+Whenever you introduce a custom definition, edge cases deserve extra care. Saying "\`n\` is prime" means \`n > 1\` and its only divisors are \`1\` and \`n\`—forget \`n > 1\` and \`1\` sneaks in as a prime. Sometimes two definitions are mathematically equivalent yet behave differently in proofs: defining "even" as \`n % 2 = 0\` and defining it as \`∃ r, n = r + r\` pick out the same numbers, though the second is often much friendlier when proving algebraic identities.
 
-Test a definition on easy examples before building on it: show that \`4\` satisfies it, that \`3\` does not, and that the edge cases behave. These small checks catch most errors.
+Before building a whole file on top of a new definition, sanity-check it on a few concrete values: confirm that \`4\` passes, \`3\` fails, and boundary cases like \`0\` and \`1\` behave the way you expect.
 
-## Why this matters
+## Checking your statement by translating it back
 
-Formal proofs are only as good as their statements. In a large project the statements and definitions are what people review most carefully, because they are short, and because an error there is invisible to the checker. The reviewers ask: does this say what the paper says? Learning to answer that question about your own formalization is the skill that the Workshop is built to practice.
+A formal proof can only vouch for the statement written at the top. In real formalization projects, reviewers scrutinize definitions and theorem statements far more carefully than proofs, because statements are short and errors there are completely invisible to the checker.
 
-A useful exercise is to take a theorem you have proved in the game and write it in English without looking at the Lean, then compare. Differences are either places where your English was vague or places where the Lean said something more precise than you meant. Both teach you something.`,
+A great exercise is to take a theorem you've already proved in this game, hide the Lean code, rewrite the claim in English from memory, and compare the two. Any mismatch points straight to a spot where either your English was fuzzy or your Lean said something sharper than you realized—and spotting that difference is the core skill the Workshop builds.`,
   },
   {
     id: 'lean-programming',
     section: 'practice',
     title: 'Lean as a programming language',
-    summary: 'Functions, recursion, structures, #eval and IO in Lean, and what it means that Lean is implemented in Lean and compiles to native code.',
+    summary: 'Functions, recursion, structures, #eval, and IO in Lean—plus why Lean compiles to fast native code and implements itself.',
     minutes: 6,
     worlds: ['types', 'nat'],
     next: ['mathlib-community', 'lean-in-the-world'],
-    body: `Lean is a general-purpose functional programming language. You do not need to use it as one to prove theorems, but the language you write programs in and the language you prove in are the same, and seeing the programming side clarifies the proving side. Everything on this page uses real Lean features, some of which the game's engine leaves out.
+    body: `Even if you only ever open Lean to prove theorems, it helps to know that underneath it's a full-fledged functional programming language. Programs and proofs share the exact same syntax and type checker, so seeing how Lean runs code makes the proving side click even faster. The examples below use real Lean features, including several that this game's engine omits.
 
-## Functions and recursion
+## Functions, pattern matching, and termination
 
-A function is defined with \`def\`, giving its name, its arguments with their types, its result type, and a body. Recursive functions are defined by cases, usually with pattern matching on a constructor:
+You define a function with \`def\`, listing its name, typed parameters, return type, and body. Recursive functions usually pattern-match directly on the constructors of an input:
 
 \`\`\`lean-real
 def fib : Nat → Nat
@@ -1041,13 +1039,13 @@ def fib : Nat → Nat
 example : fib 10 = 55 := by decide
 \`\`\`
 
-The command \`#eval\` runs an expression and prints its value, here \`6765\`. Lean insists that recursive functions terminate, because a non-terminating function would let you prove false statements: a function of type \`Nat → False\` would be a proof of absurdity. For simple recursion on a constructor, as here, the check is automatic. For more complicated recursion you supply a termination argument, and Lean checks it.
+Running \`#eval fib 20\` evaluates the function and prints \`6765\`. Unlike mainstream languages, Lean requires recursive functions used in logic to terminate—otherwise an infinite loop could inhabit \`Nat → False\` and wreck consistency. When recursion peels off constructors cleanly like \`fib\` does, Lean verifies termination automatically; for trickier recursion, you supply a decreasing measure and Lean checks it.
 
-You can also state and prove facts about the function by computing. The last line of the block above does this: the tactic \`decide\` asks Lean to evaluate a decidable statement. This is a proof by computation, the same idea as \`rfl\` in the article on equality.
+Notice the final line, too: \`decide\` proves \`fib 10 = 55\` simply by computing both sides, the same proof-by-computation idea behind \`rfl\` in the equality article.
 
-## Data: structures and inductive types
+## Structures, inductive data, and proofs about code
 
-A \`structure\` groups named fields, and an \`inductive\` type lists constructors, as the article on inductive types described. Lists are a standard inductive type. Here is a function that sums a list of numbers, and a theorem about it:
+Just as you saw in the article on inductive types, Lean models data with \`structure\` (named fields) and \`inductive\` types (lists of constructors). Lists are a classic inductive type—either empty (\`[]\`) or a head element attached to a tail (\`x :: xs\`). Here's a list-summing function alongside a theorem about it:
 
 \`\`\`lean-real
 def sum : List Nat → Nat
@@ -1062,11 +1060,11 @@ theorem sum_append (xs ys : List Nat) : sum (xs ++ ys) = sum xs + sum ys := by
 #eval sum [1, 2, 3, 4]
 \`\`\`
 
-The program prints \`10\`. The theorem says that summing the concatenation of two lists gives the sum of the sums, and its proof is an induction on the first list, exactly like the induction on \`Nat\`, because \`List\` is an inductive type with two constructors. This is the reason Lean is used for verified software: the program and the facts about it live side by side, in one file, checked by one kernel.
+\`#eval\` prints \`10\`, while \`sum_append\` proves that summing two joined lists equals the sum of their individual sums. Because \`List\` is inductive with two constructors, proving a property about \`sum\` uses \`induction\` in the exact same way induction works on \`Nat\`. That's the draw of verified software in Lean: the implementation and the proof sit in the same file, checked by the same kernel.
 
-## Interacting with the world
+## Side effects and the IO type
 
-Programs that read and write use the \`IO\` type. A \`main\` function of type \`IO Unit\` is the entry point of an executable:
+Programs that talk to the outside world—printing to a terminal, reading files, opening sockets—return values in the \`IO\` type. An executable starts at a \`main\` function of type \`IO Unit\`:
 
 \`\`\`lean-real
 def main : IO Unit :=
@@ -1075,113 +1073,111 @@ def main : IO Unit :=
 #eval main
 \`\`\`
 
-This prints \`Hello, Lean\`. \`IO\` is how Lean separates computations that have effects, such as printing and reading files, from pure functions. A pure function of type \`Nat → Nat\` cannot print or read anything, and that separation is what makes it safe to reason about: a theorem about the function is a theorem about all its uses.
+This prints \`Hello, Lean\`. Separating \`IO\` from pure types keeps mathematical functions clean: a function of type \`Nat → Nat\` can't secretly read a file or mutate global state, so a theorem you prove about it holds everywhere it's called.
 
-## Compiled, and written in itself
+## Native compilation and a self-hosted compiler
 
-Lean does not only interpret programs. It compiles them to native code, so a Lean program can be built into a fast executable. The language was designed with this in mind: its compiler does reference counting and reuses memory in place when a value is not shared, which lets purely functional code run efficiently.
+Lean isn't just an interpreter for small demos—it compiles programs down to native machine code so they run as standalone executables. Its runtime uses reference counting and automatically reuses memory in place whenever a value isn't shared, giving purely functional data structures surprisingly strong performance.
 
-Lean 4 is also largely written in Lean. The parser, the elaborator, the tactic framework and the compiler are Lean programs, and the language's own syntax extensions, such as macros, are used to define much of its notation. The kernel, the small trusted core, is a separate piece of code in a lower-level language. That a language can be used to implement itself is a good sign about its practicality, and it explains why anyone who can write Lean can also write tactics: they are the same kind of program as the rest of the system.
+Even more tellingly, Lean 4 is mostly written in Lean 4. Its parser, elaborator, tactic framework, and compiler are all Lean code, and Lean's macro system powers much of its own syntax. Only the small trusted kernel is written separately in C++. Being self-hosted isn't just a badge of honor—it's why anyone who learns Lean can write custom tactics and extensions in the exact same language they use every day.
 
-## Proofs inside programs
+## Carrying proofs inside data and APIs
 
-Because types can mention values, a program can carry proofs of its own properties. A common example is indexing into a list. The lookup function can require a proof that the index is in range, so a failing lookup is ruled out at compile time. The cost is that you must produce the proof when you call the function, and sometimes that proof is the hard part. Lean provides tactics such as \`omega\` and \`simp\` that discharge routine side conditions like these, and when they cannot, you can restructure the program.
+Because Lean has dependent types, functions can ask callers for proofs alongside ordinary arguments. A list lookup function, for instance, can require a proof that the index is strictly smaller than the list's length, eliminating out-of-bounds crashes at compile time. The catch is that you have to supply that proof at every call site. Tactics like \`omega\` and \`simp\` clear routine bounds checks automatically, and when a proof obligation turns messy, it's often a nudge to redesign the data structure.
 
-## What the game does and does not teach
+## Programming features beyond this game
 
-The game uses \`def\` and \`#eval\` and shows recursion on natural numbers, because these are the entry to induction. It does not teach \`IO\`, structures, type classes or the \`do\` notation, which together make up most of ordinary Lean programming. If that side of Lean interests you, the official documentation has a book on functional programming in Lean, and the Graduate screen lists other books to read next. The ecosystem for general-purpose software is still young compared with those of older languages, so for a project that needs a large set of libraries, check that the ones you need exist before you commit.`,
+This game introduces \`def\`, \`#eval\`, and recursion on \`Nat\` mainly as a bridge to induction. It leaves out \`IO\`, custom \`structure\`s, type classes, and \`do\` notation, which form the backbone of everyday Lean programming. If you want to explore Lean as a software language, the official *Functional Programming in Lean* book is a welcoming start, and the Graduate screen links to more resources. Just keep in mind that Lean's general-purpose library ecosystem is still young compared to older languages, so check for the packages you need before betting a big app on it.`,
   },
   {
     id: 'mathlib-community',
     section: 'ecosystem',
     title: 'Mathlib and the community',
-    summary: 'What Mathlib is, how it is built and reviewed, and where to ask questions and search for theorems.',
+    summary: 'What Mathlib is, how volunteers review and maintain it, and the best ways to search for theorems and get help.',
     minutes: 5,
     next: ['lean-in-the-world'],
-    body: `Lean itself is a language and a checker. Most of what makes it useful for mathematics is a library built on top of it, and the people who maintain that library. This article describes both.
+    body: `Core Lean gives you a language and a proof checker. What turns it into a serious home for mathematics is the library built on top of it—and the people who write, review, and answer questions about it every day.
 
-## What Mathlib is
+## What lives inside Mathlib
 
-**Mathlib** is a library of formalized mathematics for Lean, written and maintained by a community of volunteers and researchers. It contains definitions and proved theorems from algebra, linear algebra, topology, analysis, measure theory, number theory, combinatorics, category theory, logic and more, together with the tactics and infrastructure that make working in these areas practical. Everything in it has been checked by Lean's kernel.
+**Mathlib** is Lean's community-built library of formalized mathematics. It gathers definitions, theorems, and specialized tactics across algebra, linear algebra, topology, analysis, measure theory, number theory, combinatorics, category theory, logic, and more—every last theorem verified by Lean's kernel.
 
-It is large. The library's statistics page, at the time of writing, reports roughly 140,000 definitions and 290,000 theorems, contributed by several hundred people. These figures grow every week, so treat them as an order of magnitude rather than a fact to cite.
+The library is already huge. At the time of writing, its statistics page tracks roughly 140,000 definitions and 290,000 theorems from several hundred contributors, and those numbers climb every week. Treat them as a rough sense of scale rather than a fixed tally.
 
-The scale is the point. When you want to say "let \`G\` be a finite group" or "let \`f\` be a continuous function on a compact space", the notions exist, with their basic theory, and your own work can build on it. It also means that a project can be far larger than what any one person could write, which is how formalizations of research-level results become possible.
+That scale is what changes what's possible. When you want to start a theorem with "let \`G\` be a finite group" or "let \`f\` be a continuous function on a compact space", the definitions and foundational lemmas are already waiting for you. You don't have to rebuild undergraduate math from scratch before tackling a research-level problem.
 
-## How it is built
+## Open review and fast-moving code
 
-Mathlib is developed in the open, in a public repository on GitHub. Contributions arrive as pull requests, and each one is reviewed by maintainers and other contributors before it is merged. Reviewers look at more than whether the proof compiles, which the build checks automatically. They look at whether the definitions are the right ones, whether the statements are stated at the right generality, whether names follow the library's conventions, and whether the new material duplicates something already there. A style guide and a naming guide document these expectations.
+Mathlib lives in a public GitHub repository, and every addition comes through a pull request reviewed by maintainers and other contributors. Because continuous integration already confirms that proofs compile, human reviewers focus on what the kernel can't judge: Are the definitions clean? Are the theorems stated at the right level of generality? Do the names match library conventions? Does this duplicate an existing result?
 
-Two consequences follow. First, the library's statements are curated: the effort of review goes into the part that a proof checker cannot check, namely whether a statement means what it should. Second, the library moves quickly, and names and file locations are sometimes changed. When a name is renamed, the old one is typically kept for a while as a deprecated alias, so that projects have time to update. If you use Mathlib, you pin a version, and upgrade deliberately.
+That review culture has two practical effects. First, Mathlib's statements are thoughtfully curated—you're getting well-tested formalizations, not just piles of compiling code. Second, the library evolves briskly, so files occasionally move and lemmas get renamed (usually with a temporary deprecated alias to soften the transition). Real projects pin a specific Mathlib version and upgrade deliberately on their own schedule.
 
-## Where people talk
+## The Lean Zulip and community spaces
 
-The main meeting place is the **Lean Zulip**, a chat server at leanprover.zulipchat.com. It is organized into streams and topics, and it is where users ask questions, where developers discuss design, and where formalization projects are coordinated. Beginners are welcome, and there is a stream for new members. A good question includes a small piece of code that others can paste into the web editor, the error message, and what you expected. People answer such questions quickly, and often with advice that improves the whole proof rather than just fixing one line.
+The hub of the ecosystem is the **Lean Zulip** chat server at leanprover.zulipchat.com, organized into topic-based streams where beginners ask questions, library designers debate APIs, and large formalization teams coordinate. Newcomers are genuinely welcome—there's a dedicated stream just for new members. If you post a small, self-contained snippet others can paste into the web editor, along with the error message and what you expected, someone will usually reply quickly—often improving the whole proof instead of merely patching one line.
 
-The community also runs workshops, summer schools and online courses, and publishes teaching books; the Graduate screen lists several.
+Beyond Zulip, the community runs workshops, summer schools, online seminars, and free interactive textbooks; the Graduate screen highlights several good starting points.
 
-## Finding what you need
+## Five ways to find a theorem you need
 
-A library this size cannot be memorized, so finding things is a skill of its own.
+Nobody memorizes a library of hundreds of thousands of lemmas, so knowing how to search is half the battle:
 
-- **The documentation site** for Mathlib, at leanprover-community.github.io/mathlib4_docs, lists every declaration with its statement and links to its source. Each name can be looked up directly.
-- **Loogle**, at loogle.lean-lang.org, searches by the shape of a statement. You can enter a pattern such as the name of a function and the form of its result, and it lists matching theorems.
-- **Natural-language search engines**, such as Moogle and LeanSearch, let you describe a theorem in words and return candidates. They are useful when you know the mathematics but not the name. Treat results as suggestions and check the statement.
-- **\`exact?\`** is a tactic that searches the library for a lemma that closes the current goal. When it succeeds, it prints the term it found, so you can copy it into your proof. For example, asked to prove \`a + b = b + a\` for natural numbers, it replies with \`exact Nat.add_comm a b\`. It does not always find an answer, and it can be slow on large goals, but it is often the quickest way to learn a name.
-- **Naming conventions**, described in the article on reading theorems, let you guess names. Typing the start of a name in the editor lists completions.
+- **Mathlib docs** (leanprover-community.github.io/mathlib4_docs) index every declaration with its full statement and direct links to the source file.
+- **Loogle** (loogle.lean-lang.org) searches by type shape—hand it a function name or a pattern for the conclusion, and it lists matching theorems.
+- **Natural-language search** tools like Moogle and LeanSearch let you describe a theorem in plain English and browse candidates. Always inspect the returned statement carefully to be sure it matches what you want.
+- **\`exact?\`** is a Lean tactic that searches imported libraries for a single lemma that closes your current goal, printing a snippet like \`exact Nat.add_comm a b\` that you can drop straight into your proof. It can be slow on huge goals and doesn't always succeed, yet it's one of the fastest ways to learn library names.
+- **Naming conventions**, covered in the article on reading theorems, let you guess names directly—and editor autocomplete fills in the rest once you type the first few letters.
 
-## Projects built on it
+## Collaborative blueprints
 
-Mathlib is a base for larger efforts, some of which are described in the next article. Many projects keep their own repositories and import Mathlib as a dependency. They are organized with a **blueprint**, a human-readable outline of the mathematical argument, linked to the Lean declarations that formalize each part, so that many contributors can work on pieces in parallel and see what remains. Projects that finish often contribute their general lemmas back to Mathlib.
+Many major formalization projects live in their own repositories while importing Mathlib underneath. To coordinate dozens of contributors working in parallel, teams often maintain a **blueprint**: a readable mathematical document outlining the proof, linked piece by piece to the corresponding Lean declarations so everyone can see which lemmas are proved and which still need work. Once a project wraps up, teams frequently upstream their general-purpose lemmas back into Mathlib so the whole community benefits.
 
-## How to take part
+## Making your first contribution
 
-You do not need to be an expert to contribute. Fixing a documentation error, adding a missing small lemma, or porting a result are all legitimate first contributions, and maintainers label suitable issues for newcomers. Reading someone else's merged pull request is one of the best ways to learn the library's style. A first goal might be to prove something small that you cannot find in the library, check carefully that it is not there, and offer it.
-
-Remember that the library, and the system it is written in, change. A recipe from a tutorial written a few years ago may need updating, and the current official pages are the right place to confirm anything about installation or version choice.`,
+You don't need a PhD or years of Lean experience to pitch in. Fixing a typo in documentation, adding a handy missing lemma, or golfing an awkward proof are all welcome first pull requests, and maintainers tag beginner-friendly issues. Reading a few recently merged pull requests is one of the quickest ways to absorb Mathlib's style. Keep in mind that Lean and Mathlib move fast—if an older blog post or tutorial disagrees with current tooling, check the official docs and Zulip for up-to-date setup instructions.`,
   },
   {
     id: 'lean-in-the-world',
     section: 'ecosystem',
     title: 'Lean in the world',
-    summary: 'A careful survey of what Lean has been used for: large formalizations, industrial verification and AI systems, and where to go after the game.',
+    summary: 'Where Lean shows up outside tutorials: major math formalizations, software verification at AWS, AI proof systems, and your next steps after this game.',
     minutes: 6,
     next: ['lean-tour', 'how-to-attack-a-proof'],
-    body: `It is fair to ask what Lean is used for beyond exercises. This article surveys some notable uses. It is a selection, not a ranking, and it states only what is documented by the projects themselves. Details such as the status of ongoing work date quickly, so the project pages are the places to check.
+    body: `Once you've spent a few hours proving logic puzzles and arithmetic identities, it's natural to ask what Lean gets used for out in the wild. Here's a grounded tour of notable real-world projects—not an exhaustive list or a ranking, just documented work showing how Lean is used in mathematics, software engineering, and AI. Because active projects move quickly, always check their home pages for the latest status.
 
-## Large formalization projects
+## Landmark formalizations in mathematics
 
-**The Liquid Tensor Experiment.** In 2020, Peter Scholze, a leading mathematician, posed a challenge: to check by computer a difficult theorem about "liquid vector spaces", from his work with Dustin Clausen on condensed mathematics, because he was not fully certain of the proof. The Lean community took it up, led by Johan Commelin, with the participation of about a dozen mathematicians and several computer scientists. The main theorem was formally verified, and the project's announcement of completion is dated July 2022. In 2021, about half a year in, the part of the argument Scholze had been least sure of was checked, and he wrote publicly about how far the project had come. The project also showed that Lean could handle an area of mathematics that was far from the basic material of the library at that time.
+**The Liquid Tensor Experiment.** In late 2020, Fields Medalist Peter Scholze issued a public challenge: formally verify a delicate theorem about "liquid vector spaces" from his work with Dustin Clausen on condensed mathematics, a proof Scholze himself wasn't completely certain had no hidden flaw. A Lean team led by Johan Commelin—bringing together roughly a dozen mathematicians and several computer scientists—took it on. Within about six months, in 2021, they verified the exact piece Scholze had worried about most, and by July 2022 they announced the full theorem complete. Along the way, the project proved Lean could handle cutting-edge mathematics far removed from what Mathlib already contained.
 
-**The Polynomial Freiman–Ruzsa conjecture.** In November 2023 a team led by Timothy Gowers, Ben Green, Freddie Manners and Terence Tao shared a proof of a version of this conjecture from additive combinatorics. Tao then organized a Lean formalization with many collaborators, and it was completed within about three weeks, in early December 2023. It is notable for the speed, and as an example of a crowd of people working on a fresh result in parallel, coordinated by a written blueprint.
+**The Polynomial Freiman–Ruzsa conjecture.** In November 2023, Timothy Gowers, Ben Green, Freddie Manners, and Terence Tao released a paper proving a major conjecture in additive combinatorics. Tao immediately organized a collaborative Lean formalization using a shared blueprint, and dozens of volunteers finished verifying the entire paper in roughly three weeks, wrapping up in early December 2023. The effort stood out both for its speed and for showing how a distributed team can formalize a brand-new result in parallel.
 
-**Sphere eversion.** Patrick Massot, Floris van Doorn and Oliver Nash formalized Smale's theorem that a sphere can be turned inside out without creasing it, as a consequence of a general result of differential topology called the h-principle. The aim was to test whether differential topology could be formalized at all. The project's authors published an account of it in 2023.
+**Sphere eversion.** Patrick Massot, Floris van Doorn, and Oliver Nash formalized Stephen Smale's famous theorem that a sphere can be turned inside out smoothly without creasing, deriving it from a general theorem in differential topology called the h-principle. Their goal was to test whether geometric, heavily visual differential topology could be formalized at all—and in 2023 they published their account of pulling it off.
 
-**Fermat's Last Theorem.** A project led by Kevin Buzzard at Imperial College London aims to formalize a proof of Fermat's Last Theorem, following a modern version of the argument rather than the original. It is organized with a blueprint and welcomes contributors. It is a long-term effort, and its current status is on the project page.
+**Fermat's Last Theorem.** Led by Kevin Buzzard at Imperial College London, an ongoing multi-year project aims to formalize a modern proof of Fermat's Last Theorem. Like PFR, it's organized around a public blueprint and welcomes contributors across many areas of algebraic number theory.
 
-## Verified software
+## Industrial software verification
 
-**Cedar at Amazon Web Services.** Cedar is an open-source language that AWS uses for writing authorization policies, the rules that say who may do what. The Cedar team has written a formal model of the language in Lean and proved properties of it, such as the soundness of its validator, which says that a policy accepted by the validator will not cause type errors when it is evaluated. In the course of the formal modeling and proofs, the team reported finding and fixing bugs. Cedar's own materials describe how the model was first developed in a different verification language and moved to Lean.
+**Cedar at Amazon Web Services.** Cedar is an open-source language AWS uses to write authorization policies—the rules deciding who's allowed to access what. The Cedar team built a formal model of the language in Lean and proved key security guarantees about it, including the soundness of its validator (ensuring that any policy the validator accepts won't trigger type errors during evaluation). Writing those formal models and proofs turned up real bugs that the team fixed before shipping. Notably, the team originally built their model in another verification language before migrating to Lean.
 
-This is an example of Lean as a software tool. The model is a program, the properties are theorems, and the checker is the same as for mathematics.
+Cedar shows Lean wearing its engineering hat: the language specification is a Lean program, the safety guarantees are Lean theorems, and the exact same kernel checks both.
 
-## AI systems that write Lean
+## AI systems trained against a proof checker
 
-Lean's checker gives machine-learning systems something unusual: a ground truth. A proof is either accepted or not, so a system can generate attempts, have them checked, and learn from the result without a human judge.
+For machine learning, Lean offers something rare: an automatic, incorruptible referee. Because a proof either passes the kernel or fails, an AI system can generate candidate proofs, check them at scale, and learn from feedback without waiting on human graders.
 
-**AlphaProof.** At the 2024 International Mathematical Olympiad, Google DeepMind's AlphaProof, together with AlphaGeometry 2, solved four of the six problems, scoring 28 of 42 points, which DeepMind reported as silver-medal standard. AlphaProof produced its solutions as formal proofs in Lean, trained by reinforcement learning, and the problems were first translated into Lean by people. The geometry problem was handled by AlphaGeometry 2.
+**AlphaProof.** At the 2024 International Mathematical Olympiad, Google DeepMind's AlphaProof—paired with AlphaGeometry 2 for the geometry problem—solved four of the six problems and scored 28 out of 42 points, a silver-medal-level result. Human experts translated the competition problems into Lean statements, and AlphaProof, trained via reinforcement learning, generated complete formal proofs checked by Lean.
 
-Beyond this, many research groups and companies build tools that propose Lean proofs, complete partial proofs, or suggest lemmas, and interest in the area is growing. Details are changing quickly, and claims in the news are worth checking against a paper or a release. One important point is stable, however: whatever produced a proof, a person can check it by running Lean, and the kernel does not care who or what wrote the term.
+Across academia and industry, many other teams are building AI tools that suggest lemmas, fill in routine proof steps, or draft full proofs. The field shifts fast, so headlines are always worth checking against actual papers and code. One thing stays constant, though: Lean's kernel doesn't care whether a human or a neural network wrote a proof term—anyone can run Lean locally and verify it in seconds.
 
-## What this tells you
+## Patterns across these projects
 
-Three things stand out across these examples. The cost of formalization is falling for areas with a lot of existing library, and remains high for areas without it. The largest successes have been collaborations, organized with blueprints and a shared library, and not heroic individual efforts. And Lean has moved from a research tool to something used in engineering teams.
+Three themes show up again and again. First, formalization is getting dramatically faster wherever Mathlib already has strong foundations, while staying genuinely hard in uncharted territory. Second, the headline successes have been team efforts powered by shared libraries and blueprints rather than solo marathons. Third, Lean has crossed from academic research into production software teams.
 
-It also remains true that Lean checks statements, not intentions. In every project above, a large part of the work was agreeing that the definitions and statements captured the mathematics or the specification correctly.
+And one lesson never goes away: Lean checks the statement you wrote, not the idea in your head. In every project above, a huge share of the human effort went into agreeing that the formal definitions and theorem statements faithfully captured the real mathematics or system specification.
 
-## Where to go after the game
+## Where to go after this game
 
-The game covers the core of Lean: terms, types, tactics, logic, induction, sets and functions. The next steps are real Lean with Mathlib, automation, and larger statements. The **Graduate** screen lists how to try real Lean in your browser, how to install it, which tactics the game held back and when to use them, how to search the library, and which books and courses to read next. A good first project is to take a theorem you proved in the Workshop and prove it again in Mathlib, using the library's general lemmas, then to formalize something you care about. The official sites, lean-lang.org and the Lean Zulip, are the places to find current instructions and people who will help.`,
+By the time you finish this game, you'll have a solid grip on Lean's core—terms, types, tactics, logic, induction, sets, and functions. From here, the next step is real Lean with Mathlib, automation, and bigger theorems. The **Graduate** screen gathers everything you need: how to try real Lean in your browser, how to install it locally, which tactics this game held back, how to search Mathlib, and which books to read next. A rewarding first exercise is to pick a theorem you formalized in the Workshop, reprove it in real Lean using Mathlib lemmas, and then try formalizing a favorite result of your own. Whenever you're ready for company, lean-lang.org and the Lean Zulip are right there.`,
   },
 ];
 

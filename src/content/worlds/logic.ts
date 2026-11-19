@@ -5,17 +5,17 @@ export const world: World = {
   title: 'Connective Canyon',
   tagline: 'And, or, not, iff',
   intro:
-    "Each logical connective is an **inductive type**. Its *constructors* say how to prove it; its *eliminator* says how to use it. You will meet `∧`, `∨`, `False`/`¬` and `↔` this way, learn the tactics that build and take apart their proofs, and run into the one place where Lean needs an extra axiom: classical reasoning.",
+    "Each logical connective is an **inductive type**. Its *constructors* tell you how to prove it, and its *eliminator* tells you how to use it. You'll meet `∧`, `∨`, `False`/`¬`, and `↔` this way, learn the tactics that build and take apart their proofs, and run into the one place where Lean needs an extra axiom: classical reasoning.",
   requires: ['props'],
   bigIdea:
-    'Connectives are inductive types: constructors say how to prove them, eliminators say how to use them.',
+    'Connectives are inductive types: constructors tell you how to prove them, and eliminators tell you how to use them.',
   levels: [
     {
       id: 'logic-01',
       kind: 'choice',
       title: 'Proving a conjunction',
       intro:
-        "`P ∧ Q` (\"P and Q\") is an **inductive type** with one constructor, `And.intro`, which takes a proof of `P` and a proof of `Q`. The shorthand `⟨hp, hq⟩` builds it. To *use* a proof `h : P ∧ Q`, take its parts: `h.1 : P` and `h.2 : Q`.\n\nStudy the code, then answer.",
+        "`P ∧ Q` (\"P and Q\") is an **inductive type** with one constructor, `And.intro`, which takes a proof of `P` and a proof of `Q`. The shorthand `⟨hp, hq⟩` builds it. To *use* a proof `h : P ∧ Q`, grab its parts: `h.1 : P` and `h.2 : Q`.\n\nRead the code, then answer the question.",
       outro:
         "A proof of `P ∧ Q` is literally a pair of proofs. The constructor says how to *prove* it (give both parts), and the projections say how to *use* it (take either part).",
       unlocks: { codex: ['inductive-types', 'and', 'anon-ctor'] },
@@ -27,7 +27,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
         {
           text: 'A proof of `P` or a proof of `Q`: one is enough.',
           feedback:
-            'That describes `P ∨ Q`. For `∧` the constructor `And.intro` takes *both* arguments.',
+            'That describes `P ∨ Q`. For `∧`, the constructor `And.intro` takes *both* arguments.',
         },
         {
           text: 'A proof of `P` and a proof of `Q`, packaged as `⟨hp, hq⟩`.',
@@ -37,7 +37,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
         {
           text: 'A function that turns proofs of `P` into proofs of `Q`.',
           feedback:
-            'That is a proof of `P → Q`. A conjunction asserts both facts outright, with no "if".',
+            'That\'s a proof of `P → Q`. A conjunction asserts both facts outright, with no "if".',
         },
       ],
     },
@@ -47,9 +47,9 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       title: 'Pairs and projections',
       english: 'From ((P and Q) and R), conclude (R and P).',
       intro:
-        "Build with `⟨_, _⟩`, take apart with `.1` and `.2` (also written `.left` and `.right`). They chain: if `h : (P ∧ Q) ∧ R`, then `h.1 : P ∧ Q` and `h.1.2 : Q`.\n\nUse them to rearrange the parts of `h` into the goal. This is term mode: no `by`.",
+        "Build a conjunction with `⟨_, _⟩`, and take it apart with `.1` and `.2` (also written `.left` and `.right`). They chain: if `h : (P ∧ Q) ∧ R`, then `h.1 : P ∧ Q` and `h.1.2 : Q`.\n\nUse them to rearrange the parts of `h` into the goal. This is term mode, so no `by`.",
       outro:
-        "`h.1` and `h.2` are the eliminators of `∧`, and `⟨_, _⟩` its constructor. Proving a conjunction is building a pair; using one is reading from it.",
+        "`h.1` and `h.2` are the eliminators of `∧`, and `⟨_, _⟩` is its constructor. Proving a conjunction means building a pair; using one means reading from it.",
       unlocks: { codex: ['and-proj'] },
       mode: 'term',
       header: 'theorem rotate (P Q R : Prop) (h : (P ∧ Q) ∧ R) : R ∧ P :=',
@@ -67,9 +67,9 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'predict',
       title: 'Splitting a goal',
       intro:
-        "A goal `P ∧ Q` needs a pair. The tactic `constructor` applies the constructor and leaves one new goal per argument. Each goal is tagged with the argument's name. The bullet `·` focuses on one goal at a time.\n\nPredict the goals after `constructor`.",
+        "A goal `P ∧ Q` needs a pair. The tactic `constructor` applies `And.intro` and leaves one new goal per argument, each tagged with its name. The bullet `·` focuses on one goal at a time.\n\nPredict the goals after `constructor`.",
       outro:
-        "`constructor` built `And.intro ?_ ?_`, with two holes that became two goals. It is the tactic form of the anonymous constructor `⟨_, _⟩`.",
+        "`constructor` built `And.intro ?_ ?_`, with two holes that became two goals. It's the tactic form of the anonymous constructor `⟨_, _⟩`.",
       unlocks: { tactics: ['constructor'], codex: ['constructor', 'focus-dot'] },
       code: `theorem and_demo (P Q : Prop) (hp : P) (hq : Q) : P ∧ Q := by
   constructor
@@ -80,22 +80,22 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
         {
           text: 'Two goals: `case left ⊢ P` and `case right ⊢ Q`.',
           correct: true,
-          feedback: 'Right. `And.intro` has two arguments, so there are two goals.',
+          feedback: 'Right. `And.intro` takes two arguments, so you get two goals.',
         },
         {
           text: 'One goal, `⊢ P`; the rest is dropped.',
           feedback:
-            'Nothing is dropped. A conjunction needs *both* halves, so both become goals.',
+            'Nothing gets dropped. A conjunction needs *both* halves, so both become goals.',
         },
         {
           text: 'One goal: `⊢ Q ∧ P`.',
           feedback:
-            '`constructor` does not reorder anything. It splits the conjunction into its two components.',
+            "`constructor` doesn't reorder anything—it splits the conjunction into its two components.",
         },
         {
           text: 'No goals: `constructor` finds `hp` and `hq` itself.',
           feedback:
-            '`constructor` only applies the constructor. Finding the proofs of the parts is your job (or `assumption`\'s).',
+            '`constructor` only applies the constructor. Finding the proofs of the parts is still up to you (or `assumption`).',
         },
       ],
     },
@@ -105,9 +105,9 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       title: 'Taking a hypothesis apart',
       english: 'If P and Q, and P implies R, then Q and R.',
       intro:
-        "To use a hypothesis `h : P ∧ Q` in a tactic proof, `obtain ⟨hp, hq⟩ := h` takes it apart and names the two parts. The angle brackets are a *pattern* mirroring the pair.\n\nThe introductions and the `obtain` are written. Finish with `constructor` and the two parts.",
+        "To use a hypothesis `h : P ∧ Q` in a tactic proof, `obtain ⟨hp, hq⟩ := h` unpacks it and names both parts. The angle brackets act as a *pattern* mirroring the pair.\n\nThe introductions and `obtain` are already written. Finish with `constructor` and the two parts.",
       outro:
-        "`obtain` uses the eliminator of `∧`: from a pair, it extracts the components. After it, `h` is gone and `hp`, `hq` are in the context.",
+        "`obtain` uses the eliminator of `∧` to extract the components of a pair. Once it runs, `h` is gone and `hp` and `hq` sit in your context.",
       unlocks: { tactics: ['obtain'], codex: ['obtain'] },
       mode: 'tactic',
       header: 'theorem and_chain (P Q R : Prop) : P ∧ Q → (P → R) → Q ∧ R := by',
@@ -133,9 +133,9 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       title: 'Choosing a side',
       english: 'If Q holds, then P or (Q or R).',
       intro:
-        "`P ∨ Q` (\"P or Q\") has *two* constructors: `Or.inl` (from a proof of `P`) and `Or.inr` (from a proof of `Q`). To prove a disjunction, pick a side and prove that side. The tactics are `left` and `right`.\n\nThe goal nests: `P ∨ (Q ∨ R)`. Which side holds the `Q`?",
+        "`P ∨ Q` (\"P or Q\") has *two* constructors: `Or.inl` (from a proof of `P`) and `Or.inr` (from a proof of `Q`). To prove a disjunction, pick a side and prove that side using `left` or `right`.\n\nThe goal is nested: `P ∨ (Q ∨ R)`. Which side holds the `Q`?",
       outro:
-        "To prove `∨` you *commit* to a side. That choice is the constructor `Or.inl` or `Or.inr`. If you pick the wrong side, the goal becomes unprovable, so choose with care.",
+        "To prove `∨`, you have to *commit* to a side, choosing either `Or.inl` or `Or.inr`. If you pick the wrong side, the goal becomes unprovable, so choose carefully.",
       unlocks: { tactics: ['left', 'right'], codex: ['or', 'or-intro', 'left', 'right'] },
       mode: 'tactic',
       header: 'theorem pick_second (P Q R : Prop) (hq : Q) : P ∨ (Q ∨ R) := by',
@@ -157,9 +157,9 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       title: 'Using a disjunction',
       english: 'If P or Q, then Q or P.',
       intro:
-        "To *use* `h : P ∨ Q` you must handle both cases, since you do not know which holds. `cases h with | inl hp => … | inr hq => …` splits `h` into one goal per constructor: in the first, `hp : P`; in the second, `hq : Q`.\n\nThe first case is written. Do the second.",
+        "To *use* `h : P ∨ Q`, you have to handle both cases, since you don't know which one holds. Writing `cases h with | inl hp => … | inr hq => …` splits `h` into one goal per constructor: the first gives you `hp : P`, and the second gives you `hq : Q`.\n\nThe first case is done. Finish the second.",
       outro:
-        "`cases` uses the eliminator `Or.elim`: to get something out of `P ∨ Q`, show it follows from `P` and from `Q`. Proving `∨` is a choice; using `∨` is a case split.",
+        "`cases` uses the eliminator `Or.elim`: to get a conclusion out of `P ∨ Q`, show it follows from `P` and from `Q`. Proving `∨` is a choice; using `∨` is a case split.",
       unlocks: { tactics: ['cases'], codex: ['cases'] },
       mode: 'tactic',
       header: 'theorem or_swap (P Q : Prop) : P ∨ Q → Q ∨ P := by',
@@ -185,9 +185,9 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       title: 'A shorter case split',
       english: 'If P or Q, and each implies R, then R.',
       intro:
-        "`rcases h with hp | hq` does the same case split as `cases`, in one line. The `|` in the pattern separates the cases; each case gets its own goal and its own bullet.\n\nArrange the lines. Be careful with the traps: one is Lean 3 syntax.",
+        "`rcases h with hp | hq` does the same case split as `cases`, in a single line. The `|` in the pattern separates the cases, and each case gets its own goal and bullet.\n\nArrange the lines. Watch out for the traps—one of them is old Lean 3 syntax.",
       outro:
-        "This theorem is the eliminator of `∨` itself, `Or.elim`: to conclude `R` from `P ∨ Q`, give a way to get `R` from each side.",
+        "This theorem is the eliminator of `∨` itself, `Or.elim`: to conclude `R` from `P ∨ Q`, show how to get `R` from each side.",
       unlocks: { tactics: ['rcases'], codex: ['rcases'] },
       header: "theorem or_elim' (P Q R : Prop) : P ∨ Q → (P → R) → (Q → R) → R := by",
       lines: [
@@ -209,9 +209,9 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       title: 'From falsehood, anything',
       english: 'If P holds and P does not hold, then anything holds.',
       intro:
-        "`False` is an inductive type with *no* constructors: there is no way to prove it. And `¬P` is defined as `P → False`. So from `hp : P` and `hnp : ¬P`, the term `hnp hp : False` exists. From `False`, everything follows.\n\nThe tactic `exfalso` changes any goal to `False`.",
+        "`False` is an inductive type with *no* constructors, so there's no way to prove it. Since `¬P` is defined as `P → False`, having `hp : P` and `hnp : ¬P` gives you `hnp hp : False`—and from `False`, anything follows.\n\nThe tactic `exfalso` turns any goal into `False`.",
       outro:
-        "`False` has no constructors, so its eliminator has *no* cases to handle: from a proof of `False` you can build a proof of anything. `exfalso` applies that eliminator (`False.elim`).",
+        "`False` has no constructors, so its eliminator has *no* cases to handle: from a proof of `False`, you can build a proof of anything. `exfalso` applies that eliminator (`False.elim`).",
       unlocks: { tactics: ['exfalso'], codex: ['false-not', 'not', 'exfalso'] },
       mode: 'tactic',
       showTerm: true,
@@ -225,7 +225,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
   exact hp`,
       ],
       hints: [
-        { text: 'You cannot prove `Q` directly. But your hypotheses contradict each other.' },
+        { text: "You can't prove `Q` directly, but your hypotheses contradict each other." },
         { text: 'Change the goal to `False` with `exfalso`. Then use that `¬P` is `P → False`.' },
         { text: '`exfalso`, then `exact hnp hp`.' },
       ],
@@ -236,9 +236,9 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       title: 'Spotting a contradiction',
       english: 'If P and not-P both hold, anything follows.',
       intro:
-        "`contradiction` closes any goal if the context holds an obvious contradiction, such as `hp : P` together with `hnp : ¬P`, or a hypothesis `False`.\n\nIt only looks at *separate* hypotheses. Here the contradiction is hidden inside a conjunction, so you must unpack it first.",
+        "`contradiction` closes any goal when your context holds an obvious clash, like `hp : P` alongside `hnp : ¬P`, or a hypothesis of type `False`.\n\nIt only checks *separate* hypotheses, though. Here the contradiction is tucked inside a conjunction, so you'll need to unpack it first.",
       outro:
-        "`contradiction` automates `exfalso; exact hnp hp`, and the term is `absurd hp hnp`. The combination of a proof and a refutation of the same statement is how `False` is reached.",
+        "`contradiction` automates `exfalso; exact hnp hp`, and its underlying term is `absurd hp hnp`. Pairing a proof with a refutation of the same statement is how you reach `False`.",
       unlocks: { tactics: ['contradiction'], codex: ['contradiction', 'absurd'] },
       mode: 'tactic',
       header: 'theorem no_way (P Q : Prop) (h : P ∧ ¬P) : Q := by',
@@ -260,9 +260,9 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       title: 'Both directions',
       english: 'If P iff Q, then Q iff P.',
       intro:
-        "`P ↔ Q` is an inductive type with one constructor, `Iff.intro`, taking two proofs: `P → Q` and `Q → P`. So `constructor` produces two goals. To *use* `h : P ↔ Q`, take `h.mp : P → Q` or `h.mpr : Q → P`.\n\nProve the symmetry of `↔`.",
+        "`P ↔ Q` is an inductive type with one constructor, `Iff.intro`, taking both `P → Q` and `Q → P`. So `constructor` gives you two goals. To *use* `h : P ↔ Q`, pull out either direction with `h.mp : P → Q` or `h.mpr : Q → P`.\n\nProve that `↔` is symmetric.",
       outro:
-        "`↔` is a pair of implications: `P ↔ Q` is `(P → Q) ∧ (Q → P)` in a wrapper of its own. `.mp` and `.mpr` (\"modus ponens\" and its reverse) are its two projections.",
+        "`↔` is a pair of implications: `P ↔ Q` is just `(P → Q) ∧ (Q → P)` in its own wrapper. `.mp` and `.mpr` (\"modus ponens\" and its reverse) are its two projections.",
       unlocks: { codex: ['iff', 'iff-proj'] },
       mode: 'tactic',
       header: "theorem iff_symm' (P Q : Prop) (h : P ↔ Q) : Q ↔ P := by",
@@ -279,7 +279,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
         '  exact ⟨h.mpr, h.mp⟩',
       ],
       hints: [
-        { text: 'The goal is an `↔`. It is built from two implications.' },
+        { text: 'The goal is an `↔`, which is built from two implications.' },
         { text: '`constructor` gives two goals: `Q → P` first, then `P → Q`. Which direction of `h` serves each?' },
         { text: '`h.mpr : Q → P` for the first goal, `h.mp : P → Q` for the second.' },
       ],
@@ -290,9 +290,9 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       title: 'De Morgan, and saying what you mean',
       english: 'If not (P or Q), then not P and not Q.',
       intro:
-        "`show T` states what the goal currently is. Lean checks that it matches `T` up to unfolding, and then displays it as `T`. It does not change the proof, only readability.\n\nSince `¬P` is `P → False`, `show P → False` is accepted for the goal `¬P`. Half of the proof is written, using `show` to spell out each goal.",
+        "`show T` states what the goal currently is. Lean checks that it matches `T` up to unfolding, then displays it as `T`. It doesn't change the proof, only makes it easier to read.\n\nBecause `¬P` is `P → False`, Lean accepts `show P → False` for the goal `¬P`. Half of the proof is written, using `show` to spell out the goal.",
       outro:
-        "`show` is a type annotation: it records the type you expect. Lean accepted `P → False` for `¬P` because they are *definitionally* equal. This direction of De Morgan's law needs no classical logic.",
+        "`show` is a type annotation that records the type you expect. Lean accepted `P → False` for `¬P` because they're *definitionally* equal. Notice that this direction of De Morgan's law doesn't need classical logic.",
       unlocks: { tactics: ['show'], codex: ['show'] },
       mode: 'tactic',
       header: 'theorem not_or_to_and (P Q : Prop) : ¬(P ∨ Q) → ¬P ∧ ¬Q := by',
@@ -329,9 +329,9 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       title: 'Either it is, or it is not',
       english: 'If P gives Q and not-P gives Q, then Q.',
       intro:
-        "Every statement is either true or false: `P ∨ ¬P`. This is the *law of excluded middle*, and it is **not** provable from Lean's constructive rules: it is a separate axiom, `Classical.em`. Using it means your proof is *classical*.\n\n`by_cases h : P` splits the proof into two goals, one with `h : P` and one with `h : ¬P`.",
+        "Every statement is either true or false: `P ∨ ¬P`. That's the *law of excluded middle*, and it is **not** provable from Lean's constructive rules—it's a separate axiom, `Classical.em`. Using it makes your proof *classical*.\n\n`by_cases h : P` splits the proof into two goals, one with `h : P` and one with `h : ¬P`.",
       outro:
-        "`by_cases` is `Or.elim` applied to `Classical.em P`. Constructive proofs carry computational content (a proof of `P ∨ Q` tells you which side). Classical ones do not, and Lean marks that by the axiom used.",
+        "`by_cases` applies `Or.elim` to `Classical.em P`. Constructive proofs carry computational content (a proof of `P ∨ Q` tells you which side holds); classical ones don't, and Lean tracks that via the axiom used.",
       unlocks: {
         tactics: ['by_cases'],
         codex: ['by_cases', 'classical-vs-constructive', 'excluded-middle'],
@@ -346,7 +346,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
         '  exact (Classical.em P).elim h1 h2',
       ],
       hints: [
-        { text: 'You cannot tell whether `P` holds, but you can consider both possibilities.' },
+        { text: "You can't tell whether `P` holds, but you can consider both possibilities." },
         { text: 'Use `by_cases hp : P`. You get two goals, one for each answer.' },
         { text: 'In the first goal `hp : P`, so `h1` applies. In the second, `hp : ¬P` fits `h2`.' },
       ],
@@ -357,9 +357,9 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       title: 'Proof by contradiction',
       english: 'If it is not the case that P is false, then P.',
       intro:
-        "To prove `P`, assume `¬P` and derive `False`: that is `by_contra h`. It gives `h : ¬P` and the goal `False`.\n\nHeads up: `¬¬P → P` (double negation elimination) can **not** be proved without classical reasoning. `by_contra` is the classical principle at work here.",
+        "To prove `P`, you can assume `¬P` and derive `False`—that's `by_contra h`. It adds `h : ¬P` to the context and changes the goal to `False`.\n\nHeads up: `¬¬P → P` (double negation elimination) can **not** be proved without classical reasoning. `by_contra` is the classical principle doing the work here.",
       outro:
-        "`P → ¬¬P` is provable constructively, but `¬¬P → P` is not: knowing that `P` can't be false doesn't give you a way to prove `P`. Lean's `Classical.byContradiction` supplies it, via the axiom of excluded middle.",
+        "`P → ¬¬P` is provable constructively, but `¬¬P → P` isn't: knowing that `P` can't be false doesn't hand you a proof of `P`. Lean's `Classical.byContradiction` supplies it using the axiom of excluded middle.",
       unlocks: { tactics: ['by_contra'], codex: ['by_contra'] },
       mode: 'tactic',
       header: 'theorem dne (P : Prop) : ¬¬P → P := by',
@@ -383,9 +383,9 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       boss: true,
       english: 'P-or-Q implies R holds exactly when P implies R and Q implies R.',
       intro:
-        "This law says an implication from a disjunction is the same as two implications. Use whatever you need: `constructor`, `intro`, `obtain`, `rcases`, `exact`, `apply`.\n\nBoth directions need a different tool. Look at each goal's shape before choosing.",
+        "This law says an implication from a disjunction is equivalent to a pair of implications. Use whatever tools you need: `constructor`, `intro`, `obtain`, `rcases`, `exact`, or `apply`.\n\nThe two directions call for different tools, so look at each goal's shape before choosing.",
       outro:
-        "Each connective has an introduction rule (a constructor) and an elimination rule (an eliminator): `∧` pairs and projects, `∨` injects and splits, `→` abstracts and applies, `False` has no way in and explodes out. Your proof used all of them.",
+        "Every connective has an introduction rule (its constructor) and an elimination rule (its eliminator): `∧` pairs and projects, `∨` injects and splits, `→` abstracts and applies, and `False` has no way in and explodes out. Your proof used all of them.",
       unlocks: { codex: ['intro-elim'] },
       mode: 'tactic',
       header: 'theorem or_imp_iff (P Q R : Prop) : (P ∨ Q → R) ↔ (P → R) ∧ (Q → R) := by',
@@ -412,9 +412,9 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
     | inr hq => exact h.2 hq`,
       ],
       hints: [
-        { text: 'The statement is an `↔`, so split it first. Then handle each direction separately.' },
-        { text: 'Forward: you must produce a pair of implications. Backward: you must use a pair and a disjunction.' },
-        { text: 'Forward: `Or.inl` and `Or.inr` build the disjunction `h` needs. Backward: unpack `h` with `obtain`, split with `rcases`.' },
+        { text: 'The statement is an `↔`, so split it first and handle each direction separately.' },
+        { text: 'Forward: you need to produce a pair of implications. Backward: you need to use a pair and a disjunction.' },
+        { text: 'Forward: `Or.inl` and `Or.inr` build the disjunction `h` needs. Backward: unpack `h` with `obtain`, then split with `rcases`.' },
       ],
     },
   ],
@@ -424,7 +424,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'concept',
       name: 'Inductive types',
       summary: 'Types defined by constructors; each has an eliminator that says how to use them.',
-      body: "An inductive type is generated by its **constructors**: they are the only ways to build a term. To *use* a term, an **eliminator** (recursor) says what you must provide for each constructor. `And` has one constructor; `Or` has two; `False` has none. `Nat` has two, `zero` and `succ`.",
+      body: "An inductive type is generated by its **constructors**, which are the only ways to build a term of it. To *use* a term, an **eliminator** (recursor) tells you what you need to provide for each constructor. `And` has one constructor, `Or` has two, `False` has none, and `Nat` has two (`zero` and `succ`).",
       example: '#check @And.intro',
     },
     {
@@ -441,7 +441,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'symbol',
       name: '⟨ ⟩',
       summary: 'Anonymous constructor: builds a term of an inductive type with one constructor.',
-      body: "`⟨a, b⟩` builds a pair for `∧` and `↔` (and, later, `∃`). With three parts, `⟨a, b, c⟩` is `⟨a, ⟨b, c⟩⟩`. Lean works out the constructor from the expected type.",
+      body: "`⟨a, b⟩` builds a pair for `∧` and `↔` (and later `∃`). With three parts, `⟨a, b, c⟩` is shorthand for `⟨a, ⟨b, c⟩⟩`. Lean figures out which constructor you mean from the expected type.",
       input: '\\< and \\>',
       example: 'example (P Q R : Prop) (hp : P) (hq : Q) (hr : R) : P ∧ Q ∧ R := ⟨hp, hq, hr⟩',
     },
@@ -450,7 +450,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'term',
       name: 'h.1, h.2',
       summary: 'The two parts of a conjunction (also `h.left`, `h.right`).',
-      body: "If `h : P ∧ Q` then `h.1 : P` and `h.2 : Q`. They chain: `h.2.1` is the first part of the second part. These are the eliminators of `∧` in term mode.",
+      body: "If `h : P ∧ Q`, then `h.1 : P` and `h.2 : Q`. They chain, so `h.2.1` is the first part of the second part. These are the eliminators of `∧` in term mode.",
       example: 'example (P Q : Prop) (h : P ∧ Q) : Q := h.2',
     },
     {
@@ -458,7 +458,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'tactic',
       name: 'constructor',
       summary: 'Applies the constructor of the goal; each argument becomes a goal.',
-      body: "On `P ∧ Q` it gives goals `P` and `Q`; on `P ↔ Q` it gives `P → Q` and `Q → P`. Use bullets `·` to handle each goal in turn.",
+      body: "On `P ∧ Q`, it leaves goals `P` and `Q`; on `P ↔ Q`, it leaves `P → Q` and `Q → P`. Use bullets `·` to handle each goal in turn.",
       example: 'example (P Q : Prop) (hp : P) (hq : Q) : P ∧ Q := by\n  constructor\n  · exact hp\n  · exact hq',
       term: '⟨_, _⟩',
     },
@@ -467,7 +467,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'symbol',
       name: '·',
       summary: 'Focuses on the first goal; the bullet block must close it.',
-      body: 'After a tactic leaves several goals, `· tactics` works on the first one only and must finish it. Indent the block.',
+      body: 'After a tactic leaves several goals, `· tactics` focuses on the first one only and has to finish it. Indent the block under the bullet.',
       input: '\\.',
     },
     {
@@ -475,7 +475,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'tactic',
       name: 'obtain',
       summary: 'Takes apart a hypothesis by pattern, naming its parts.',
-      body: "`obtain ⟨hp, hq⟩ := h` splits `h : P ∧ Q` into `hp : P` and `hq : Q`. Patterns nest: `⟨⟨a, b⟩, c⟩`. It uses the eliminator of the hypothesis's type.",
+      body: "`obtain ⟨hp, hq⟩ := h` splits `h : P ∧ Q` into `hp : P` and `hq : Q`. Patterns can nest, like `⟨⟨a, b⟩, c⟩`. Under the hood, it uses the eliminator of the hypothesis's type.",
       example: 'example (P Q : Prop) (h : P ∧ Q) : Q := by\n  obtain ⟨hp, hq⟩ := h\n  exact hq',
       term: 'match h with | ⟨hp, hq⟩ => _',
     },
@@ -484,7 +484,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'symbol',
       name: '∨',
       summary: 'Disjunction: `P ∨ Q` is proved by a proof of `P` or a proof of `Q`.',
-      body: "`P ∨ Q` has two constructors, `Or.inl` and `Or.inr`. A proof records which side was chosen. To use one, you must handle both cases. `\\/` also works.",
+      body: "`P ∨ Q` has two constructors, `Or.inl` and `Or.inr`. A proof records which side was chosen, so using one means handling both cases. `\\/` also works.",
       input: '\\or',
       example: 'example (P Q : Prop) (hp : P) : P ∨ Q := Or.inl hp',
     },
@@ -501,7 +501,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'tactic',
       name: 'left',
       summary: 'For `P ∨ Q`, commit to proving `P`.',
-      body: "Applies `Or.inl`; the goal becomes `P`. Only choose `left` if you are sure `P` is provable.",
+      body: "Applies `Or.inl`, turning the goal into `P`. Only choose `left` when you're sure `P` is provable.",
       example: 'example (P Q : Prop) (hp : P) : P ∨ Q := by\n  left\n  exact hp',
       term: 'Or.inl _',
     },
@@ -519,7 +519,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'tactic',
       name: 'cases',
       summary: 'Splits a hypothesis by its constructors, one goal per case.',
-      body: "`cases h with | inl hp => … | inr hq => …` handles both ways a disjunction could hold. The same tactic splits other inductive types.",
+      body: "`cases h with | inl hp => … | inr hq => …` handles both ways a disjunction can hold. The same tactic splits any other inductive type too.",
       example:
         'example (P Q : Prop) (h : P ∨ Q) : Q ∨ P := by\n  cases h with\n  | inl hp => right; exact hp\n  | inr hq => left; exact hq',
       term: 'Or.elim h (fun hp => _) (fun hq => _)',
@@ -529,7 +529,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'tactic',
       name: 'rcases',
       summary: 'Pattern-matching `cases`: `|` for alternatives, `⟨ ⟩` for parts.',
-      body: "`rcases h with hp | hq` splits a disjunction; `rcases h with ⟨a, b⟩ | c` mixes both. Nested patterns handle nested connectives in one line.",
+      body: "`rcases h with hp | hq` splits a disjunction, and `rcases h with ⟨a, b⟩ | c` mixes both patterns. Nested patterns unpack nested connectives in a single line.",
       example:
         'example (P Q : Prop) (h : P ∨ Q) : Q ∨ P := by\n  rcases h with hp | hq\n  · right; exact hp\n  · left; exact hq',
       term: 'Or.elim h (fun hp => _) (fun hq => _)',
@@ -539,7 +539,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'concept',
       name: 'False and negation',
       summary: '`False` has no constructors; `¬P` means `P → False`.',
-      body: "There is no way to prove `False`, so a proof of it is a contradiction. `¬P` is *defined* as `P → False`: a refutation is a function that turns any proof of `P` into a contradiction. From `False` you can derive anything (`False.elim`).",
+      body: "There's no way to prove `False`, so a proof of it is a contradiction. `¬P` is *defined* as `P → False`: a refutation is a function that turns any proof of `P` into a contradiction. From `False`, you can derive anything (`False.elim`).",
       example: 'example (P : Prop) (hp : P) (hnp : ¬P) : False := hnp hp',
     },
     {
@@ -556,7 +556,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'tactic',
       name: 'exfalso',
       summary: 'Changes the goal to `False`.',
-      body: "Use it when your hypotheses are contradictory and the goal is unrelated. Afterwards, derive `False`, usually with `exact hnp hp`.",
+      body: "Use it when your hypotheses contradict each other and the goal is unrelated. Once the goal is `False`, derive it—usually with `exact hnp hp`.",
       example: 'example (P Q : Prop) (hp : P) (hnp : ¬P) : Q := by\n  exfalso\n  exact hnp hp',
       term: 'False.elim _',
     },
@@ -565,7 +565,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'tactic',
       name: 'contradiction',
       summary: 'Closes the goal when the context contains an obvious contradiction.',
-      body: "It finds `h : P` with `h' : ¬P`, or `h : False`, and so on. It does not look inside conjunctions: unpack with `obtain` first.",
+      body: "Finds `h : P` alongside `h' : ¬P`, or `h : False`, and closes the goal. It doesn't peek inside conjunctions, so unpack them with `obtain` first.",
       example: 'example (P Q : Prop) (hp : P) (hnp : ¬P) : Q := by\n  contradiction',
       term: 'absurd hp hnp',
     },
@@ -574,7 +574,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'term',
       name: 'absurd',
       summary: '`absurd hp hnp` proves anything from `hp : P` and `hnp : ¬P`.',
-      body: "`absurd : P → ¬P → Q`. The term-mode way to say \"these contradict\".",
+      body: "`absurd : P → ¬P → Q`. The term-mode way to say \"these contradict.\"",
       example: 'example (P Q : Prop) (hp : P) (hnp : ¬P) : Q := absurd hp hnp',
     },
     {
@@ -599,7 +599,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'tactic',
       name: 'show',
       summary: 'States the current goal, up to unfolding; a readability aid.',
-      body: "`show T` checks that the goal is the same as `T` (after unfolding definitions) and displays it as `T`. Use it to remind yourself, or to see through a definition such as `¬P` as `P → False`.",
+      body: "`show T` checks that the goal matches `T` (after unfolding definitions) and displays it as `T`. Use it to keep track of where you are, or to reveal a definition like `¬P` as `P → False`.",
       example: 'example (P : Prop) : ¬P → ¬P := by\n  intro h\n  show P → False\n  exact h',
       term: '(e : T)',
     },
@@ -608,7 +608,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'concept',
       name: 'Classical vs constructive',
       summary: 'Constructive proofs build things; classical ones add excluded middle.',
-      body: "Lean's core logic is constructive: a proof of `P ∨ Q` says *which* side holds. Classical reasoning adds the axiom `Classical.em : P ∨ ¬P`, so you can reason without knowing. It is perfectly valid, but non-constructive. Statements like `¬¬P → P` need it.",
+      body: "Lean's core logic is constructive: a proof of `P ∨ Q` tells you *which* side holds. Classical reasoning adds the axiom `Classical.em : P ∨ ¬P`, letting you reason by cases without knowing which side is true. It's completely valid, just non-constructive—and statements like `¬¬P → P` require it.",
       example: 'example (P : Prop) : P ∨ ¬P := Classical.em P',
     },
     {
@@ -616,7 +616,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'term',
       name: 'Classical.em',
       summary: 'The law of excluded middle: `P ∨ ¬P` for every `P`.',
-      body: "`Classical.em P : P ∨ ¬P`. An axiom: it is not provable from Lean's constructive rules.",
+      body: "`Classical.em P : P ∨ ¬P`. It's an axiom—you can't prove it from Lean's constructive rules.",
       example: 'example (P : Prop) : P ∨ ¬P := Classical.em P',
     },
     {
@@ -624,7 +624,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'tactic',
       name: 'by_cases',
       summary: 'Splits the proof on whether `P` holds: classical.',
-      body: "`by_cases h : P` gives two goals: one with `h : P`, the other with `h : ¬P`. It relies on excluded middle.",
+      body: "`by_cases h : P` splits into two goals: one with `h : P` and one with `h : ¬P`. It relies on excluded middle.",
       example:
         'example (P Q : Prop) (h1 : P → Q) (h2 : ¬P → Q) : Q := by\n  by_cases hp : P\n  · exact h1 hp\n  · exact h2 hp',
       term: 'Or.elim (Classical.em P) (fun h => _) (fun h => _)',
@@ -634,17 +634,17 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       kind: 'tactic',
       name: 'by_contra',
       summary: 'Proof by contradiction: assume `¬goal`, derive `False`. Classical.',
-      body: "`by_contra h` adds `h : ¬(goal)` and sets the goal to `False`. It uses `Classical.byContradiction`, so it is classical.",
+      body: "`by_contra h` adds `h : ¬(goal)` and sets the goal to `False`. Because it uses `Classical.byContradiction`, it's classical.",
       example: 'example (P : Prop) : ¬¬P → P := by\n  intro h\n  by_contra hn\n  exact h hn',
       term: 'Classical.byContradiction (fun h => _)',
-      mathlib: 'In Mathlib `by_contra` can also work without classical logic in decidable cases.',
+      mathlib: 'In Mathlib, `by_contra` can also work without classical logic in decidable cases.',
     },
     {
       id: 'intro-elim',
       kind: 'concept',
       name: 'Introduction and elimination',
       summary: 'Each connective: constructors to prove it, an eliminator to use it.',
-      body: "`→`: `fun` / application. `∧`: `⟨_, _⟩` / `.1 .2`. `∨`: `Or.inl, Or.inr` / `cases`. `↔`: `⟨f, g⟩` / `.mp .mpr`. `False`: none / `False.elim`. `¬P` is `P → False`. Proofs are built from these pieces, and the kernel checks them.",
+      body: "`→`: `fun` / application. `∧`: `⟨_, _⟩` / `.1`, `.2`. `∨`: `Or.inl`, `Or.inr` / `cases`. `↔`: `⟨f, g⟩` / `.mp`, `.mpr`. `False`: none / `False.elim`. `¬P` is `P → False`. Every proof is built from these pieces, and the kernel checks them.",
     },
   ],
   lemmas: [],

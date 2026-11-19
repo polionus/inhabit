@@ -29,7 +29,7 @@ export function ArenaScreen({ sub, arg }: { sub?: string; arg?: string }) {
     default:
       return (
         <div className="page narrow">
-          <EmptyState glyph="?" title="Nothing here" action={<a className="btn primary" href="#/arena">Back to the Arena</a>}>That Arena page does not exist.</EmptyState>
+          <EmptyState glyph="?" title="Nothing here" action={<a className="btn primary" href="#/arena">Back to the Arena</a>}>That Arena page doesn't exist.</EmptyState>
         </div>
       );
   }

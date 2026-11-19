@@ -23,12 +23,12 @@ export function Privacy({ onGo, onBack }: { onGo: () => void; onBack: () => void
   return (
     <Card className="dl-privacy" tone="gold" as="section" aria-label="Before you connect">
       <h2>Before you connect</h2>
-      <p>A live duel connects your browser <strong>directly</strong> to your friend&apos;s browser. In plain words:</p>
+      <p>A live duel connects your browser <strong>directly</strong> to your friend&apos;s browser. Here&apos;s what that means:</p>
       <ul>
-        <li><strong>Each of you can see the other&apos;s IP address</strong>, and so can the signalling service that introduces the two browsers (PeerJS&apos;s free public broker). Google&apos;s public STUN server is also contacted to help the browsers find each other.</li>
-        <li>Nothing else is sent to anyone: during the duel only your display name, whether each puzzle was solved and how long it took travel between you. There is no account, no analytics and no Inhabit server.</li>
+        <li><strong>Each of you can see the other&apos;s IP address</strong>, and so can the signaling service that introduces the two browsers (PeerJS&apos;s free public broker). Google&apos;s public STUN server is also contacted to help the browsers find each other.</li>
+        <li>Nothing else is sent to anyone: during the duel only your display name, whether each puzzle was solved, and how long it took travel between you. There&apos;s no account, no analytics, and no Inhabit server.</li>
         <li>Only share the room link with people you trust. Until you click below, no connection to any of these services is made.</li>
-        <li>Results are on the honour system, and friend duels are unrated.</li>
+        <li>Results are on the honor system, and friend duels are unrated.</li>
       </ul>
       <div className="dl-actions">
         <button className="btn primary big" onClick={onGo}>I understand, connect</button>
@@ -101,7 +101,7 @@ export function JoinScreen({ roomId }: { roomId?: string }) {
   if (!roomId || !kind) {
     return (
       <div className="page narrow">
-        <EmptyState glyph="?" title="That is not a room link" action={<a className="btn primary" href="#/arena/duel">Back to duels</a>}>The link looks incomplete. Ask your friend to send it again.</EmptyState>
+        <EmptyState glyph="?" title="That's not a room link" action={<a className="btn primary" href="#/arena/duel">Back to duels</a>}>The link looks incomplete. Ask your friend to send it again.</EmptyState>
       </div>
     );
   }

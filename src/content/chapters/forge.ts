@@ -4,7 +4,94 @@ import type { ChapterExplainer } from '../types.ts';
 export const chapter: ChapterExplainer | undefined = {
   worldId: 'forge',
   title: "Formalize your own theorem: say it, type it, define it, state it, prove it",
-  dek: "The hardest part of formalizing is the statement, not the proof, so this chapter gives a five-step method for turning an idea in words into a Lean theorem that says what you meant.",
-  body: "## The hard part is the statement\n\nUntil now every level gave you a statement and asked for a proof. Real work starts earlier. A mathematician has an idea in words, such as \"the sum of two odd numbers is even\", and nobody hands over a Lean version. If your formal statement is subtly wrong, you can prove it perfectly and still have proved the wrong thing.\n\nThis chapter is about the whole path from idea to checked theorem. We use five steps: say it, type it, define it, state it, prove it.\n\n## Say it, and type it\n\n**Say it** means writing the claim in careful English and marking every \"for all\", \"there exists\" and \"if … then\". Then test it on a small example. A sentence that you cannot test is not yet precise. \"The sum of two odd numbers is even\" is tested by `3 + 5 = 8`.\n\n**Type it** means giving every object in the sentence a type. A number is `n : Nat`, a set of points is `A : Set α`, a function is `f : α → β`, a property is `P : α → Prop`. Types are part of the meaning, so this comes before writing anything formal. Is \"odd\" a property of numbers or of integers? You must decide.\n\n## Define it\n\nWhen a notion is missing from the library, name it with `def`. A property is a predicate, a function into `Prop`, and its body says what it means:\n\n```lean\ndef forge_IsSquare (n : Nat) : Prop := ∃ k, n = k * k\n\nexample : forge_IsSquare 9 := ⟨3, rfl⟩\nexample (m : Nat) : forge_IsSquare (m * m) := ⟨m, rfl⟩\n```\n\nThe first line introduces a new name, `forge_IsSquare`, which turns each number into a statement. The `example` lines show the payoff: `forge_IsSquare 9` unfolds to `∃ k, 9 = k * k`, so the pair `⟨3, rfl⟩` proves it. Your own definitions behave like `Even` and `Odd`, because those are defined the same way.\n\n## State it\n\nNow turn the English into a type. Hypotheses go before the colon as arguments, and the conclusion goes after it. Take \"if `f` sends every point of `A` into `B`, then the image of `A` lies inside `B`\":\n\n```lean\nexample (α β : Type) (f : α → β) (A : Set α) (B : Set β)\n    (h : ∀ x, x ∈ A → f x ∈ B) : f '' A ⊆ B := by\n  intro y hy\n  obtain ⟨x, hx, hxy⟩ := hy\n  rw [← hxy]\n  exact h x hx\n```\n\nThe \"if\" became the hypothesis `h`. The `→` sits under the `∀`, because the claim is about each `x` that lies in `A`. The conclusion is a subset statement.\n\nStatements go wrong in a small number of ways, and they are worth learning by name. You can write `∧` where you meant `→`, which makes a claim much stronger than intended. You can leave out a hypothesis, so the statement is false. You can reverse an implication. You can swap the order of two quantifiers, and \"for every `x` there is a `y`\" is not \"there is a `y` for every `x`\". You can also put the `¬` in the wrong place: \"not all are even\" and \"all are not even\" are different statements. After writing, read your statement back in English and see if it still says what you meant.\n\n## Prove it: plan first\n\nThe proof above went through in four lines, because it is small. Here is what the goal looks like along the way. After `intro y hy`:\n\n```text\ny : β\nhy : y ∈ f '' A\n⊢ y ∈ B\n```\n\nSince `hy` unfolds to an existential, `obtain` gives a point `x`, its membership, and the equation:\n\n```text\nx : α\nhx : x ∈ A\nhxy : f x = y\n⊢ y ∈ B\n```\n\nRewriting right to left replaces `y` by `f x`, leaving `f x ∈ B`, and `h x hx` is exactly that.\n\nFor bigger theorems, write a skeleton first. State the intermediate claims with `have`, give each one the proof `by sorry`, and let Lean check that the pieces fit together:\n\n```text\nhave h1 : x ∈ B := by sorry\nhave h2 : x ∈ D := by sorry\nexact ⟨h1, h2⟩\n```\n\nLean accepts this with a warning that the declaration uses `sorry`. The warning is not an error: it is a reminder of what is still open. Fill the holes one at a time, and the warning goes away when the last one is gone. If the skeleton itself does not fit, you find out before you spend an hour on the details.\n\nThree small tactics tidy repeated work. `all_goals` runs a tactic on every open goal, `try` runs a tactic and carries on if it fails, and `repeat` keeps applying a tactic until it stops working.\n\n## Reading errors\n\nMost of proving is reading what Lean says. An error has three parts: where, what Lean expected, and what you gave. A type mismatch means these differ. If the message says it expected `x ∈ B` and got `x ∈ A`, you used the wrong hypothesis. If `rw` reports that it did not find the pattern, the left side of your equation does not appear in the goal as written, so print the goal and compare. When Lean says \"unsolved goals\", it lists exactly what is left, so use that list as your next to-do.\n\n## The bigger picture\n\nEvery earlier chapter supplies a column of the table. Types and functions give step two, sets and numbers give the material, connectives and quantifiers give step four, tactics give step five. A statement is a type, and a proof is a term inhabiting it. So formalizing means designing the type, and that is a skill rather than a chore.\n\nIn real Lean and Mathlib, you will do the same five steps on a bigger scale. You will search for existing lemmas instead of rebuilding them, with `exact?` and the library's documentation, and you will let `simp`, `omega` and `ring` close the routine parts. The skill that carries over is the one you have just practiced: say precisely what you mean, and read what Lean says back.\n\n## Practice on your own ideas\n\nThe best way to learn the five steps is to apply them to a claim you invented. Pick something small: \"the sum of two even numbers is even\", \"composing two injective functions gives an injective function\", \"a subset of a subset is a subset\". Say it in careful English, give each object a type, decide whether you need a `def`, and write the statement with a skeleton before any proof. If a step feels vague, that is where your idea is still unclear, and the formal language is helping you find it. Many people discover that a claim they believed has a missing hypothesis the first time they try to type it.",
+  dek: "The hardest part of formalizing is getting the statement right, not the proof. Here's a five-step method for turning a math idea into a Lean theorem that actually says what you mean.",
+  body: `## Why the statement is the hardest part
+
+Up to now, every level has handed you a ready-made theorem and asked for its proof. Real formalization starts one step earlier. You begin with an idea in plain words—say, "the sum of two odd numbers is even"—and nobody gives you the Lean version. If your formal statement is slightly off, you can write a spotless proof and still end up proving the wrong claim.
+
+This chapter walks through the whole journey from rough idea to machine-checked theorem using five steps: say it, type it, define it, state it, and prove it.
+
+## Steps 1 and 2: say it plainly, then give everything a type
+
+**Say it** means spelling out the claim in careful English, highlighting every "for all," "there exists," and "if … then." Then test it on a small concrete example. If you can't test a sentence on an example, it isn't precise enough yet. "The sum of two odd numbers is even" passes right away: \`3 + 5 = 8\`.
+
+**Type it** means assigning a Lean type to every object in the sentence. A natural number is \`n : Nat\`, a set of points is \`A : Set α\`, a function is \`f : α → β\`, and a property is \`P : α → Prop\`. Types are part of the mathematical meaning, so settle them before writing the statement. For instance, is "odd" a property of natural numbers or of integers? You have to decide up front.
+
+## Step 3: name new concepts with \`def\`
+
+Whenever a concept isn't already in the library, introduce it with \`def\`. A property of numbers is simply a predicate—a function returning \`Prop\`—whose body explains what it means:
+
+\`\`\`lean
+def forge_IsSquare (n : Nat) : Prop := ∃ k, n = k * k
+
+example : forge_IsSquare 9 := ⟨3, rfl⟩
+example (m : Nat) : forge_IsSquare (m * m) := ⟨m, rfl⟩
+\`\`\`
+
+The first line creates a new name, \`forge_IsSquare\`, mapping each natural number to a proposition. The two examples show how cleanly it behaves: \`forge_IsSquare 9\` unfolds to \`∃ k, 9 = k * k\`, so the pair \`⟨3, rfl⟩\` proves it on the spot. Your own definitions act just like \`Even\` and \`Odd\`, because those are built the exact same way.
+
+## Step 4: translate the claim into a Lean type
+
+Next, turn your English sentence into a type. Hypotheses sit before the colon as named arguments, and the conclusion goes after it. Take the claim "if \`f\` sends every point of \`A\` into \`B\`, then the image of \`A\` lies inside \`B\`":
+
+\`\`\`lean
+example (α β : Type) (f : α → β) (A : Set α) (B : Set β)
+    (h : ∀ x, x ∈ A → f x ∈ B) : f '' A ⊆ B := by
+  intro y hy
+  obtain ⟨x, hx, hxy⟩ := hy
+  rw [← hxy]
+  exact h x hx
+\`\`\`
+
+Notice how each piece lands. The "if" clause becomes the hypothesis \`h\`, with \`→\` tucked inside \`∀\` because the condition applies to every \`x\` belonging to \`A\`, and the conclusion becomes a subset goal.
+
+Formal statements tend to go wrong in a handful of familiar ways, and it's worth knowing all of them by sight. Writing \`∧\` where you meant \`→\` makes a claim far stronger than intended. Dropping a hypothesis turns a true statement into an unprovable one. Flipping an implication reverses cause and effect. Swapping two quantifiers changes the meaning completely, since "for every \`x\` there's a \`y\`" isn't the same as "there's a single \`y\` that works for every \`x\`." Misplacing \`¬\` causes similar trouble: "not all numbers are even" says something very different from "all numbers are not even." Once you've typed a statement, translate it back into English word for word and check that it still matches what you had in mind.
+
+## Step 5: sketch the proof before filling in details
+
+The proof above only needed four lines because the claim is compact. Watch how the goal evolves as it runs. After \`intro y hy\`:
+
+\`\`\`text
+y : β
+hy : y ∈ f '' A
+⊢ y ∈ B
+\`\`\`
+
+Because \`hy\` unfolds to an existential, \`obtain\` hands you the input \`x\`, its membership in \`A\`, and the equation tying \`f x\` to \`y\`:
+
+\`\`\`text
+x : α
+hx : x ∈ A
+hxy : f x = y
+⊢ y ∈ B
+\`\`\`
+
+Rewriting right to left swaps \`y\` for \`f x\`, leaving \`f x ∈ B\`, which \`h x hx\` closes immediately.
+
+For longer theorems, start by laying down a skeleton. Write out the intermediate milestones with \`have\`, plug \`by sorry\` into each one, and let Lean check that the overall structure fits together:
+
+\`\`\`text
+have h1 : x ∈ B := by sorry
+have h2 : x ∈ D := by sorry
+exact ⟨h1, h2⟩
+\`\`\`
+
+Lean accepts that file while warning you that it still contains \`sorry\`. That warning isn't an error; it's just a checklist of the pieces left to prove. Fill in one hole at a time, and the warning disappears once the last \`sorry\` is gone. Better yet, if the blueprint itself doesn't line up, you catch the flaw in seconds instead of an hour into the details.
+
+Three small combinators also cut down on repetitive typing: \`all_goals\` runs a tactic across every open subgoal, \`try\` runs a tactic without failing if it doesn't apply, and \`repeat\` keeps applying a tactic until nothing changes.
+
+## Making sense of Lean's error messages
+
+A huge share of formal proving is simply reading what Lean tells you. Almost every error has three parts: where it happened, what Lean expected, and what you actually gave it. A type mismatch means those last two disagree—if Lean expected \`x ∈ B\` and got \`x ∈ A\`, you probably handed it the wrong hypothesis. If \`rw\` says it didn't find the pattern, the left side of your equation doesn't appear literally in the goal, so look closely at the goal state and compare. And when Lean reports "unsolved goals," it prints the exact list of what's still open, giving you your next to-do item.
+
+## Every chapter in one workflow
+
+Looking back, every earlier chapter feeds one step of this method. Types and functions power step two, sets and numbers supply the objects, connectives and quantifiers power step four, and tactics drive step five. Because a statement is a type and a proof is a term inhabiting it, formalizing means designing the right type—and that's a real mathematical skill, not just busywork.
+
+In real Lean and Mathlib, you'll follow these exact five steps on a larger scale. You'll search for existing lemmas with \`exact?\` and the documentation instead of reproving everything from scratch, and you'll let \`simp\`, \`omega\`, and \`ring\` clean up routine steps. What carries straight across is the habit you've just practiced: say precisely what you mean, and listen carefully to what Lean says back.
+
+## Trying the five steps on your own claims
+
+The fastest way to lock this method in is to test it on a claim you come up with yourself. Pick something modest—"the sum of two even numbers is even," "composing two injective functions yields an injective function," or "a subset of a subset is a subset." Write it in careful English, assign a type to every object, decide whether you need a \`def\`, and sketch a \`sorry\` skeleton before touching the proof details. Whenever a step feels fuzzy, that's usually a spot where the idea itself needs sharpening—and plenty of people catch a missing hypothesis in a theorem they thought they knew the very first time they try to type it.`,
   guide: ['english-to-lean','how-to-attack-a-proof'],
 };

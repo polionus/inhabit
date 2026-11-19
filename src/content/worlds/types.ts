@@ -5,10 +5,10 @@ export const world: World = {
   title: 'Basecamp',
   tagline: 'Terms, types and functions',
   intro:
-    "Everything in Lean is a **term**, and every term has a **type**. In Basecamp you write terms by hand: numbers, functions, functions that return functions, and finally functions whose result *type* depends on their input. No tactics yet, just the raw material that all later proofs are built from. By the end you can read `(A → B) → (B → C) → A → C` and write a term that inhabits it.",
+    "Everything in Lean is a **term**, and every term has a **type**. In Basecamp, you'll write terms by hand: numbers, functions, functions that return functions, and finally functions whose result *type* depends on their input. There aren't any tactics yet—just the raw material that all later proofs are built from. By the end, you'll be able to read `(A → B) → (B → C) → A → C` and write a term that inhabits it.",
   requires: [],
   bigIdea:
-    'Every expression has a type; functions are the basic building block; and types themselves can depend on values.',
+    'Every expression has a type, functions are the basic building block, and types themselves can depend on values.',
   levels: [
     {
       id: 'types-01',
@@ -16,9 +16,9 @@ export const world: World = {
       title: 'Something of type Nat',
       english: 'Give any natural number.',
       intro:
-        "Replace `sorry` with any natural number, such as `7`.\n\nThe line `7 : Nat` says that the term `7` has the type `Nat`, the natural numbers 0, 1, 2, …",
+        "Replace `sorry` with any natural number, like `7`.\n\nWriting `7 : Nat` means the term `7` has type `Nat`, the natural numbers 0, 1, 2, …",
       outro:
-        "You *inhabited* the type `Nat`: you produced a term of it. Keep that word in mind. The whole game is about inhabiting types, and soon the types will be statements you want to prove.",
+        "You just *inhabited* the type `Nat` by producing a term of it. Hold onto that word—the whole game is about inhabiting types, and soon those types will be statements you want to prove.",
       unlocks: { codex: ['terms-types', 'nat', 'sorry', 'example-cmd'] },
       mode: 'term',
       header: 'example : Nat :=',
@@ -35,9 +35,9 @@ export const world: World = {
       kind: 'choice',
       title: 'Asking for a type',
       intro:
-        "Put your cursor on each `#check` line and read Lean's answer in the panel. Then answer the question.\n\n`#check e` asks Lean for the type of `e`; it computes nothing. `Nat.succ` is the function \"the next number\".",
+        "Put your cursor on each `#check` line and read Lean's answer in the panel. Then answer the question.\n\n`#check e` asks Lean for the type of `e`; it doesn't compute anything. `Nat.succ` is the function for \"the next number.\"",
       outro:
-        "`Nat → Nat` is a **function type**: \"give me a `Nat`, get a `Nat` back\". And `Nat.succ 3` has type `Nat`: applying a function to an argument gives something of the result type.",
+        "`Nat → Nat` is a **function type**: \"give me a `Nat`, get a `Nat` back.\" And `Nat.succ 3` has type `Nat`—applying a function to an argument gives something of the result type.",
       unlocks: { codex: ['check', 'function-types', 'arrow'] },
       question: 'What type does Lean report for `Nat.succ` on its own?',
       code: `#check (3 : Nat)
@@ -47,7 +47,7 @@ export const world: World = {
         {
           text: '`Nat`',
           feedback:
-            'That is the type of `Nat.succ 3`, the result once the function has been given a number. `Nat.succ` by itself is the function.',
+            "That's the type of `Nat.succ 3`, the result once the function has been given a number. `Nat.succ` by itself is the function.",
         },
         {
           text: '`Nat → Nat`',
@@ -58,7 +58,7 @@ export const world: World = {
         {
           text: '`4`',
           feedback:
-            '`#check` reports types, not values, and 4 is a term, not a type. It never evaluates anything. (`#eval` computes.)',
+            '`#check` reports types, not values, and 4 is a term, not a type. It never evaluates anything (`#eval` is the one that computes).',
         },
         {
           text: '`Type`',
@@ -73,9 +73,9 @@ export const world: World = {
       title: 'Using a function',
       english: 'Given a function f from Nat to Nat and a number n, produce a Nat.',
       intro:
-        "You are given a function `f` and a number `n` above the line. Replace `sorry` with a `Nat` built from them.\n\nTo use a function, write it next to its argument: `f n`. No brackets, no commas.",
+        "You're given a function `f` and a number `n` above the line. Replace `sorry` with a `Nat` built from them.\n\nTo use a function, write it right next to its argument: `f n`. No parentheses, no commas.",
       outro:
-        "The rule \"`f : A → B`, `a : A`, so `f a : B`\" is the only way to *use* a function. Keep it in mind: Proposition Peaks turns out to be about this rule.",
+        "The rule \"if `f : A → B` and `a : A`, then `f a : B`\" is the only way to *use* a function. Keep it in mind: Proposition Peaks turns out to be built on this exact rule.",
       unlocks: { codex: ['application'] },
       mode: 'term',
       header: 'example (f : Nat → Nat) (n : Nat) : Nat :=',
@@ -93,9 +93,9 @@ export const world: World = {
       title: 'Building a function',
       english: 'Define the function `double` that doubles a number.',
       intro:
-        "Replace `sorry` with what the function returns for the input `n`, so that `double` doubles its input.\n\n`fun n => n + 1` is the function that takes `n` and returns `n + 1`. A hidden test checks `double 3 = 6` by plain computation (`rfl`).",
+        "Replace `sorry` with what the function should return for the input `n`, so that `double` doubles its input.\n\n`fun n => n + 1` is the function that takes `n` and returns `n + 1`. A hidden test checks `double 3 = 6` by plain computation (`rfl`).",
       outro:
-        "`fun` is the way to *make* an element of a function type; application is the way to *use* one. Together they are the whole story of functions, and `def` just gives the result a name.",
+        "`fun` is how you *make* an element of a function type, and application is how you *use* one. Together they're the whole story of functions, and `def` simply gives the result a name.",
       unlocks: { codex: ['fun', 'lambda', 'def'] },
       mode: 'term',
       header: 'def double : Nat → Nat :=',
@@ -114,9 +114,9 @@ export const world: World = {
       title: 'Two arguments, one at a time',
       english: 'Define `area`, taking a width and a height and returning their product.',
       intro:
-        "Replace `sorry` with a function that takes a width `w` and a height `h` and returns their product. Write it as `fun w h => …`.\n\nThe type `Nat → Nat → Nat` means a function that returns a function, so the tests can also write `area 3` with one argument.",
+        "Replace `sorry` with a function that takes a width `w` and a height `h` and returns their product. Write it as `fun w h => …`.\n\nThe type `Nat → Nat → Nat` means a function that returns another function, which is why the tests can also write `area 3` with just one argument.",
       outro:
-        "`area 3` is a function in its own right, still waiting for its second argument. A function of several arguments is a chain of one-argument functions. Later, `P → Q → R` will read as \"given a proof of P and a proof of Q, get R\".",
+        "`area 3` is a function in its own right, still waiting for its second argument. A function of several arguments is really a chain of one-argument functions. Later, `P → Q → R` will read as \"given a proof of P and a proof of Q, get R.\"",
       unlocks: { codex: ['currying'] },
       mode: 'term',
       header: 'def area : Nat → Nat → Nat :=',
@@ -136,16 +136,16 @@ example : Nat → Nat := area 3`,
       title: 'Composing functions',
       english: 'Given f : A → B and g : B → C, build a function A → C.',
       intro:
-        "Arrange the lines into a term of type `A → C`. Two lines are traps.\n\n`A B C : Type` stand for *any* types, so you know nothing about their elements: the only moves are applying `f` and `g`.",
+        "Arrange the lines into a term of type `A → C`. Two lines are traps.\n\n`A B C : Type` stand for *any* types, so you don't know anything about their elements—your only moves are applying `f` and `g`.",
       outro:
-        "You never needed to know what `A`, `B`, `C` were. The term works for every choice, because it only follows the types: `a : A`, then `f a : B`, then `g (f a) : C`.",
+        "You never needed to know what `A`, `B`, and `C` were. The term works for any choice because it only follows the types: `a : A`, then `f a : B`, then `g (f a) : C`.",
       header: 'example (A B C : Type) (f : A → B) (g : B → C) : A → C :=',
       lines: ['  fun a =>', '    g (f a)'],
       distractors: ['    f (g a)', '    g a'],
       hints: [
-        { text: 'The goal is a function, so the term must start by building one. Which line does that?' },
+        { text: 'The goal is a function, so the term has to start by building one. Which line does that?' },
         { text: 'Follow the types: `a : A` can go into `f`, and the result can go into `g`.' },
-        { text: 'First `fun a =>`, then the body `g (f a)`. `f (g a)` feeds a `C` to `f`, which expects an `A`.' },
+        { text: 'First `fun a =>`, then the body `g (f a)`. Writing `f (g a)` would feed a `C` to `f`, which expects an `A`.' },
       ],
     },
     {
@@ -153,9 +153,9 @@ example : Nat → Nat := area 3`,
       kind: 'choice',
       title: 'Types have types',
       intro:
-        "Types are terms too, so they have types. `Nat : Type`: `Nat` is a type. What is the type of `Type` itself? Lean builds a tower of **universes**: `Type`, `Type 1`, `Type 2`, …\n\nMove the cursor over each `#check`, then predict the answer for `Type`. `Prop`, which you will meet next, sits right at the bottom.",
+        "Types are terms too, so they have types of their own. `Nat : Type` says `Nat` is a type—so what's the type of `Type` itself? Lean builds a tower of **universes**: `Type`, `Type 1`, `Type 2`, …\n\nMove the cursor over each `#check`, then predict the answer for `Type`. `Prop`, which you'll meet next, sits right at the bottom.",
       outro:
-        "Each universe lives in the next one: `Nat : Type`, `Type : Type 1`, and `Prop : Type`. If `Type : Type` held, you could build a Russell-style paradox, so Lean climbs a ladder instead.",
+        "Each universe lives in the next one up: `Nat : Type`, `Type : Type 1`, and `Prop : Type`. If `Type : Type` held, you could build a Russell-style paradox, so Lean climbs a ladder instead.",
       unlocks: { codex: ['universes'] },
       question: 'Lean answers `Nat : Type`. What does it answer for `#check Type`?',
       code: `#check Nat
@@ -166,7 +166,7 @@ example : Nat → Nat := area 3`,
         {
           text: '`Type : Type`',
           feedback:
-            'Tempting, but a type that contains itself leads to paradoxes (Girard\'s paradox, a cousin of Russell\'s). Lean avoids this by climbing a level.',
+            "Tempting, but a type that contains itself leads to paradoxes (Girard's paradox, a cousin of Russell's). Lean avoids this by climbing a level.",
         },
         {
           text: '`Type : Type 1`',
@@ -176,12 +176,12 @@ example : Nat → Nat := area 3`,
         {
           text: '`Type : Nat`',
           feedback:
-            '`Nat` is a type whose terms are numbers. `Type` is not a number; it is a type of types.',
+            "`Nat` is a type whose terms are numbers. `Type` isn't a number—it's a type of types.",
         },
         {
           text: '`Type : Prop`',
           feedback:
-            'It goes the other way. `Prop` is itself a term of `Type`, as the last `#check` shows.',
+            'It goes the other way around. `Prop` is a term of `Type`, as the last `#check` shows.',
         },
       ],
     },
@@ -191,9 +191,9 @@ example : Nat → Nat := area 3`,
       title: 'Types as arguments',
       english: 'Define the polymorphic identity function: it takes a type α, then a value of type α, and returns it.',
       intro:
-        "So far the *output type* never depended on the input. Here it does: `(α : Type) → α → α` says \"give me a type α, then an element of α, and I return an element of α\". The result type mentions the argument `α`. This is a **dependent function type**.\n\nDefine `myId`. It takes two arguments: first the type, then the value.",
+        "So far, a function's *output type* has never depended on its input. Here it does: `(α : Type) → α → α` says \"give me a type α, then an element of α, and I'll return an element of α.\" Because the result type mentions the argument `α`, this is a **dependent function type**.\n\nDefine `myId`. It takes two arguments: first the type, then the value.",
       outro:
-        "`A → B` is just the special case `(x : A) → B` where `B` doesn't mention `x`. Taking a type as an argument is what makes a function polymorphic. In Quantifier Quay you will see that `∀` is exactly this construct.",
+        "`A → B` is just the special case `(x : A) → B` where `B` doesn't mention `x`. Taking a type as an argument is what makes a function polymorphic, and in Quantifier Quay you'll see that `∀` is this exact same construct.",
       unlocks: { codex: ['pi-types'] },
       mode: 'term',
       header: 'def myId : (α : Type) → α → α :=',
@@ -213,9 +213,9 @@ example : Nat → Nat := area 3`,
       boss: true,
       english: 'Define `swapArgs`: given any two-argument function, return the one that takes its arguments in the other order.',
       intro:
-        "Put everything together. `swapArgs` takes three types, then a function `α → β → γ`, and returns a function `β → α → γ`. Reading the type slowly (currying!) tells you how many names `fun` needs.\n\nA hidden test runs it on a concrete function, so the term must really compute.",
+        "Let's put everything together. `swapArgs` takes three types, then a function `α → β → γ`, and returns a function `β → α → γ`. Reading the type slowly—remembering currying—tells you how many names `fun` needs.\n\nA hidden test runs it on a concrete function, so your term has to actually compute.",
       outro:
-        "You wrote a term whose type is a *theorem-shaped statement*: for all types, a function of two arguments can be flipped. In the next world, the same terms will be read as proofs.",
+        "You just wrote a term whose type reads like a theorem: for any types, a two-argument function can have its arguments flipped. In the next world, these same terms will become proofs.",
       mode: 'term',
       header: 'def swapArgs : (α β γ : Type) → (α → β → γ) → β → α → γ :=',
       starter: '  sorry',
@@ -224,7 +224,7 @@ example : Nat → Nat := area 3`,
       hints: [
         { text: 'Count the arguments the type promises: three types, one function, then two values.' },
         { text: 'Name them in order: `fun α β γ f b a => …`. Note `b : β` comes first.' },
-        { text: 'The result must be a `γ`. Only `f` produces one. What does `f` need, and in which order?' },
+        { text: 'The result has to be a `γ`, and only `f` produces one. What does `f` need, and in which order?' },
         { text: 'The body is `f a b`.' },
       ],
     },
@@ -235,7 +235,7 @@ example : Nat → Nat := area 3`,
       kind: 'concept',
       name: 'Terms and types',
       summary: 'Every term has a type, written `a : A`.',
-      body: "Lean's basic judgement is `a : A`: the term `a` has type `A`. Numbers, functions and proofs are all terms. Every term has exactly one type (up to computation). To *inhabit* a type is to produce a term of it.",
+      body: "Lean's basic judgment is `a : A`: the term `a` has type `A`. Numbers, functions, and proofs are all terms, and every term has a single type (up to computation). To *inhabit* a type means to produce a term of it.",
       example: 'example : Nat := 7',
     },
     {
@@ -243,7 +243,7 @@ example : Nat → Nat := area 3`,
       kind: 'definition',
       name: 'Nat',
       summary: 'The natural numbers 0, 1, 2, …',
-      body: "`Nat` is the type of natural numbers. It has two ways of being built: `0` (`Nat.zero`) and `Nat.succ n`, the number after `n`. Numerals like `7` are shorthand. Later you will see that this is an *inductive type*.",
+      body: "`Nat` is the type of natural numbers. It has two ways of being built: `0` (`Nat.zero`) and `Nat.succ n`, the number after `n`. Numerals like `7` are shorthand. Later you'll see that this makes `Nat` an *inductive type*.",
       example: 'example : Nat := Nat.succ 3',
     },
     {
@@ -251,14 +251,14 @@ example : Nat → Nat := area 3`,
       kind: 'term',
       name: 'sorry',
       summary: 'A placeholder that stands for a missing term or proof.',
-      body: "`sorry` fills any gap so the rest of your code can be checked. Lean warns that the result is incomplete. It is how you leave a gap while you work, never a finished solution.",
+      body: "`sorry` fills any gap so the rest of your code can still be checked, and Lean warns you that the result is incomplete. It's handy for leaving a gap while you work, never a finished solution.",
     },
     {
       id: 'example-cmd',
       kind: 'term',
       name: 'example',
       summary: 'Checks a term against a type without naming it.',
-      body: "`example : T := e` asks Lean to check that `e` has type `T`, and then forgets it. `def name : T := e` and `theorem name : T := e` do the same but keep the name for later use.",
+      body: "`example : T := e` asks Lean to check that `e` has type `T`, then forgets it. `def name : T := e` and `theorem name : T := e` do the same thing, except they keep the name for later use.",
       example: 'example : Nat := 5',
     },
     {
@@ -266,7 +266,7 @@ example : Nat → Nat := area 3`,
       kind: 'term',
       name: '#check',
       summary: 'Asks Lean for the type of an expression.',
-      body: "`#check e` prints `e : T`. It never computes the value. Use it constantly: when you are unsure what something is, check it.",
+      body: "`#check e` prints `e : T` without computing the value. Use it constantly—whenever you're unsure what something is, check it.",
       example: '#check Nat.succ',
     },
     {
@@ -274,7 +274,7 @@ example : Nat → Nat := area 3`,
       kind: 'concept',
       name: 'Function types',
       summary: '`A → B` is the type of functions that take an `A` and return a `B`.',
-      body: "If `f : A → B` and `a : A` then `f a : B`. The arrow associates to the right: `A → B → C` means `A → (B → C)`. Functions are terms like any other, so they can be arguments and results of other functions.",
+      body: "If `f : A → B` and `a : A`, then `f a : B`. The arrow associates to the right, so `A → B → C` means `A → (B → C)`. Functions are terms like any other, which means they can be passed to and returned from other functions.",
       example: 'example : Nat → Nat := Nat.succ',
     },
     {
@@ -290,7 +290,7 @@ example : Nat → Nat := area 3`,
       kind: 'term',
       name: 'f a',
       summary: 'Apply a function to an argument by writing them side by side.',
-      body: "`f a` applies `f` to `a`. With several arguments, `f a b` means `(f a) b`. Parentheses group: `f (g a)` applies `g` first.",
+      body: "`f a` applies `f` to `a`. With several arguments, `f a b` means `(f a) b`. Use parentheses to group: `f (g a)` applies `g` first.",
       example: 'example (f : Nat → Nat) : Nat := f 2',
     },
     {
@@ -298,7 +298,7 @@ example : Nat → Nat := area 3`,
       kind: 'term',
       name: 'fun x => e',
       summary: 'Builds a function that sends `x` to `e`.',
-      body: "`fun x => e` is a function whose body `e` may use `x`. Several names are short for nesting: `fun a b => e` is `fun a => fun b => e`. You can annotate: `fun (x : Nat) => e`.",
+      body: "`fun x => e` builds a function whose body `e` can use `x`. Listing several names is shorthand for nesting: `fun a b => e` is `fun a => fun b => e`. You can add type annotations too, like `fun (x : Nat) => e`.",
       example: 'example : Nat → Nat := fun n => n + 1',
     },
     {
@@ -322,7 +322,7 @@ example : Nat → Nat := area 3`,
       kind: 'concept',
       name: 'Currying',
       summary: 'A function of several arguments is a function returning a function.',
-      body: "`A → B → C` is `A → (B → C)`. Giving only the first argument yields a function still waiting for the second: partial application. This is why `f a b` is `(f a) b`.",
+      body: "`A → B → C` is `A → (B → C)`. Passing only the first argument gives you a function still waiting for the second—that's partial application, and it's why `f a b` means `(f a) b`.",
       example: 'example : Nat → Nat → Nat := fun a b => a + b',
     },
     {
@@ -330,7 +330,7 @@ example : Nat → Nat := area 3`,
       kind: 'concept',
       name: 'Universes',
       summary: 'Types have types: `Nat : Type`, `Type : Type 1`, and `Prop : Type`.',
-      body: "`Type` is the type of ordinary types; `Type 1` the type of `Type`; and so on upward. A type never lives in itself, which would cause paradoxes. `Prop` is a separate bottom universe for statements; it is the subject of the next world.",
+      body: "`Type` is the type of ordinary types, `Type 1` is the type of `Type`, and so on upward. A type never lives in itself, which avoids paradoxes. `Prop` is a separate bottom universe for statements, and it's the subject of the next world.",
       example: '#check Type',
     },
     {
@@ -338,7 +338,7 @@ example : Nat → Nat := area 3`,
       kind: 'concept',
       name: 'Dependent function types',
       summary: '`(x : A) → B x`: the result type may depend on the argument.',
-      body: "In `(α : Type) → α → α` the type after the first arrow mentions `α`. Such a type is a *Π-type*. When `B` does not mention `x`, it is written `A → B`. Polymorphism and (later) `∀` are both instances.",
+      body: "In `(α : Type) → α → α`, the type after the first arrow mentions `α`. That kind of type is called a *Π-type*. When `B` doesn't mention `x`, we just write `A → B`. Polymorphism and (later) `∀` are both instances of it.",
       example: 'example : (α : Type) → α → α := fun α a => a',
     },
   ],

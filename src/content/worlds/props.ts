@@ -5,7 +5,7 @@ export const world: World = {
   title: 'Proposition Peaks',
   tagline: 'Proofs are programs',
   intro:
-    "A statement like `P → Q` is a type, and a proof of it is a term: a function. That is the **Curry–Howard correspondence**, and this world is built on it. You will re-solve a Basecamp puzzle as logic, then meet *tactics* as a way of building those terms step by step: `exact`, `intro`, `apply`, `have`, `assumption`.",
+    "A statement like `P → Q` is a type, and a proof of it is a term—specifically, a function. That's the **Curry–Howard correspondence**, and this world is built on it. You'll re-solve a Basecamp puzzle as logic, then meet *tactics* as a way to build those terms step by step: `exact`, `intro`, `apply`, `have`, and `assumption`.",
   requires: ['types'],
   bigIdea:
     'Curry–Howard: propositions are types, proofs are terms, and implication is the function arrow.',
@@ -16,9 +16,9 @@ export const world: World = {
       title: 'The same program',
       english: 'If P implies Q and Q implies R, then P implies R.',
       intro:
-        "Replace `sorry` with a term of the type below. It is Basecamp's puzzle `(A → B) → (B → C) → A → C` again, so solve it exactly as you did before.\n\nThe difference is `P Q R : Prop`: `Prop` is the type of *statements*, a term `hp : P` is a **proof** of `P`, and `P → Q` reads \"if P then Q\".",
+        "Replace `sorry` with a term of the type below. It's Basecamp's puzzle `(A → B) → (B → C) → A → C` again, so you can solve it the exact same way.\n\nThe only difference is `P Q R : Prop`: `Prop` is the type of *statements*, a term `hp : P` is a **proof** of `P`, and `P → Q` reads \"if P then Q.\"",
       outro:
-        "You wrote the same `fun` term as in Basecamp. A proof of \"P implies Q\" *is* a function that turns any proof of `P` into a proof of `Q`. Only the reading changed.",
+        "You wrote the exact same `fun` term as in Basecamp. A proof of \"P implies Q\" *is* a function that turns any proof of `P` into a proof of `Q`—only the way we read it changed.",
       unlocks: { codex: ['prop', 'theorem'] },
       mode: 'term',
       header: 'theorem imp_trans (P Q R : Prop) : (P → Q) → (Q → R) → P → R :=',
@@ -36,9 +36,9 @@ export const world: World = {
       kind: 'choice',
       title: 'Modus ponens',
       intro:
-        "Read the theorem below and decide what *logical* step the application `hpq hp` performs. Hover over `hpq hp` in the panel if you like.\n\nHere `hpq : P → Q` is a function and `hp : P` is its argument.",
+        "Read the theorem below and decide what *logical* step the application `hpq hp` performs. Hover over `hpq hp` in the panel if you'd like.\n\nHere `hpq : P → Q` is a function and `hp : P` is its argument.",
       outro:
-        "Modus ponens, \"from P and P → Q conclude Q\", is function application. Propositions are types, proofs are terms, `→` is the function arrow. This is the **Curry–Howard correspondence**.",
+        "Modus ponens—\"from P and P → Q, conclude Q\"—is just function application. Propositions are types, proofs are terms, and `→` is the function arrow. That's the **Curry–Howard correspondence**.",
       unlocks: { codex: ['curry-howard'] },
       question: 'What logical step does `hpq hp` perform?',
       code: 'theorem mp_demo (P Q : Prop) (hp : P) (hpq : P → Q) : Q := hpq hp',
@@ -47,22 +47,22 @@ export const world: World = {
           text: 'It combines a proof of `P` and a proof of `P → Q` into a proof of `Q` (modus ponens).',
           correct: true,
           feedback:
-            'Yes. Applying the function `hpq` to the proof `hp` yields a proof of `Q`: the rule `f : A → B`, `a : A` gives `f a : B`.',
+            'Yes. Applying the function `hpq` to the proof `hp` yields a proof of `Q`—the same rule where `f : A → B` and `a : A` give `f a : B`.',
         },
         {
           text: 'It proves `P → Q`.',
           feedback:
-            '`hpq` already *is* a proof of `P → Q`; it is a hypothesis. Applying it to `hp` consumes the `P` and produces something of type `Q`.',
+            "`hpq` already *is* a proof of `P → Q`; it's a hypothesis. Applying it to `hp` consumes the `P` and produces something of type `Q`.",
         },
         {
           text: 'It proves `P`, since `hp` is written last.',
           feedback:
-            'The theorem states `Q`, and the type of `hpq hp` is the *result* type of the function, `Q`. Argument position does not decide the type.',
+            "The theorem states `Q`, and the type of `hpq hp` is the function's *result* type, `Q`. Argument position doesn't decide the type.",
         },
         {
           text: 'Nothing logical: it is only function application that happens to type-check.',
           feedback:
-            'That is the surprise: there is no difference. Type-checking `hpq hp : Q` *is* checking that the step from `P` and `P → Q` to `Q` is valid.',
+            "That's the surprise: there's no difference. Type-checking `hpq hp : Q` *is* checking that the logical step from `P` and `P → Q` to `Q` is valid.",
         },
       ],
     },
@@ -72,9 +72,9 @@ export const world: World = {
       title: 'Your first tactic: exact',
       english: 'From a proof of Q and a proof of Q → R, prove R.',
       intro:
-        "Replace `sorry` with `exact` and a term of the goal's type. The goal `R` is shown after `⊢`; look at the hypotheses above the line.\n\n`by` switches from writing a term to giving *instructions* for building one. `exact e` means \"the term `e` has exactly the goal's type\".",
+        "Replace `sorry` with `exact` and a term of the goal's type. The goal `R` appears after `⊢`, with your hypotheses listed above the line.\n\n`by` switches from writing a term directly to giving *instructions* for building one. `exact e` tells Lean that the term `e` has the exact type of the goal.",
       outro:
-        "A tactic block is a program that builds a term. `exact` just hands over a finished term. Open the term below: Lean checked *that* against the goal.",
+        "A tactic block is just a script that builds a term, and `exact` hands over a finished one. Open the proof term below: Lean checked *that* against the goal.",
       unlocks: { tactics: ['exact'], codex: ['by', 'tactics-concept', 'exact', 'turnstile'] },
       mode: 'tactic',
       showTerm: true,
@@ -92,9 +92,9 @@ export const world: World = {
       kind: 'predict',
       title: 'Assuming the premise',
       intro:
-        "To prove `P → Q`, assume `P` and prove `Q`. In a tactic proof, `intro hp` does exactly this. It takes the left side of the arrow off the goal and puts it in the context as a hypothesis called `hp`.\n\nBefore you run the proof, commit to a prediction for the goal after `intro hp`.",
+        "To prove `P → Q`, you assume `P` and prove `Q`. In a tactic proof, `intro hp` does just that: it peels the left side of the arrow off the goal and puts it in your context as a hypothesis called `hp`.\n\nBefore running the proof, predict what the goal looks like after `intro hp`.",
       outro:
-        "`intro hp` builds `fun hp => ?_`: a function with the body still missing. The goal `P → Q → P` was a function type, so the way to prove it is to write a function.",
+        "`intro hp` builds `fun hp => ?_`, a function whose body is still missing. Since the goal `P → Q → P` is a function type, proving it means writing a function.",
       unlocks: { tactics: ['intro'], codex: ['intro'] },
       code: `theorem const_fn (P Q : Prop) : P → Q → P := by
   intro hp
@@ -105,22 +105,22 @@ export const world: World = {
         {
           text: 'Context gains `hp : P`; the goal becomes `Q → P`.',
           correct: true,
-          feedback: 'Right. One `intro` removes one arrow and records the premise.',
+          feedback: 'Right. One `intro` removes one arrow and records its premise.',
         },
         {
           text: 'The goal becomes `Q → P`, and nothing is added to the context.',
           feedback:
-            'The premise does not vanish: `intro` *moves* it into the context, where you can use it as `hp : P`.',
+            "The premise doesn't vanish—`intro` *moves* it into the context, where you can use it as `hp : P`.",
         },
         {
           text: 'Context gains `hp : P`; the goal becomes `P`.',
           feedback:
-            'That would remove two arrows. A single `intro hp` introduces one premise; the `Q →` is still there.',
+            'That would remove two arrows. A single `intro hp` introduces one premise, so the `Q →` is still there.',
         },
         {
           text: 'The goal is unchanged, and `hp : P` is added.',
           feedback:
-            'The goal changes: the premise `P →` is removed, since it is now a hypothesis rather than something still to be assumed.',
+            "The goal does change: the premise `P →` is removed, since it's now a hypothesis rather than something still waiting to be assumed.",
         },
       ],
     },
@@ -130,9 +130,9 @@ export const world: World = {
       title: 'Introducing several premises',
       english: 'If P and Q together give R, then Q and P together give R.',
       intro:
-        "`intro` can take several names at once: `intro h hq` is `intro h` then `intro hq`. Each name matches one arrow, left to right.\n\nSome of the proof is written. Fill in the rest. Remember the goal after your introductions: it is the thing to prove, so a hypothesis has to provide it.",
+        "`intro` can take several names at once: `intro h hq` is shorthand for `intro h` followed by `intro hq`. Each name peels off one arrow, left to right.\n\nPart of the proof is already written. Fill in the rest, keeping an eye on the goal after your introductions—that's what a hypothesis needs to give you.",
       outro:
-        "The term Lean built is `fun h hq hp => h hp hq`: one `fun` per `intro`. The tactic proof and the term proof are two notations for the same object.",
+        "The term Lean built is `fun h hq hp => h hp hq`, with one `fun` argument per `intro`. The tactic proof and the term proof are just two ways to write the same object.",
       mode: 'tactic',
       showTerm: true,
       header: 'theorem imp_flip (P Q R : Prop) : (P → Q → R) → Q → P → R := by',
@@ -143,7 +143,7 @@ export const world: World = {
   exact h hp hq`,
       ],
       hints: [
-        { text: 'After `intro h hq` the goal is `P → R`. It is still an implication.' },
+        { text: 'After `intro h hq`, the goal is `P → R`—still an implication.' },
         { text: 'Introduce the last premise too, then use `exact`.' },
         { text: '`h` expects first a proof of `P`, then a proof of `Q`.' },
         { text: '`intro h hq hp`, then `exact h hp hq`.' },
@@ -154,9 +154,9 @@ export const world: World = {
       kind: 'predict',
       title: 'Working backwards',
       intro:
-        "The goal is `R`, and `hqr : Q → R` produces an `R` if given a `Q`. `apply hqr` says: \"I will use `hqr`; what is still missing?\" The goal is replaced by what `hqr` needs.\n\nPredict the goal after `apply hqr`.",
+        "The goal is `R`, and `hqr : Q → R` gives you an `R` if you supply a `Q`. Writing `apply hqr` says, \"I'll use `hqr`; what's still missing?\" Lean replaces the goal with what `hqr` needs.\n\nPredict the goal after `apply hqr`.",
       outro:
-        "`apply hqr` builds `hqr ?_`: an application with a hole, and the hole is the new goal. `exact` gives the whole term; `apply` gives the head and leaves the arguments for you.",
+        "`apply hqr` builds `hqr ?_`—an application with a hole, where the hole becomes your new goal. `exact` supplies the whole term, while `apply` supplies the function and leaves its arguments for you.",
       unlocks: { tactics: ['apply'], codex: ['apply'] },
       code: `theorem back_demo (P Q R : Prop) (hq : Q) (hqr : Q → R) : R := by
   apply hqr
@@ -166,22 +166,22 @@ export const world: World = {
         {
           text: 'The goal becomes `Q`.',
           correct: true,
-          feedback: 'Right: `hqr` turns a proof of `Q` into a proof of `R`, so it remains to prove `Q`.',
+          feedback: "Right: `hqr` turns a proof of `Q` into a proof of `R`, so all that's left is to prove `Q`.",
         },
         {
           text: 'The goal stays `R`.',
           feedback:
-            'The goal moves. `apply` replaces `R` with what is needed to use `hqr` to get an `R`.',
+            'The goal changes. `apply` replaces `R` with whatever you need in order to get `R` from `hqr`.',
         },
         {
           text: 'The goal becomes `Q → R`.',
           feedback:
-            '`Q → R` is the type of `hqr` itself, which we are already using. What is left is its argument.',
+            "`Q → R` is the type of `hqr` itself, which you're already using. What's left is its argument.",
         },
         {
           text: 'There are no goals left: `apply` proves it.',
           feedback:
-            'A proof of `Q` is still needed. Only after `exact hq` is everything done.',
+            "You still need a proof of `Q`. The proof isn't finished until `exact hq` closes that goal.",
         },
       ],
     },
@@ -191,9 +191,9 @@ export const world: World = {
       title: 'Assume, then work backwards',
       english: 'If P implies Q and Q implies R, then P implies R.',
       intro:
-        "Order matters in a tactic proof. First move the premise into the context, then work backwards from the goal, one `apply` at a time, until a hypothesis closes it.\n\nArrange the lines. Three of the lines offered are traps.",
+        "Order matters in a tactic proof. First move the premise into the context, then work backwards from the goal one `apply` at a time until a hypothesis closes it.\n\nArrange the lines. Three of them are traps.",
       outro:
-        "Each `apply` peeled one implication off the goal until `exact hp` finished. This is the term `fun hp => hqr (hpq hp)`, found backwards instead of forwards.",
+        "Each `apply` peeled one implication off the goal until `exact hp` finished the job. That's the term `fun hp => hqr (hpq hp)`, built backwards instead of forwards.",
       header: 'theorem chain (P Q R : Prop) (hpq : P → Q) (hqr : Q → R) : P → R := by',
       lines: ['  intro hp', '  apply hqr', '  apply hpq', '  exact hp'],
       distractors: ['  exact hpq', '  apply hp', '  exact hqr hp'],
@@ -209,9 +209,9 @@ export const world: World = {
       title: 'Naming an intermediate fact',
       english: 'From P, P → Q, Q → R and R → S, conclude S.',
       intro:
-        "`have h : T := e` adds a new hypothesis `h : T` to the context, where `e` is a proof of `T`. It lets you name an intermediate step and keep going.\n\nTwo steps are written. One step is missing. Fill in the middle one.",
+        "`have h : T := e` adds a new hypothesis `h : T` to the context, where `e` is a proof of `T`. It lets you name an intermediate step and keep moving.\n\nTwo steps are written, and the middle one is missing. Fill it in.",
       outro:
-        "`have` builds a term in which the intermediate result is named once and used later. Naming a fact breaks a long proof into short steps, like a lemma inside a proof.",
+        "`have` builds a term where an intermediate result is named once and reused later. Naming a fact breaks a long proof into short steps, like a miniature lemma inside a proof.",
       unlocks: { tactics: ['have'], codex: ['have'] },
       mode: 'tactic',
       showTerm: true,
@@ -238,9 +238,9 @@ export const world: World = {
       title: 'Let Lean look it up',
       english: 'If Q holds and Q implies R, then P implies R.',
       intro:
-        "`assumption` closes the goal if some hypothesis has *exactly* the goal's type. Lean searches the context for you.\n\nUse `intro` and `apply` to reach a goal that is already in the context, then let `assumption` finish.",
+        "`assumption` closes the goal if some hypothesis has *exactly* the goal's type, so Lean searches the context for you.\n\nUse `intro` and `apply` to reach a goal that's already in the context, then let `assumption` finish.",
       outro:
-        "`assumption` is `exact h` where Lean finds `h` for you. Notice that the hypothesis `hp` is never used: the proof term ignores it. Assuming something and not using it is harmless.",
+        "`assumption` is just `exact h` where Lean finds `h` for you. Notice that `hp` is never used—the proof term ignores it, and assuming something without using it is completely fine.",
       unlocks: { tactics: ['assumption'], codex: ['assumption'] },
       mode: 'tactic',
       showTerm: true,
@@ -267,9 +267,9 @@ export const world: World = {
       boss: true,
       english: 'If P and Q give R, and P gives Q, then P gives R.',
       intro:
-        "Use whatever you need: `intro`, `apply`, `have`, `exact`, `assumption`.\n\nThe hypothesis `P → Q → R` needs *two* proofs. Think about where each one comes from, and in which order you introduce things.",
+        "Use whatever tactics you need here: `intro`, `apply`, `have`, `exact`, or `assumption`.\n\nThe hypothesis `P → Q → R` needs *two* proofs. Think about where each one comes from, and in what order you introduce things.",
       outro:
-        "The term behind your proof is `fun h1 h2 hp => h1 hp (h2 hp)`, the S combinator of combinatory logic. The Lean **kernel** never sees your tactics: it only checks that this final term has the stated type.",
+        "Behind your proof sits `fun h1 h2 hp => h1 hp (h2 hp)`, the S combinator of combinatory logic. Lean's **kernel** never sees your tactics—it only checks that this final term has the stated type.",
       unlocks: { codex: ['kernel-check'] },
       mode: 'tactic',
       showTerm: true,
@@ -296,7 +296,7 @@ export const world: World = {
       kind: 'concept',
       name: 'Prop',
       summary: 'The type of statements. A term of a statement is a proof of it.',
-      body: "`Prop` is the universe of propositions, and `Prop : Type`. If `P : Prop` then `P` is itself a type, and a term `h : P` is a *proof* of `P`. Proving `P` means finding such a term; a proposition is true when its type is inhabited.",
+      body: "`Prop` is the universe of propositions, and `Prop : Type`. If `P : Prop`, then `P` is itself a type, and a term `h : P` is a *proof* of `P`. Proving `P` means finding such a term—a proposition is true when its type is inhabited.",
       example: 'example (P : Prop) (h : P) : P := h',
     },
     {
@@ -304,7 +304,7 @@ export const world: World = {
       kind: 'term',
       name: 'theorem',
       summary: 'Like `example`, but with a name for later use.',
-      body: "`theorem name (args) : statement := proof` states a proposition and proves it. The hypotheses in parentheses are arguments; the part after the colon is the goal.",
+      body: "`theorem name (args) : statement := proof` states a proposition and proves it. The hypotheses in parentheses are arguments, and the part after the colon is the goal.",
       example: 'theorem id_prop (P : Prop) (h : P) : P := h',
     },
     {
@@ -312,7 +312,7 @@ export const world: World = {
       kind: 'concept',
       name: 'Propositions as types',
       summary: 'Curry–Howard: statements are types, proofs are terms, `→` is the function arrow.',
-      body: "A proof of `P → Q` is a function that turns proofs of `P` into proofs of `Q`; modus ponens is application. Writing a proof is writing a program, and checking a proof is type-checking. Every connective you meet next has a matching type former.",
+      body: "A proof of `P → Q` is a function that turns proofs of `P` into proofs of `Q`, and modus ponens is function application. Writing a proof is writing a program, and checking a proof is type-checking. Every connective you'll meet next has a matching type former.",
       example: 'example (P Q : Prop) (hp : P) (hpq : P → Q) : Q := hpq hp',
     },
     {
@@ -320,7 +320,7 @@ export const world: World = {
       kind: 'term',
       name: 'by',
       summary: 'Enters tactic mode: a script that builds a term.',
-      body: "`:= by tac₁; tac₂ …` (or one tactic per line) asks Lean to *construct* the term by running the tactics, each acting on the current goal. The result is an ordinary term.",
+      body: "`:= by tac₁; tac₂ …` (or one tactic per line) tells Lean to *construct* a term by running tactics on the current goal. The result is still an ordinary term.",
       example: 'example (P : Prop) (h : P) : P := by exact h',
     },
     {
@@ -328,14 +328,14 @@ export const world: World = {
       kind: 'concept',
       name: 'What tactics are',
       summary: 'Tactics are programs that build proof terms step by step.',
-      body: "A proof state is a list of **goals**: a context of hypotheses and a type after `⊢`. Each tactic transforms the goal, perhaps leaving new ones. When no goals remain, Lean has assembled a complete term. Tactics are a convenience; the term is the proof.",
+      body: "A proof state is a list of **goals**, each showing a context of hypotheses and a target type after `⊢`. Every tactic transforms the goal, sometimes leaving new ones behind. Once no goals remain, Lean has assembled a complete term. Tactics are a convenience; the term is what counts.",
     },
     {
       id: 'turnstile',
       kind: 'symbol',
       name: '⊢',
       summary: 'Separates hypotheses from the goal in the proof state.',
-      body: 'In the infoview, everything left of `⊢` is in your context and the type to its right is what you must produce.',
+      body: 'In the infoview, everything left of `⊢` is in your context, and the type to its right is what you need to produce.',
       input: '\\vdash',
     },
     {
@@ -343,7 +343,7 @@ export const world: World = {
       kind: 'tactic',
       name: 'exact',
       summary: 'Closes the goal with a term of exactly that type.',
-      body: "`exact e` elaborates `e` against the goal. If the type matches, the goal is closed; otherwise Lean reports a type mismatch. Reach for it when you can see the whole term.",
+      body: "`exact e` checks `e` against the goal. If the type matches, the goal closes; otherwise Lean reports a type mismatch. Reach for it whenever you can see the whole term.",
       example: 'example (P Q : Prop) (hp : P) (hpq : P → Q) : Q := by\n  exact hpq hp',
       term: 'e',
     },
@@ -352,7 +352,7 @@ export const world: World = {
       kind: 'tactic',
       name: 'intro',
       summary: 'Moves the premise of an implication into the context.',
-      body: "On a goal `P → Q`, `intro hp` adds `hp : P` and leaves the goal `Q`. `intro a b c` introduces several. Use it whenever the goal is a function type.",
+      body: "On a goal `P → Q`, `intro hp` adds `hp : P` to the context and leaves the goal `Q`. Writing `intro a b c` introduces several at once. Use it whenever the goal is a function type.",
       example: 'example (P Q : Prop) : P → Q → P := by\n  intro hp hq\n  exact hp',
       term: 'fun hp => _',
     },
@@ -361,7 +361,7 @@ export const world: World = {
       kind: 'tactic',
       name: 'apply',
       summary: 'Uses a function whose result matches the goal; the arguments become new goals.',
-      body: "On goal `R` with `h : Q → R`, `apply h` leaves the goal `Q`. With several arguments, you get one goal per missing argument. It is *backward reasoning*: you start from the goal and ask what would suffice.",
+      body: "On a goal `R` with `h : Q → R`, `apply h` leaves the goal `Q`. If `h` takes several arguments, you get one new goal per missing argument. It's *backward reasoning*: you start from the goal and ask what would be enough to prove it.",
       example: 'example (P Q : Prop) (hp : P) (hpq : P → Q) : Q := by\n  apply hpq\n  exact hp',
       term: 'h _',
     },
@@ -370,7 +370,7 @@ export const world: World = {
       kind: 'tactic',
       name: 'have',
       summary: 'Adds a named intermediate fact to the context.',
-      body: "`have h : T := e` gives you `h : T` for the rest of the proof. Writing `:= by tactics` lets you prove it right there. It does not change the goal.",
+      body: "`have h : T := e` gives you `h : T` for the rest of the proof. Writing `:= by ...` lets you prove it right there with tactics, without changing the main goal.",
       example: 'example (P Q R : Prop) (hpq : P → Q) (hqr : Q → R) (hp : P) : R := by\n  have hq : Q := hpq hp\n  exact hqr hq',
       term: 'have h : T := e; _',
     },
@@ -379,7 +379,7 @@ export const world: World = {
       kind: 'tactic',
       name: 'assumption',
       summary: 'Closes the goal if a hypothesis has exactly its type.',
-      body: "`assumption` searches the context for a hypothesis matching the goal. It saves naming it. It fails if none matches exactly.",
+      body: "`assumption` searches the context for a hypothesis matching the goal, saving you from naming it. It fails if nothing matches exactly.",
       example: 'example (P Q : Prop) (hp : P) (hq : Q) : P := by\n  assumption',
       term: 'h (the matching hypothesis)',
     },
@@ -388,7 +388,7 @@ export const world: World = {
       kind: 'concept',
       name: 'What the kernel checks',
       summary: 'The kernel checks only that the final term has the stated type.',
-      body: "Whatever tactics you used, Lean's small trusted **kernel** receives a finished term and type-checks it against the theorem statement. Tactics are not trusted; the kernel is. That is why a proof assistant's answer \"this is proved\" can be believed.",
+      body: "No matter what tactics you used, Lean's small, trusted **kernel** receives a finished term and type-checks it against the theorem statement. Tactics aren't trusted; the kernel is. That's why you can trust a proof assistant when it says a theorem is proved.",
     },
   ],
   lemmas: [],

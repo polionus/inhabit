@@ -4,32 +4,32 @@ import type { ChapterExplainer } from '../types.ts';
 export const chapter: ChapterExplainer = {
   worldId: 'quant',
   title: 'For all and there exists: where types start to depend',
-  dek: 'Mathematics is about numbers, sets and functions, not bare statements. This chapter shows that "for all" is a function, "there exists" is a pair, and why the order of two quantifiers changes the meaning.',
+  dek: 'Mathematics is about numbers, sets, and functions, not bare statements. Here you\'ll see how "for all" is a function, "there exists" is a pair, and why quantifier order matters.',
   guide: ['dependent-types', 'english-to-lean', 'how-to-attack-a-proof'],
-  body: `## The question
+  body: `## Talking about infinitely many things in one statement
 
-Compare two sentences. "It is raining" is a single statement. "Every number is either even or odd" is a statement about infinitely many things at once. Most of mathematics looks like the second kind: for every triangle, for some prime, for no function with this property. How does a proof checker deal with "every" and "some" without checking infinitely many cases?
+Compare two sentences. "It's raining" is a single claim. "Every number is either even or odd" makes a claim about infinitely many numbers in one breath. Almost all real mathematics looks like the second kind: for every triangle, for some prime, for no continuous function with this property. How can a proof checker verify "every" and "some" without testing infinitely many cases one by one?
 
-The answer reuses what you have. A proof of "for all" is a *function*. A proof of "there exists" is a *pair*. The only new ingredient is that the type of the output is allowed to depend on the input, which is the dependent function type from Basecamp finally earning its keep.
+Lean answers that by reusing tools you already know. A proof of "for all" is a *function*, and a proof of "there exists" is a *pair*. The one new twist is that the output type is allowed to depend on the input value—the dependent function type you glimpsed back in Basecamp finally earns its keep.
 
-## Predicates
+## Predicates: properties as functions into Prop
 
-A **predicate** is a property of objects. In Lean it is a function into \`Prop\`. If \`P : Nat → Prop\`, then \`P 3\` is a statement, and so is \`P 100\`. Applying a predicate does not decide whether the result is true. It only produces a statement that may or may not have a proof. A relation is a predicate with more arguments, such as \`R : Nat → Nat → Prop\`.
+A **predicate** is a property that objects can have or lack. In Lean, it's a function returning a \`Prop\`. If \`P : Nat → Prop\`, then \`P 3\` is a proposition and \`P 100\` is another. Applying \`P\` to a number doesn't decide whether the claim is true or false; it simply builds the statement, which may or may not have a proof. A **relation** is just a predicate with multiple inputs, like \`R : Nat → Nat → Prop\`.
 
-## For all
+## "For all" is a dependent function
 
-\`∀ x, P x\` says that \`P x\` holds for every \`x\`. A proof is a function that takes any \`x\` and returns a proof of \`P x\`. Notice that the *type* of the result, \`P x\`, mentions the argument. This is exactly a dependent function type. The ordinary implication \`A → B\` is the special case where \`B\` does not mention the argument.
+\`∀ x, P x\` says that \`P x\` holds for every \`x\`. A proof of it is a function that takes any \`x\` and returns a proof of \`P x\`. Look closely at the return type: \`P x\` mentions the input \`x\`, which makes \`∀ x, P x\` a dependent function type. Ordinary implication \`A → B\` is just the special case where \`B\` doesn't mention the argument.
 
 \`\`\`lean
 example (P : Nat → Prop) (h : ∀ n, P n) : P 5 := h 5
 example (P : Nat → Prop) : (∀ n, P n) → ∀ m, P m := fun h m => h m
 \`\`\`
 
-To use a \`∀\`, apply it to an object: \`h 5\` is a proof of \`P 5\`. In tactic mode, \`specialize h 5\` replaces \`h\` with that instance. To prove a \`∀\`, introduce an arbitrary object with \`intro n\` and prove the statement for it. The word "arbitrary" matters: you may not assume anything about \`n\` that is not already in the context.
+To use a \`∀\` hypothesis, you apply it to a specific object: \`h 5\` is a proof of \`P 5\`. In tactic mode, \`specialize h 5\` replaces \`h\` with that specific instance. To *prove* a \`∀\` goal, you bring in an arbitrary element with \`intro n\` and prove the claim for it. "Arbitrary" is doing real work here: you can't assume anything about \`n\` that isn't already in your context.
 
-## There exists
+## "There exists" is a dependent pair
 
-\`∃ x, P x\` says some \`x\` has the property. A proof is a pair, a **witness** \`w\` together with a proof \`hw : P w\`. The type of the second component depends on the value of the first, so this is a *dependent pair*.
+\`∃ x, P x\` claims that at least one \`x\` satisfies \`P\`. A proof is a pair consisting of a **witness** \`w\` and a proof \`hw : P w\`. Because the type of the second piece depends on the value of the first, Lean calls this a *dependent pair*.
 
 \`\`\`lean
 example : ∃ n : Nat, n + 2 = 5 := ⟨3, rfl⟩
@@ -38,22 +38,24 @@ example (P : Nat → Prop) (h : ∃ n, P n) : ∃ m, P m := by
   exact ⟨w, hw⟩
 \`\`\`
 
-In tactic mode, \`use w\` supplies the witness and leaves you the proof about it. To use an existence hypothesis, \`obtain ⟨w, hw⟩ := h\` takes it apart. Afterward you hold *some* \`w\` and the fact \`hw : P w\`, and nothing else about \`w\`. You do not know which one it is. That is the point: whatever you prove must work for any witness.
+In tactic mode, \`use w\` supplies the witness and leaves you to prove \`P w\`. Going the other way, \`obtain ⟨w, hw⟩ := h\` unpacks an existence hypothesis into some \`w\` together with \`hw : P w\`. You don't know which value \`w\` actually is, and that's the whole point: whatever you prove from \`w\` has to hold no matter which witness is inside \`h\`.
 
-## Order matters
+## Why quantifier order flips the meaning
 
 Compare two statements about a relation \`R\`:
 
-- \`∀ n, ∃ m, R n m\`: for each \`n\`, some \`m\` works. The \`m\` may depend on \`n\`.
-- \`∃ m, ∀ n, R n m\`: one single \`m\` works for every \`n\`.
+- \`∀ n, ∃ m, R n m\`: for each \`n\`, some \`m\` works—and \`m\` is allowed to depend on \`n\`.
+- \`∃ m, ∀ n, R n m\`: a single \`m\` works for every \`n\` simultaneously.
 
-Take \`R n m\` to mean "\`m\` is bigger than \`n\`" on the natural numbers. The first is true, since you can take \`m = n + 1\`. The second is false, since no number is bigger than every number. The second statement always implies the first, but not the other way round. In English, "everyone has a friend" and "someone is everyone's friend" are exactly this difference.
+Suppose \`R n m\` means "\`m\` is larger than \`n\`" on the natural numbers. The first statement is true, because you can always pick \`m = n + 1\`. The second is false, because no single number beats every number. The second always implies the first, never the other way around. In everyday English, that's the gap between "everyone has a friend" and "someone is everybody's friend."
 
-## Saying it in Lean
+## Translating "every" and "some" from English
 
-Translating English is a skill of its own. "Every P is a Q" becomes \`∀ x, P x → Q x\`, an implication under a \`∀\`. It does not become \`∀ x, P x ∧ Q x\`, which would claim that everything is a P. And "some P is a Q" becomes \`∃ x, P x ∧ Q x\`, with a conjunction, because an implication would be satisfied by any object that is not a P. A good test is to ask what a counterexample would look like. For the first form, it is an object that is a P and not a Q.
+Turning English sentences into Lean is its own skill, and two patterns come up constantly. "Every \`P\` is a \`Q\`" translates to \`∀ x, P x → Q x\`, with an implication under the \`∀\`. It doesn't become \`∀ x, P x ∧ Q x\`, which would assert that everything in the universe is a \`P\`. On the flip side, "some \`P\` is a \`Q\`" becomes \`∃ x, P x ∧ Q x\`, using a conjunction—an implication there would be trivially true whenever *any* non-\`P\` object exists. When you're unsure which connective fits, test what a counterexample would look like: a counterexample to "every \`P\` is a \`Q\`" is an object that's a \`P\` and not a \`Q\`.
 
-## One proof, step by step
+## Combining a universal rule with a witness
+
+Watch how \`∀\` and \`∃\` fit together in a short proof:
 
 \`\`\`lean
 example (α : Type) (P Q : α → Prop) (a : α) :
@@ -63,14 +65,14 @@ example (α : Type) (P Q : α → Prop) (a : α) :
   exact h a hp
 \`\`\`
 
-We begin with the full statement as the goal, and the objects \`α\`, \`P\`, \`Q\`, \`a\` in the context:
+We start with \`α\`, \`P\`, \`Q\`, and \`a\` in scope and the implication as our goal:
 
 \`\`\`text
 a : α
 ⊢ (∀ x, P x → Q x) → P a → ∃ x, Q x
 \`\`\`
 
-\`intro h hp\` takes the two premises:
+\`intro h hp\` moves both premises into the context:
 
 \`\`\`text
 h : ∀ x, P x → Q x
@@ -78,27 +80,27 @@ hp : P a
 ⊢ ∃ x, Q x
 \`\`\`
 
-The goal is an existence claim, so we owe a witness. The only object of type \`α\` anywhere is \`a\`, so \`use a\` is the natural move. The goal becomes the proof about it:
+Since the goal asks for an existence proof, we owe a witness of type \`α\`. The only element of \`α\` in sight is \`a\`, so \`use a\` is the natural choice, leaving us to prove \`Q\` about it:
 
 \`\`\`text
 ⊢ Q a
 \`\`\`
 
-Now \`h a\` is the rule instantiated at \`a\`, with type \`P a → Q a\`. Applying it to \`hp\` gives \`Q a\`. Note how \`h a hp\` is a single function applied to two arguments: first the object, then the proof about it.
+Applying \`h\` to \`a\` gives \`h a : P a → Q a\`, and feeding \`hp\` into that produces \`Q a\`. Notice that \`h a hp\` is just one function applied to two arguments in a row: first the object \`a\`, then the proof \`hp\`.
 
-## Common mistakes
+## Quantifier traps to watch out for
 
-**Choosing a witness that is not available.** If you write \`use b\` for a \`b\` that does not exist in the context, Lean says unknown identifier. A witness has to be something you can name.
+**Naming a witness that isn't in scope.** Writing \`use b\` when there's no \`b\` in your context triggers "unknown identifier." A witness has to be an actual expression you can build from what you have.
 
-**Assuming something about an arbitrary element.** After \`intro n\`, you do not know whether \`n\` is zero or large. Lean will not let you use that. If you need a case split, ask for one.
+**Assuming something special about an arbitrary variable.** After \`intro n\`, you don't know whether \`n\` is zero, even, or huge, and Lean won't let you pretend otherwise. If your argument depends on cases, split on them explicitly.
 
-**Swapping the quantifier order.** If you prove \`∀ n, ∃ m, ...\` and then \`use\` a witness before \`intro n\`, you have picked \`m\` too early, and it cannot mention \`n\`.
+**Running \`use\` before \`intro\`.** On a goal like \`∀ n, ∃ m, ...\`, if you try to pick a witness before introducing \`n\`, you've chosen \`m\` too early and it can't mention \`n\`.
 
-**Forgetting that \`obtain\` hides the value.** After taking apart \`∃ x, P x\`, the \`x\` is abstract. You cannot say which number it is.
+**Expecting \`obtain\` to reveal a concrete value.** Unpacking \`∃ x, P x\` gives you an abstract \`x\`. You know \`P x\` holds, and nothing else—you can't inspect which number \`x\` equals.
 
-**Forgetting parentheses with negation.** \`¬∃ x, P x\` and \`∃ x, ¬P x\` are different statements. The first says none work. The second says some fail.
+**Dropping parentheses around negation.** \`¬∃ x, P x\` and \`∃ x, ¬P x\` say very different things: the first says *nothing* satisfies \`P\`, while the second only says *something* fails \`P\`.
 
-## Where this leads
+## Quantifiers in the rest of mathematics
 
-Quantifiers are what let Lean state real mathematics, such as "every continuous function on a closed interval is bounded". In Mathlib, you will see \`∀\` and \`∃\` in nearly every statement, usually with bounds, like \`∀ x ∈ s, P x\`, which unfolds to \`∀ x, x ∈ s → P x\`. The previous chapters give you the tools. The next one, Equality Estuary, asks what it means for two objects to be the same, and how to prove it.`,
+With \`∀\` and \`∃\` in hand, Lean can state real theorems like "every continuous function on a closed interval is bounded." In Mathlib, quantifiers appear in nearly every declaration, often with bounded notation like \`∀ x ∈ s, P x\`, which is just shorthand for \`∀ x, x ∈ s → P x\`. Next, in Equality Estuary, we turn to a deceptively simple question: what does it mean for two objects to be equal, and how do you prove it?`,
 };

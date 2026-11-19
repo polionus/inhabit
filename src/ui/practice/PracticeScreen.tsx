@@ -84,7 +84,7 @@ function TacticPractice({ levelId, small }: { levelId: string; small: boolean })
     }
   };
 
-  if (!info || !focus) return <Empty text="The generator cannot make problems for this level yet. The map has plenty to do." />;
+  if (!info || !focus) return <Empty text="The generator can't build problems for this level yet—there's plenty more waiting on the map." />;
   if (puzzles && puzzles.length === 0) return <Empty text="No generated problems fit what you have unlocked at this level. Back to the map." />;
 
   const found = data.findLevel(levelId);
@@ -160,7 +160,7 @@ function TacticPractice({ levelId, small }: { levelId: string; small: boolean })
         </div>
       )}
       <p className="muted small">
-        Only the tactics you have unlocked are needed. Hints and the reference solution are always there; there is no timer.
+        You only need the tactics you've unlocked so far. Hints and the reference solution are always there, and there's no timer.
       </p>
       <PuzzlePlayer key={puzzle.id} puzzle={puzzle} explain={false} onDone={onDone} />
       {current && (

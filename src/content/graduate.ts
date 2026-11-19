@@ -5,121 +5,121 @@ export const graduate: GraduateSection[] = [
   {
     id: 'real',
     title: 'What you already know is real',
-    body: `The Lean in this game is a **subset of real Lean 4**, not a toy language. Every reference solution in the game was compiled by the real Lean 4 compiler, and the syntax you typed (\`theorem\`, \`intro\`, \`rw\`, \`obtain\`, \`⟨a, b⟩\`, \`fun x => …\`) is what Lean users type every day.
+    body: `The Lean you wrote here is a **subset of real Lean 4**, not a toy language. Every reference solution in the game compiles under the real Lean 4 compiler, and the syntax you practiced (\`theorem\`, \`intro\`, \`rw\`, \`obtain\`, \`⟨a, b⟩\`, \`fun x => …\`) is what Lean programmers write every day.
 
-The game left things out on purpose, so that you could see how the core works:
+We left a few big pieces out on purpose so you could see how the core machinery works first:
 
-- **Type classes**: the machinery that makes \`+\` work on numbers, integers, real numbers and more. In the game, \`+\` was just addition on \`Nat\`.
-- **Structures and universe polymorphism**: you used \`Prop\`, \`Type\` and \`Type 1\`, but not \`Sort u\` in general.
-- **Order on \`Nat\`**: \`≤\` and \`<\` were parsed but never proved with.
-- **Real numbers, integers and fractions**, and the large algebra libraries around them.
-- **Automation**: tactics that find proofs for you (next sections).
+- **Type classes**: the system that lets \`+\` work on natural numbers, integers, reals, and matrices alike. Here, \`+\` only meant \`Nat\` addition.
+- **Structures and universe polymorphism**: you saw \`Prop\`, \`Type\`, and \`Type 1\`, but not general \`Sort u\` polymorphism.
+- **Order on \`Nat\`**: \`≤\` and \`<\` were parsed, not proved with.
+- **Integers, rationals, real numbers**, and the broader algebra libraries built around them.
+- **Automation**: tactics that close routine goals for you (covered below).
 
-None of this changes what a proof is: a term whose type is the statement, checked by a small kernel.`,
+None of those change what a proof actually is—a term whose type is the theorem statement, checked by a small kernel.`,
   },
   {
     id: 'browser',
     title: 'Try real Lean in your browser',
-    body: `The quickest step needs no installation: the Lean web editor at **https://live.lean-lang.org**.
+    body: `The fastest way to try full Lean needs no install at all: open the Lean web editor at **https://live.lean-lang.org**.
 
-The Sandbox and the Workshop have an **Open in real Lean** button. It sends your code to that page with \`import Mathlib\` at the top, so you can see how real Lean checks it. The first run may take a little while, because Mathlib is large.
+Both the Sandbox and the Workshop have an **Open in real Lean** button that sends your code straight there with \`import Mathlib\` at the top. Give the first run a few seconds—Mathlib is huge, so loading it takes a moment.
 
-The editor looks like the game's: your code on the left, the **infoview** on the right. Put the cursor on a line to see the hypotheses and the goal (\`⊢\`) at that point, and any error messages. Errors are underlined in the code, and the infoview shows their text, in the same three-part form you practiced reading: where, expected, got.
+The layout will feel right at home: code on the left, live **infoview** on the right. Move your cursor to any line to inspect the hypotheses, the goal (\`⊢\`), and any diagnostics. Errors underline in the editor and follow the same three-part structure you already know how to read: where, expected, got.
 
-Things may print slightly differently from the game, or need small edits; the next sections say what to expect.`,
+A few goals may print slightly differently, or a lemma name may need a small tweak; the phrasebook below explains what to expect.`,
   },
   {
     id: 'install',
-    title: 'Install it',
-    body: `For projects bigger than an experiment, install Lean on your own computer. The usual route:
+    title: 'Install it locally',
+    body: `Once you want to work on anything larger than a quick experiment, install Lean on your computer. The standard setup is straightforward:
 
 1. Install **Visual Studio Code**.
-2. Install the official **Lean 4** extension. It has a setup guide that walks you through installing the Lean toolchain with **elan**, the Lean version manager.
-3. Create a project that depends on **Mathlib**, the community library of mathematics.
+2. Install the official **Lean 4** extension, which includes a guided setup for **elan** (Lean's version manager).
+3. Create a project that depends on **Mathlib**, the community mathematics library.
 
-Follow the official instructions rather than a recipe from memory, since details change between versions:
+Follow the official guides rather than an old recipe, since setup flags occasionally change between versions:
 
 - https://lean-lang.org/install/
 - https://leanprover-community.github.io/get_started.html
 
-The Mathlib pages explain how to create a project and how to download Mathlib's pre-built files, which saves a long compile. Once it works, open a \`.lean\` file in VS Code and you are in the same infoview you know from the game, with your own files.`,
+Make sure to grab Mathlib's pre-built cache (the Mathlib guide shows the one-line command) so you don't sit through a long compile. Open any \`.lean\` file in VS Code and you'll have the same live infoview you're already used to.`,
   },
   {
     id: 'automation',
-    title: 'Automation: the tactics we withheld',
-    body: `You proved \`0 + n = n\` by induction, step by step. In real Lean you would write \`simp\`. We made you do it by hand first, because automation is only trustworthy once you can tell what it did, and what to do when it fails.
+    title: 'Automation: the tactics we held back',
+    body: `You proved \`0 + n = n\` by induction, step by step. In real Lean, you'd just write \`simp\`. Doing it by hand first pays off: automation is much easier to trust—and debug when it stalls—once you know what it's building underneath.
 
-- \`simp\`: rewrites with a large set of simplification lemmas. First thing to try.
-- \`omega\`: linear arithmetic over \`Nat\` and \`Int\`.
-- \`decide\`: settles closed, decidable statements by computation.
-- \`ring\` (Mathlib): equalities in commutative rings. Replaces long \`rw\` chains.
-- \`linarith\` (Mathlib): linear inequalities from hypotheses.
-- \`norm_num\` (Mathlib): numeric calculations.
-- \`exact?\` / \`apply?\`: search the library for a lemma that closes or advances the goal.
+- \`simp\`: rewrites with a large database of simplification lemmas. Usually the first thing to try.
+- \`omega\`: solves linear arithmetic over \`Nat\` and \`Int\`.
+- \`decide\`: closes concrete, decidable statements by computation.
+- \`ring\` (Mathlib): proves equalities in commutative rings, replacing long \`rw\` chains.
+- \`linarith\` (Mathlib): handles linear inequalities from your hypotheses.
+- \`norm_num\` (Mathlib): evaluates concrete numerical expressions.
+- \`exact?\` / \`apply?\`: searches the library for a lemma that closes or advances your goal.
 - \`aesop\`: general-purpose proof search.
-- \`grind\`: a newer, powerful automation in Lean itself.
-- \`tauto\` (Mathlib): propositional logic.
-- \`push_neg\` (Mathlib): pushes \`¬\` through quantifiers, e.g. \`¬∀ x, P x\` into \`∃ x, ¬P x\`.
+- \`grind\`: a newer built-in solver in recent Lean versions.
+- \`tauto\` (Mathlib): closes propositional logic goals.
+- \`push_neg\` (Mathlib): pushes \`¬\` inside quantifiers, turning \`¬∀ x, P x\` into \`∃ x, ¬P x\`.
 
-Automation is a tool, not a replacement: you still need to know what you want to prove.`,
+Automation handles the plumbing, not the insight—you still decide the shape of the proof.`,
   },
   {
     id: 'finding',
-    title: 'Finding lemmas',
-    body: `Real libraries have hundreds of thousands of theorems. You find them in three ways.
+    title: 'Finding lemmas in Mathlib',
+    body: `Real libraries hold hundreds of thousands of theorems, so nobody memorizes them. You find what you need in three ways:
 
-**Names follow a pattern.** You have been using it: \`Nat.add_comm\`, \`Set.inter_subset_left\`, \`Function.Injective.comp\`. Namespace first, then a description of the statement: \`inter_comm\`, \`subset_union_left\`. \`_left\` and \`_right\` say which side, \`_iff\` marks an equivalence, \`_of_\` precedes the hypothesis.
+**Read the naming pattern.** You've already been using it: \`Nat.add_comm\`, \`Set.inter_subset_left\`, \`Function.Injective.comp\`. Namespace first, then a description of the statement (\`inter_comm\`, \`subset_union_left\`). Suffixes carry meaning too: \`_left\` and \`_right\` pick a side, \`_iff\` marks an equivalence, and \`_of_\` introduces the hypothesis.
 
-**Ask Lean.** In a proof, \`exact?\` searches for a lemma that closes the goal.
+**Ask Lean directly.** Drop \`exact?\` or \`apply?\` into a proof and Lean will search for a matching lemma.
 
-**Search engines**:
+**Use the search tools:**
 
-- Loogle, search by pattern or type: https://loogle.lean-lang.org
-- LeanSearch, search in plain English: https://leansearch.net
-- Moogle, another natural-language search: https://www.moogle.ai
-- The Mathlib documentation: https://leanprover-community.github.io/mathlib4_docs/
+- Loogle (search by type or pattern): https://loogle.lean-lang.org
+- LeanSearch (search in plain English): https://leansearch.net
+- Moogle (natural-language search): https://www.moogle.ai
+- Mathlib docs: https://leanprover-community.github.io/mathlib4_docs/
 
-If a statement feels like it should be in the library, it probably is, with the name you would have guessed after practice. Always search before you prove or define something.`,
+If a lemma feels like it ought to exist in Mathlib, it almost certainly does—always search before proving or defining something from scratch.`,
   },
   {
     id: 'differences',
-    title: 'Differences you will notice',
-    body: `- **\`ℕ\`** is notation for \`Nat\` (type \`\\N\`). Same type.
-- **General lemmas**: where the game says \`Nat.add_comm\`, Mathlib prefers \`add_comm\`, which works on every additive structure. The \`Nat\` versions still exist.
-- **\`Even\` and \`Odd\`** are defined for many types, not just \`ℕ\`; for \`ℕ\` they unfold the way you know.
-- **Sets** (\`Set\`, \`∈\`, \`⊆\`, \`∪\`, \`''\`, \`⁻¹'\`) and **\`use\`, \`by_contra\`, \`ext\`, \`obtain\`, \`rcases\`** work the same.
-- **Type classes** hide behind \`+\` and \`*\`: you will see them in error messages and in the signatures of lemmas.
-- **\`Finset\`**: Mathlib has finite sets (\`Finset\`) alongside \`Set\`, with different lemmas. Pick the one that matches your statement.
-- **Printing**: real Lean may show \`n.succ\` or \`n + 1\` where the game showed the other, and prints some goals with more detail.
-- **Order and the real numbers** exist, with \`≤\`, \`<\`, \`linarith\` and \`norm_num\`.
+    title: "Differences you'll notice",
+    body: `- **\`ℕ\`** is Mathlib's notation for \`Nat\` (type \`\\N\`). Same type underneath.
+- **More general lemmas**: where this game uses \`Nat.add_comm\`, Mathlib usually reaches for \`add_comm\`, which works in any commutative additive structure. The \`Nat.\` versions are still there too.
+- **\`Even\` and \`Odd\`** are defined generally across algebraic structures, not just \`ℕ\`; on \`ℕ\` they behave the way you're used to.
+- **Sets** (\`Set\`, \`∈\`, \`⊆\`, \`∪\`, \`''\`, \`⁻¹'\`) and tactics like **\`use\`, \`by_contra\`, \`ext\`, \`obtain\`, \`rcases\`** work the same way.
+- **Type classes** sit behind \`+\` and \`*\`, so you'll start seeing square brackets like \`[AddCommMonoid α]\` in lemma signatures and error messages.
+- **\`Finset\`**: Mathlib has finite sets (\`Finset\`) alongside \`Set\`, with their own lemmas—pick whichever matches your theorem.
+- **Goal printing**: real Lean may print \`n.succ\` or \`n + 1\` where the game showed the other, and can show a bit more detail in complex goals.
+- **Order and real numbers**: \`≤\`, \`<\`, \`ℤ\`, \`ℚ\`, and \`ℝ\` are all available, paired with \`linarith\` and \`norm_num\`.
 
-When a game proof does not compile as-is, read the error; it is usually a renamed lemma.`,
+When a proof from the game doesn't compile verbatim in real Lean, read the error carefully—it's usually just a slightly different lemma name or implicit argument.`,
   },
   {
     id: 'next',
     title: 'Where to go next',
-    body: `Pick what fits your goal.
+    body: `Pick whichever resource fits what you want to do next:
 
-- **Theorem Proving in Lean 4**: the official book. The best account of the type theory behind Lean (dependent types, inductive types, type classes). Read it next if you liked the "why" in this game.
-- **Mathematics in Lean**: a book of exercises that teaches Mathlib through everyday mathematics: sets, functions, number theory, analysis. Read it if you want to formalize mathematics.
-- **The Mechanics of Proof**: a course on how to write proofs, using Lean for exercises. Good for the proof-writing side.
-- **The Natural Number Game and other games**, on the Lean Game Server: https://adam.math.hhu.de. More practice in the same spirit, with other topics.
-- **The Lean Zulip chat**: https://leanprover.zulipchat.com. Where Lean users ask for help; beginners are welcome in the beginner channels. Include your code and the error message.
+- **Theorem Proving in Lean 4**: the official book, and the clearest deep dive into Lean's type theory (dependent types, inductive types, type classes). Great next step if you enjoyed the "why" behind this game.
+- **Mathematics in Lean**: an exercise-driven book that teaches Mathlib through standard math—sets, functions, number theory, analysis. Best choice if you want to formalize mathematics.
+- **The Mechanics of Proof**: a proof-writing course using Lean for exercises. Great if you're building proof skills alongside Lean.
+- **The Natural Number Game and other Lean games** at https://adam.math.hhu.de: more interactive games in the same spirit, covering other areas of math.
+- **The Lean Zulip chat** at https://leanprover.zulipchat.com: the main community hub. Beginners are genuinely welcome in the new-members channels—just paste a small working snippet and the error you're seeing.
 
-Search for the exact title of each book to find its current home page.`,
+Search for any of the book titles above to find their current home pages.`,
   },
   {
     id: 'project',
     title: 'A first project checklist',
-    body: `The five steps still apply. In Mathlib:
+    body: `The same five steps from the Workshop carry straight into Mathlib:
 
-1. **Say it.** Write the statement in careful English, marking the quantifiers.
-2. **Type it.** Choose the types. Mathlib favors general statements (a type variable \`α\`, or an algebraic structure) over fixed ones such as \`ℕ\`, when the mathematics allows it.
-3. **Define it, after searching.** Search Mathlib first (Loogle, LeanSearch, \`exact?\`). The notion you want has often been defined, with a rich supply of lemmas. Define your own only when nothing fits.
-4. **State it.** Write the statement with \`sorry\` as the proof, and check that it compiles and reads back correctly *before* proving.
-5. **Prove it in small lemmas.** Skeleton first, with \`have … := by sorry\`, then fill. Split long proofs into named lemmas. Try \`exact?\` and \`simp\` on small goals, and read every error.
+1. **Say it.** Write the claim in careful English and mark every quantifier.
+2. **Type it.** Pick the right types. When the math allows it, Mathlib prefers general types (a type variable \`α\` or an algebraic structure) over concrete ones like \`ℕ\`.
+3. **Define it—after searching.** Check Loogle, LeanSearch, or \`exact?\` first. If Mathlib already has the definition, using it unlocks hundreds of ready-made lemmas.
+4. **State it.** Write the theorem with \`sorry\` as the proof and make sure it compiles and reads back the way you meant before proving a single line.
+5. **Prove it in small pieces.** Sketch a skeleton with \`have … := by sorry\`, break long steps into helper lemmas, and let \`exact?\` and \`simp\` handle the small chores.
 
-Keep the project in git, and ask on Zulip when stuck. A good first goal: re-prove, in Mathlib, a theorem you proved in this game, then one you invented in the Workshop.`,
+Keep your project in git, and don't hesitate to ask on Zulip when you hit a wall. A fun first milestone: re-prove one of your favorite theorems from this game in Mathlib, then formalize one you came up with in the Workshop.`,
   },
 ];
 
@@ -129,30 +129,30 @@ export const phrasebook: PhrasebookRow[] = [
   {
     game: 'Nat.add_comm, Nat.mul_comm, Nat.add_assoc',
     mathlib: 'add_comm, mul_comm, add_assoc',
-    note: 'The general versions work in any commutative or associative structure. The `Nat.` versions also still exist.',
+    note: 'The general versions work in any commutative or associative structure, and the `Nat.` versions still exist too.',
   },
-  { game: 'Nat.zero_add', mathlib: 'zero_add', note: 'Also `Nat.zero_add`.' },
+  { game: 'Nat.zero_add', mathlib: 'zero_add', note: '`Nat.zero_add` also exists.' },
   { game: 'Nat.two_mul', mathlib: 'two_mul', note: '`2 * a = a + a`.' },
   { game: 'Nat.add_left_comm', mathlib: 'add_left_comm', note: '`a + (b + c) = b + (a + c)`.' },
   {
     game: 'Nat.dvd_trans',
     mathlib: 'dvd_trans',
-    note: 'The `Nat.` version exists too; there is also dot notation, `h1.trans h2`.',
+    note: '`Nat.dvd_trans` exists too, or use dot notation: `h1.trans h2`.',
   },
-  { game: 'Nat.dvd_add', mathlib: 'dvd_add', note: 'Also `Nat.dvd_add`.' },
-  { game: 'Nat.dvd_mul_right a b : a ∣ a * b', mathlib: 'dvd_mul_right a b', note: 'Also `Nat.dvd_mul_right`.' },
+  { game: 'Nat.dvd_add', mathlib: 'dvd_add', note: '`Nat.dvd_add` also exists.' },
+  { game: 'Nat.dvd_mul_right a b : a ∣ a * b', mathlib: 'dvd_mul_right a b', note: '`Nat.dvd_mul_right` also exists.' },
   { game: 'Nat.dvd_refl', mathlib: 'dvd_refl', note: '`dvd_rfl` is the version with an implicit argument.' },
   {
     game: 'Even n (unfolds to ∃ r, n = r + r)',
     mathlib: 'Even n',
-    note: 'The same definition, for any additive structure. For `ℕ`, search for lemmas such as `Nat.even_iff` that connect it to `n % 2 = 0`.',
+    note: 'Same definition, generalized to any additive structure. On `ℕ`, lemmas like `Nat.even_iff` connect it to `n % 2 = 0`.',
   },
   {
     game: 'Even.add, Even.mul_right, Nat.even_or_odd',
     mathlib: 'Even.add, Even.mul_right, Nat.even_or_odd',
-    note: 'Mathlib has lemmas with these names. Check the exact form with `#check` or Loogle.',
+    note: 'Mathlib has lemmas under these names—check exact signatures with `#check` or Loogle.',
   },
-  { game: 'Set.Subset.trans', mathlib: 'Set.Subset.trans', note: 'Also `subset_trans`, or `h1.trans h2`.' },
+  { game: 'Set.Subset.trans', mathlib: 'Set.Subset.trans', note: 'Also `subset_trans`, or dot notation `h1.trans h2`.' },
   { game: 'Set.inter_comm, Set.union_comm', mathlib: 'Set.inter_comm, Set.union_comm', note: 'Same names.' },
   {
     game: 'Set.inter_subset_left, Set.inter_subset_right, Set.subset_union_left',
@@ -163,38 +163,38 @@ export const phrasebook: PhrasebookRow[] = [
   {
     game: 'Set.inter_union_distrib_left',
     mathlib: 'Set.inter_union_distrib_left',
-    note: 'Search for it with `exact?` or Loogle to confirm the exact form.',
+    note: 'Check the exact signature with `exact?` or Loogle.',
   },
   {
     game: 'Set.mem_inter_iff, Set.mem_union, Set.mem_diff, Set.mem_compl_iff',
     mathlib: 'Set.mem_inter_iff, Set.mem_union, Set.mem_diff, Set.mem_compl_iff',
-    note: 'Same names. `simp` uses them automatically.',
+    note: 'Same names, and `simp` applies them automatically.',
   },
   { game: "f '' A,  f ⁻¹' B", mathlib: "f '' A,  f ⁻¹' B", note: 'Same notation. `Set.mem_image` and `Set.mem_preimage` unfold membership.' },
-  { game: "Set.preimage_inter, Set.subset_preimage_image", mathlib: 'Set.preimage_inter, Set.subset_preimage_image', note: 'Mathlib has both; check the form with `#check`.' },
-  { game: 'Function.Injective.comp, Function.Surjective.comp', mathlib: 'Function.Injective.comp, Function.Surjective.comp', note: 'Same names; they are also used as `hg.comp hf`.' },
+  { game: 'Set.preimage_inter, Set.subset_preimage_image', mathlib: 'Set.preimage_inter, Set.subset_preimage_image', note: 'Both exist in Mathlib; check the exact form with `#check`.' },
+  { game: 'Function.Injective.comp, Function.Surjective.comp', mathlib: 'Function.Injective.comp, Function.Surjective.comp', note: 'Same names, and dot notation `hg.comp hf` works too.' },
   {
     game: 'Function.LeftInverse.injective',
     mathlib: 'Function.LeftInverse.injective',
-    note: 'Same name. For the converse and relatives, search for `Function.LeftInverse`.',
+    note: 'Same name. Search for `Function.LeftInverse` to see related lemmas.',
   },
   {
     game: 'Function.Surjective.of_comp, Function.Injective.of_comp',
     mathlib: 'search with `exact?` or Loogle',
-    note: 'Mathlib has cancellation lemmas for composites. Search for them by their statement; do not rely on the exact names.',
+    note: "Mathlib has cancellation lemmas for compositions—search by statement rather than relying on exact names.",
   },
-  { game: 'Function.cantor_surjective', mathlib: 'Function.cantor_surjective', note: "Cantor's theorem is in Mathlib under this name." },
+  { game: 'Function.cantor_surjective', mathlib: 'Function.cantor_surjective', note: "Cantor's theorem has the same name in Mathlib." },
   { game: 'iff_not_self', mathlib: 'iff_not_self', note: '`¬(a ↔ ¬a)`.' },
-  { game: 'Classical.em', mathlib: 'Classical.em, em, by_cases', note: '`by_cases` and `by_contra` work as in the game; `em p` gives `p ∨ ¬p`.' },
+  { game: 'Classical.em', mathlib: 'Classical.em, em, by_cases', note: '`by_cases` and `by_contra` work the same way; `em p` gives `p ∨ ¬p`.' },
   {
     game: 'use w   /   exists w',
     mathlib: 'use w',
-    note: '`exists w` is core Lean; `use` is Mathlib and tries `rfl` afterwards. `refine ⟨w, ?_⟩` is the common ancestor.',
+    note: '`exists w` is in core Lean; `use` comes from Mathlib and tries `rfl` afterwards. Both build on `refine ⟨w, ?_⟩`.',
   },
   {
     game: 'by_contra h, then work with h : ¬P',
     mathlib: 'by_contra h, by_contra!, push_neg',
-    note: '`by_contra!` also pushes the negation inwards, so `¬∀ x, P x` becomes `∃ x, ¬P x`.',
+    note: '`by_contra!` also pushes the negation inward, turning `¬∀ x, P x` straight into `∃ x, ¬P x`.',
   },
   {
     game: '¬∀ x, P x ↔ ∃ x, ¬P x  (needs by_contra)',
@@ -204,21 +204,21 @@ export const phrasebook: PhrasebookRow[] = [
   {
     game: 'obtain ⟨x, hx⟩ := h,  rcases,  rintro,  ext x',
     mathlib: 'obtain ⟨x, hx⟩ := h,  rcases,  rintro,  ext x',
-    note: 'Identical. `ext` also reaches function and set equality.',
+    note: 'Identical. `ext` also handles function and set equality.',
   },
   {
     game: 'a long chain of rw [Nat.add_assoc, Nat.add_comm, …]',
     mathlib: 'ring, omega, simp',
-    note: '`ring` proves equalities in commutative rings; `omega` handles linear arithmetic on `ℕ` and `ℤ`.',
+    note: '`ring` proves equalities in commutative rings; `omega` settles linear arithmetic on `ℕ` and `ℤ`.',
   },
   {
     game: 'repeat, all_goals, try',
     mathlib: 'repeat, all_goals, try',
-    note: 'Identical; real Lean also has `any_goals`, `first | t1 | t2` and `<;>`.',
+    note: 'Identical; real Lean also has `any_goals`, `first | t1 | t2`, and `<;>`.',
   },
   {
     game: 'induction n with | zero => … | succ k ih => …',
     mathlib: 'induction n with | zero => … | succ k ih => …',
-    note: 'Identical. In Mathlib the goal may print `k + 1` or `k.succ`; they are equal by `rfl`.',
+    note: 'Identical. Mathlib may print `k + 1` or `k.succ`; they are equal by `rfl`.',
   },
 ];

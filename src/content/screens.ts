@@ -4,157 +4,190 @@ import type { ScreenId, ScreenIntro } from './types.ts';
 export const screens: Partial<Record<ScreenId, ScreenIntro>> = {
   map: {
     title: 'Map',
-    lede: 'The ten worlds of the game and the paths between them. Each world teaches one big idea of Lean, and the map shows where you are, what is open and what you have finished.',
-    about:
-      'Each world has a primer that tells the story of its idea, then a run of short levels, each adding one new thing, and a boss level at the end that mixes in tools from earlier worlds. After the fifth world the map branches: numbers and induction on one side, sets and functions on the other, and both lead to the last world. You can pass a world you already know by beating its boss. Stars on each level show how cleanly you solved it, and the totals appear here.',
+    lede: "Your roadmap through all ten worlds. Each chapter builds one core idea of Lean, and you can see what's open, what's ahead, and what you've mastered.",
+    about: `Each world starts with a chapter explainer and a short primer, then walks through 9 to 18 focused levels before a boss level pulls earlier skills back in.
+
+After Equality Estuary, the path splits into two tracks—numbers and induction on one side, sets and functions on the other—and both meet at the Formalization Forge. Already know a topic? Beat its boss level to test out of the world.`,
     tips: [
-      'Open a world page first: its primer explains the idea before the levels ask you to use it.',
-      'Already know a topic? Beat the boss level of that world to pass the rest.',
-      'Every level has a lesson beside the task. Read it when a step does not make sense.',
+      'Read the chapter explainer or world primer first if you like seeing the big picture before diving in.',
+      'Already comfortable with a topic? Beat the boss level of that world to skip the rest.',
+      "Stuck on a step? Open the lesson beside the editor or ask the Stuck panel to read your goal.",
     ],
   },
 
   review: {
     title: 'Review',
-    lede: 'Up to five cards a day, bringing back levels you met earlier. Solving something again after a gap is how it stays with you, and it is where the third star is earned.',
-    about:
-      'Every level you finish enters a deck with five boxes. A level you solve again moves up a box and returns after a longer gap: 1, 3, 7, 16 and then 35 days. After a solve you can rate it easy, right or hard, which adjusts the first gap. A session is at most five cards, the ones that have waited longest first, and you can ask for five more. Proof levels start from a blank editor, so you recall the proof and do not just recognize it. Levels whose solution you looked at come back early, for you to solve on your own. The third star of a level is earned by solving it again here at least once.',
+    lede: 'Up to five quick cards a day from levels you finished earlier. Solving a proof again after a gap is how it sticks—and how you earn the third star.',
+    about: `Finished levels enter a five-box spaced review deck with growing intervals (1, 3, 7, 16, and 35 days). After solving a card, rating it easy, right, or hard tunes when it comes back.
+
+- Sessions are capped at five cards (most overdue first), with an option to do five more.
+- Proof levels open from a blank editor so you practice recall, not just recognition.
+- Levels where you revealed the solution come back sooner so you can solve them unaided.`,
     tips: [
-      'Short and regular beats long and rare: ten minutes a few times a week is plenty.',
-      'Rate honestly. Choosing hard brings a level back sooner, which is what you want for shaky ones.',
-      'Nothing ready is fine. Levels return when their gap has passed, and nothing piles up against you.',
+      'Short, steady sessions beat cramming—ten minutes a few times a week is plenty.',
+      "Rate honestly. Marking a shaky level as hard brings it back sooner, which is what you want.",
+      "Nothing due today? That's normal—cards return when their gap is up, and nothing piles up against you.",
     ],
   },
 
   codex: {
     title: 'Codex',
-    lede: 'Your personal reference. Each idea, tactic and piece of notation you meet in a level is added here, with an explanation and an example you can read again at any time.',
-    about:
-      'Entries unlock as you play, at the level that teaches them, so the Codex grows with you and never shows what you have not met. Each entry defines a term in plain words and gives a short example. Entries cover concepts, such as what a type or an inductive definition is, and tactics, such as `intro` and `rw`. You can search them, and links between entries let you follow an idea back to what it depends on.',
+    lede: 'Your personal Lean reference. Every concept, tactic, and symbol you meet gets added here with a plain explanation and a short example.',
+    about: `Entries unlock as you reach the levels that introduce them, so the Codex grows alongside your skills without spoiling what's ahead.
+
+Use search to look up any tactic or idea, and follow the links between entries to see what a concept rests on.`,
     tips: [
-      'Use the search box for a word you half remember, such as "unfold" or "induction".',
-      'Stuck on a tactic? Its entry shows a short example and says when to use it.',
-      'Entries link to each other. Follow the links to see what an idea rests on.',
+      'Search for any half-remembered word, like "unfold" or "induction".',
+      'Not sure how a tactic works? Its entry has a minimal example and explains when to reach for it.',
+      'Follow the cross-links between entries to trace an idea back to its foundations.',
     ],
   },
 
   sandbox: {
     title: 'Sandbox',
-    lede: 'A free editor with every tactic and lemma unlocked, for experiments. Nothing here is graded and nothing is saved to your progress.',
-    about:
-      'Type any Lean the game understands and see the goal view and the messages at once. The command `#check` prints the type of an expression, which is the quickest way to learn what a name means. The command `#eval` runs an expression and prints its value, for example a small function applied to a number. Use the sandbox to test a guess before you try it in a level, or to explore an idea of your own. The button **Open in real Lean** sends your code to the Lean web editor at live.lean-lang.org, where the full system, including automation and Mathlib, is available.',
+    lede: 'An open editor with every tactic and lemma unlocked. Try out ideas freely—nothing here is graded or saved to your progress.',
+    about: `Write any Lean the game's engine understands and watch the live goal view update as you type.
+
+- \`#check expr\` prints an expression's type—the fastest way to see what a lemma or function expects.
+- \`#eval expr\` computes a value, like running a function on a number.
+- **Open in real Lean** sends your code to live.lean-lang.org with full Lean 4, automation, and Mathlib.`,
     tips: [
-      'Try `#check Nat.add_comm` to see a statement without proving it.',
-      'Copy a proof from a level and change it to see which parts matter.',
-      'The game checks a subset of Lean. If something fails here, real Lean may still accept it.',
+      'Try `#check Nat.add_comm` to inspect a lemma statement without proving anything.',
+      'Paste a proof from a level and tweak it to see which lines are actually doing the work.',
+      "The browser engine covers a subset of Lean—if something doesn't check here, real Lean may still accept it.",
     ],
   },
 
   workshop: {
     title: 'Workshop',
-    lede: 'Where you formalize a theorem of your own. Five steps take you from a sentence in English to a statement that Lean accepts and a proof that Lean checks.',
-    about:
-      'Formalizing is a craft, and the Workshop splits it into five steps. First, say it: write the claim in careful English and mark every "for all", "there exists" and "if". Second, type it: give each object a type. Third, define it: write a definition for any notion the library lacks. Fourth, state it: write the theorem with `sorry` as its proof and check that it reads back correctly. Fifth, prove it, skeleton first. If you need an idea, the Workshop suggests starting points. Your theorems are saved on this device.',
+    lede: 'Formalize a theorem of your own in five steps—from a careful English sentence to a Lean proof checked in your browser.',
+    about: `The Workshop breaks formalizing into five concrete steps:
+
+1. **Say it** in careful English, marking every "for all", "there exists", and "if".
+2. **Type it** by giving every object a Lean type.
+3. **Define it** with a \`def\` for any concept not already in the library.
+4. **State it** as a Lean proposition and read it back to make sure it matches your English.
+5. **Prove it**, sketching a skeleton first with \`sorry\` if it's long.
+
+Need a starting point? Browse the 17 suggested theorem ideas. Everything you save stays on this device.`,
     tips: [
-      'Start with a small statement you can finish. A modest theorem proved is better than an ambitious one abandoned.',
-      'Read your statement back in English before you prove anything. A wrong statement can still be proved.',
-      'Stuck on a proof? Write the steps as `have` lines with `sorry`, then fill them one at a time.',
+      'Start small. A modest theorem you finish beats an ambitious one you abandon.',
+      "Always read your Lean statement back in English before proving it—Lean will gladly let you prove the wrong claim.",
+      'Stuck in the middle? Sketch the plan with `have … := by sorry`, then fill in one hole at a time.',
     ],
   },
 
   graduate: {
     title: 'Graduate',
-    lede: 'The step from this game to real Lean 4 and Mathlib: how to try it, install it, use the automation the game held back, and find the theorems you need.',
-    about:
-      'The game teaches a subset of Lean 4, with the same syntax, names and statements as the real thing, so what you learned carries over. This guide covers what changes. It shows how to open real Lean in your browser or install it, which automation tactics the game withheld and when to use each, how to search the library by name, by pattern and in plain English, and the differences you will notice in Mathlib. A phrasebook maps the names used here to Mathlib names, and a closing section lists books and communities to read and join next.',
+    lede: 'Ready for real Lean 4 and Mathlib? Everything you need to make the jump: browser editor, local setup, automation tactics, and library search.',
+    about: `Because this game teaches real Lean 4 syntax and follows Lean's naming conventions, almost everything you've practiced carries straight over.
+
+This guide covers what's new outside the game: how to try real Lean with zero install or set up VS Code, the automation tactics we withheld (\`simp\`, \`omega\`, \`ring\`, and friends), how to search Mathlib, and a phrasebook mapping game names to their Mathlib counterparts.`,
     tips: [
-      'Try Open in real Lean from the Sandbox first. It needs no install.',
-      'Search the library before you prove or define anything. It is often already there.',
-      'Use the phrasebook when a game proof fails in real Lean. It is usually a renamed lemma.',
+      'Try **Open in real Lean** from the Sandbox first—it needs no setup at all.',
+      "Search Mathlib before proving or defining anything; there's a good chance it already exists.",
+      'If a game proof fails in real Lean, check the phrasebook—it is usually just a slightly different lemma name.',
     ],
   },
 
   profile: {
     title: 'Profile',
-    lede: 'Your progress, rank, stars, daily quests, streak and badges, and the settings for the game. Everything here is stored in your browser on this device.',
-    about:
-      'Your player level comes from the experience you earn by solving levels, reviewing and practicing, and it never goes down. Stars show how you solved each level: one with hints, two without, three once you have solved it again in Review. A level whose solution you looked at stays open but earns no star until you solve it yourself, and the mastery table shows how much of each world is your own work. Each day brings three quests, such as solving two levels or reading a Guide article, and any you leave unfinished simply expire. Your streak counts active days and forgives one rest day a week. Badges mark milestones. Settings let you lift the tactic lock and mute sound. **Export save** writes your progress to a file you can import on another device, and nothing is sent to a server.',
+    lede: 'Your rank, stars, quests, streak, badges, and settings. Everything is stored locally in your browser.',
+    about: `Here's how progress works:
+
+- **Stars**: 1 for solving with hints, 2 for solving cleanly on your own, and 3 once you re-solve the level in Review. Revealing a solution leaves the level open as *studied* with no star until you solve it yourself.
+- **Player level & quests**: XP comes from solving levels, reviews, and practice. Three daily quests refresh each day, and unfinished ones simply expire.
+- **Streak**: Counts active days and forgives one rest day a week.
+- **Settings & saves**: Lift the tactic lock, mute sound, or export your save as a JSON file to back it up or move devices.`,
     tips: [
-      'Export your save now and then. Clearing browser data erases progress that has not been exported.',
-      'Turn off the tactic lock in the settings if you want to use any tactic in any level.',
-      'A missed day is not announced as a loss. Come back whenever you like.',
+      'Export your save occasionally—clearing browser data erases unbacked-up progress.',
+      'Want full freedom? Turn off the tactic lock in Settings to use any tactic on any level.',
+      "Missed a day? Nothing scolds you—just pick back up whenever you're ready.",
     ],
   },
 
   guide: {
     title: 'Guide',
-    lede: 'Long-form reading about Lean itself: what it is and can do, the ideas underneath, how to work in it, and the community around it. You can read it in any order.',
-    about:
-      'The levels teach by doing, and the Guide explains. Its sixteen articles are in four sections. Lean covers what the system is, what it can do and how to read what it shows you. Theory covers types, propositions as types, dependent types, induction, equality and the kernel that makes proofs trustworthy. Practice covers how to attack a proof, how to turn English into a statement, and Lean as a programming language. Ecosystem covers Mathlib, the community and what Lean is used for. Articles link to the worlds they support, and the worlds link back.',
+    lede: 'Sixteen short articles on Lean itself: what it can do, the type theory underneath, how to plan proofs, and the ecosystem around it.',
+    about: `The Guide is organized into four sections—read them in any order:
+
+- **Lean**: what Lean is, a tour of its capabilities, and how to read theorems and goal views.
+- **Theory**: types, propositions as types, dependent types, induction, equality, and the trusted kernel.
+- **Practice**: how to attack a proof, translating English into Lean, and programming in Lean.
+- **Ecosystem**: Mathlib, the community, and real-world uses of Lean.
+
+Every code snippet is compiled by Lean, and each world links directly to the articles that back it up.`,
     tips: [
-      'New to Lean? Start with the first article, then the tour of what Lean can do.',
-      'Stuck on a level? Look for the article linked from its world page.',
-      'Code in the articles is checked against real Lean, so you can paste it into the Sandbox.',
+      'Brand new to Lean? Start with "What Lean is", then skim the capability tour.',
+      'Want deeper context on a world? Check the Guide articles linked from its chapter page.',
+      'All Lean snippets here are real checked code—feel free to paste them into the Sandbox and tinker.',
     ],
   },
 
   arena: {
     title: 'Arena',
-    lede: 'Optional play on generated puzzles: a daily proof, rated puzzles, timed rushes and duels. The curriculum has no timers, and neither does anything here unless you choose a timed mode.',
-    about:
-      'The levels are finite, and the Arena is not. A generator makes puzzles on demand, and the same seed always gives the same puzzle, so a link can carry one to a friend. Every generated proof puzzle comes with a reference proof that the engine accepts, and samples are also compiled in real Lean. Puzzles have ratings from about 400 to 1900. Arena play earns experience and advances quests like everything else, and it needs no account or server, so results are on the honour system. Nothing leaves your browser except during a live duel.',
+    lede: 'Optional generated puzzles for extra play: a Daily Proof, rated puzzles, timed Proof Rush, and duels. Nothing here is timed unless you choose a timed mode.',
+    about: `The main campaign is finite; the Arena keeps going. A deterministic generator creates fresh puzzles from seeds, so sharing a link gives a friend the exact same set.
+
+Every generated proof puzzle is verified by the browser engine (with samples also checked in real Lean) and carries an estimated rating from 400 to 1900. Arena play earns XP and counts toward quests, with no account or server—results are on the honor system, and nothing leaves your browser except during a live friend duel.`,
     tips: [
-      'Start with the Daily Proof. It is the same three puzzles for everyone that day.',
-      'Rated puzzles adapt to you, so a miss is information, not a punishment.',
-      'The Arena is optional. Skipping it costs you nothing in the curriculum.',
+      'Try the Daily Proof first—everyone gets the same three puzzles each day.',
+      'Rated puzzles adapt to your level, so a miss just helps calibrate your rating.',
+      'The Arena is completely optional; skipping it never holds you back on the roadmap.',
     ],
   },
 
   'arena-daily': {
     title: 'Daily Proof',
-    lede: 'Three puzzles of rising difficulty, the same for everyone each day. A clock counts up while you work, but nothing times out.',
-    about:
-      'Each calendar day, in UTC, has one fixed set of three puzzles with rising ratings, so you and a friend can compare notes on the same problems. The clock only measures: you can take as long as you like. When you finish you get a result you can share as text, with the date, a mark for each puzzle, your time and a link. Finishing the Daily Proof advances your daily quest and your daily streak. Because there is no server, times and results are on the honour system, so treat the comparison as friendly.',
+    lede: 'Three puzzles of rising difficulty—the same set for everyone each UTC day. The timer counts up, and nothing ever times out.',
+    about: `Every UTC calendar day generates one shared set of three puzzles so you and a friend can compare solutions on the exact same problems.
+
+Take as long as you like—the clock just records your time. When you finish, you get a shareable text summary with the date, your marks, your time, and a link. Because there's no server, results are on the honor system.`,
     tips: [
-      'The day changes at midnight UTC, which may not be midnight where you are.',
-      'Do the easiest puzzle first to warm up. They rise in difficulty.',
-      'Share your result as text. A friend can open the same puzzles from the link.',
+      'The daily set rolls over at midnight UTC, which may not line up with your local midnight.',
+      'Work through them in order—puzzle one is a warm-up and puzzle three is the stretch.',
+      'Share your result text so a friend can open the same set from the link.',
     ],
   },
 
   'arena-puzzles': {
     title: 'Rated puzzles',
-    lede: 'An endless run of generated puzzles, one at a time, chosen near your current rating. Solving raises your rating and a miss or a skip lowers it.',
-    about:
-      'Your Arena rating starts at 800 and moves in the Elo style: solving a puzzle that is hard for you raises it by more than solving an easy one, and a miss or a skip lowers it. Puzzles come from several families, covering logic, inhabiting types, quantifiers and sets, and each has a reference proof that the engine accepts. The rating is only an estimate of difficulty, so a puzzle may feel easier or harder than its number. Your rating and history are stored in your browser and are included when you export your save.',
+    lede: 'An endless stream of generated puzzles near your current rating. Solving pushes your rating up; a miss or skip nudges it down.',
+    about: `Your rating starts at 800 and updates Elo-style: solving a tough puzzle moves it more than an easy one, while skipping or revealing a solution lowers it.
+
+Puzzles span logic, term writing, quantifiers, and sets, each verified with a reference proof. Ratings are automated difficulty estimates, so an occasional puzzle may feel harder or easier than its number. Your rating and history live in your browser and export with your save.`,
     tips: [
-      'Skipping is allowed, but it lowers your rating like a miss. Skip when you are stuck, then move on.',
-      'A puzzle may allow only some tactics. The task lists which.',
-      'Use the Codex if a tactic name is unfamiliar.',
+      'Skipping counts the same as a miss—if a puzzle has you completely stuck, skip it and keep moving.',
+      'Each puzzle lists the tactics it allows right in the task panel.',
+      "If an unfamiliar tactic name pops up, check it in the Codex.",
     ],
   },
 
   'arena-rush': {
     title: 'Proof Rush',
-    lede: 'Quick multiple-choice questions against the clock, or until three strikes. A way to practice reading goals and recognizing the right move fast, with personal bests to beat.',
-    about:
-      'Rush has two forms. In the timed form you have 3 or 5 minutes to solve as many puzzles as you can. In Survival you keep going until you have made three strikes. Every item is a quick question with one right answer, such as the goal after a tactic or the one tactic that works, and the rating rises as you go. In the timed forms a wrong answer costs ten seconds. Your best score in each form is kept. Rush is the one place besides duels where a timer matters, and it is optional. It rewards recognizing common shapes quickly, which comes from the levels and from Review.',
+    lede: 'Fast multiple-choice questions on a 3- or 5-minute clock, or Survival until three strikes. Built for sharpening your eye for goals and tactics.',
+    about: `Pick a 3-minute sprint, a 5-minute run, or Survival (no clock, three strikes and you're out). Each question asks you to spot the right tactic, read a goal state, or judge a short statement as difficulty climbs.
+
+In timed modes, a wrong guess costs ten seconds. Your personal bests are saved locally. Rush is optional and works best once the core tactics already feel familiar from the campaign.`,
     tips: [
-      'Read the goal before choosing. A wrong guess costs more time than a pause.',
-      'Survival ends on three strikes, so accuracy matters more than speed there. Try it before the timed form.',
-      'Practice the levels and Review first. Rush rewards patterns you already know.',
+      'Pause half a second to read the goal carefully—a wrong guess costs way more than a glance.',
+      'Try Survival first if you want to focus on accuracy without watching a clock.',
+      "Rush rewards pattern recognition you build in the main worlds and Review.",
     ],
   },
 
   'arena-duel': {
     title: 'Duel',
-    lede: 'Race another player on the same set of puzzles: a bot, a friend live, or a friend through a challenge link. Friend games are unrated, and there is no public matchmaking.',
-    about:
-      'A duel is a race on the same seeded puzzles. Bots form a ladder of named players with ratings, each labeled as a bot, and each finishes a puzzle at a random time drawn from its rating against the puzzle\'s. To play a friend live, one of you shares a room link and the two browsers connect directly, peer to peer. That means each side\'s IP address is visible to the other and to the signalling service that introduces you, and the game says so before connecting. If no connection forms, a challenge link works instead: it carries the seed and your result, and your friend plays whenever they like.',
+    lede: 'Race the same seeded set of puzzles against a bot, a friend live, or a friend by challenge link. Friend matches are unrated.',
+    about: `In a duel, two players race through the same puzzles:
+
+- **Bots**: an always-ready ladder of rated bots (always clearly labeled), whose solve times scale with their rating.
+- **Live friend duel**: one player shares a room link and the two browsers connect directly peer to peer. Because it's peer to peer, both players and the signaling broker can see each other's IP address—the game reminds you before connecting.
+- **Challenge link**: play first, send the link, and your friend races your time whenever they're free.`,
     tips: [
-      'Bots are always available and labeled. Pick one near your rating.',
-      'Live duels need both players online at once. Use a challenge link otherwise.',
-      'Only share a room link with people you trust. Connecting reveals your IP address to them.',
+      'Bots are always online—pick one close to your Arena rating for a tight race.',
+      "Live duels require both players online at the same time; use a challenge link if your schedules don't overlap.",
+      'Only share a live room link with people you trust, since peer-to-peer connections expose your IP address.',
     ],
   },
 };

@@ -43,7 +43,7 @@ The curriculum (map, levels and review) has no timers, lives or penalties. The A
 
 ## Multiplayer without a server
 
-The site is static, so there is no matchmaking, and results are on the honour system. Because the generator is deterministic, a seed in a link is a shared puzzle set: two players with the same seed solve the same puzzles. A live duel connects the two browsers directly over WebRTC, using the PeerJS public broker only for signalling. Each player's IP address is therefore visible to the other player and to that broker, and the game says so before it connects. Nothing else leaves the browser.
+The site is static, so there's no matchmaking, and results are on the honor system. Because the generator is deterministic, a seed in a link is a shared puzzle set: two players with the same seed solve the same puzzles. A live duel connects the two browsers directly over WebRTC, using the PeerJS public broker only for signaling. Each player's IP address is therefore visible to the other player and to that broker, and the game says so before it connects. Nothing else leaves the browser.
 
 ## Development
 

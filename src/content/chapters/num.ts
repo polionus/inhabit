@@ -4,7 +4,100 @@ import type { ChapterExplainer } from '../types.ts';
 export const chapter: ChapterExplainer | undefined = {
   worldId: 'num',
   title: "Divisibility and parity: proofs that are a number and a check",
-  dek: "Divides, even and odd all unfold into statements that something exists, so proving one means choosing a witness, and using one means taking it apart.",
-  body: "## What does \"6 divides 12\" actually say?\n\nYou can check that 6 divides 12 by doing the division. But what is the *statement*, such that a proof assistant can hold a proof of it, assume it as a hypothesis, and take it apart? If you cannot answer that, you cannot prove anything general, such as \"if `a` divides `b` and `b` divides `c`, then `a` divides `c`\".\n\nThe answer in Lean is one idea: these notions are defined by saying that something *exists*.\n\n## Definitions that hide a witness\n\n\"`a` divides `b`\" means that `b` is `a` times something. In Lean, `a ∣ b` is the statement `∃ c, b = a * c`. The bar is typed `\\mid`, and it is not the keyboard bar `|`. In the same way, `Even n` means `∃ r, n = r + r`, and `Odd n` means `∃ k, n = 2 * k + 1`.\n\nAn existential statement is proved by giving a **witness** and **evidence** that it works. That pair is written `⟨witness, evidence⟩`:\n\n```lean\nexample : 3 ∣ 12 := ⟨4, rfl⟩\nexample : Even 10 := ⟨5, rfl⟩\nexample : Odd 7 := ⟨3, rfl⟩\n```\n\nThe first line chooses `c = 4` and the evidence is `12 = 3 * 4`, which computation proves, so `rfl` is enough. The second chooses `r = 5` and needs `10 = 5 + 5`. The third chooses `k = 3` and needs `7 = 2 * 3 + 1`. A proof is not a vague argument. It is a number and a check.\n\n## Using a hypothesis: take it apart\n\nWhen you *have* `h : a ∣ b`, you do not know which number `c` works, but you know one exists, and you can name it. The tactic `obtain ⟨c, hc⟩ := h` gives you `c : Nat` and `hc : b = a * c`. From that point on, you work with `c` and the equation, nothing more.\n\nWhen you need to *prove* a divisibility goal, you do the opposite. `use w` supplies the witness and tries `rfl` on what remains. If the evidence is not obvious, `refine ⟨w, ?_⟩` keeps it as a goal. Proving is choosing, and using is unpacking.\n\n## One proof, step by step\n\nDivisibility is transitive: if `a ∣ b` and `b ∣ c`, then `a ∣ c`.\n\n```lean\nexample (a b c : Nat) (h1 : a ∣ b) (h2 : b ∣ c) : a ∣ c := by\n  obtain ⟨m, hm⟩ := h1\n  obtain ⟨n, hn⟩ := h2\n  use m * n\n  rw [hn, hm, Nat.mul_assoc]\n```\n\nAt the start Lean shows\n\n```text\na b c : Nat\nh1 : a ∣ b\nh2 : b ∣ c\n⊢ a ∣ c\n```\n\nAfter the two `obtain` lines, the divisibility hypotheses have turned into numbers and equations:\n\n```text\nm : Nat\nhm : b = a * m\nn : Nat\nhn : c = b * n\n⊢ a ∣ c\n```\n\nThe goal is an existential, so we must choose a witness. If `b` is `a * m` and `c` is `b * n`, then `c` is `a * m * n`, so the natural choice is `m * n`. After `use m * n` the goal is the evidence:\n\n```text\n⊢ c = a * (m * n)\n```\n\nRewriting with `hn` replaces `c` by `b * n`, and rewriting with `hm` replaces `b` by `a * m`:\n\n```text\n⊢ a * m * n = a * (m * n)\n```\n\nThe last step, `Nat.mul_assoc`, is associativity from Induction Isles. It regroups the left side, and the goal closes. Notice the shape, because it repeats in every proof of this chapter: unpack the hypotheses, choose a witness from their witnesses, and prove the equation that remains.\n\n## Common mistakes\n\n**Typing the wrong bar.** If you write `a | b`, Lean reads the keyboard bar as something else and reports an error. Divides is `∣`, typed `\\mid`.\n\n**Choosing a witness too early.** `use` needs a term. If you write `use c` before you have unpacked the hypothesis that introduces `c`, Lean says it does not know `c`. Do the `obtain` lines first.\n\n**Unpacking the goal instead of a hypothesis.** `obtain` takes apart something you *have*. If the thing you want to take apart is the goal, you need `use` or `refine` instead.\n\n**Not knowing the witness.** After `obtain`, you only know what `c` satisfies. If you try `rfl` where `c` is a variable, it fails with \"the two sides are not definitionally equal\", because Lean cannot compute with an unknown number. Use the equation `hc` to rewrite.\n\n**Evidence in the wrong direction.** `Even n` is `n = r + r`, with `n` on the left. If your goal is the other way round, the rewrite finds nothing. Read the unfolded goal before choosing the first tactic.\n\n## The bigger picture\n\nDivisibility and parity are not new kinds of object. They are existential statements with names, and a dependent pair, a witness with evidence whose type depends on it, is exactly what a proof of an existential is. That is why a chapter about number theory spent its time on `use` and `obtain`, tools from Quantifier Quay.\n\nThe chapter finishes with a theorem that needs everything at once: every natural number is even or odd. The proof is by induction, from Induction Isles, and in the step case it unpacks the hypothesis `n = r + r` or `n = 2 * k + 1` and picks the right witness for `n + 1`.\n\nIn real Lean and Mathlib, `Even` and `Odd` are defined this way, and the divisibility relation is the library's `Dvd`. The lemmas `Nat.dvd_trans`, `Nat.even_add` and `Nat.even_or_odd` are all there, and the tactic `omega` settles most divisibility goals by arithmetic. The game leaves these out, so you meet the witness behind each one. The next chapter asks you to bring everything together and formalize a claim of your own.\n\n## A word on computing\n\nWhy does `⟨4, rfl⟩` work for `3 ∣ 12` while a general statement needs a proof? Because for concrete numbers Lean can simply compute `3 * 4` and compare it with `12`. Once a variable appears, computation is stuck, and you need algebra instead, such as associativity or a rewrite with an equation you unpacked. A good habit is to try `rfl` or `use` first on concrete numbers, and to switch to equations as soon as variables are involved. Seeing which situation you are in saves a lot of guessing, and it is the same distinction as in Induction Isles between `n + 0 = n` (free) and `0 + n = n` (needs induction).",
+  dek: "Divides, even, and odd all unfold into existential statements, so proving one means picking a witness and checking an equation, while using one means unpacking it.",
+  body: `## What does "6 divides 12" actually say?
+
+You can check that 6 divides 12 in half a second by dividing. Still, what *is* the mathematical statement behind it—written precisely enough that a proof assistant can store a proof, assume it as a hypothesis, and take it apart? Without an answer to that, you can't prove general facts like "if \`a\` divides \`b\` and \`b\` divides \`c\`, then \`a\` divides \`c\`."
+
+In Lean, all of these number-theory properties share one simple core: they assert that a specific number *exists*.
+
+## Definitions that hide a witness
+
+Saying "\`a\` divides \`b\`" means \`b\` is \`a\` multiplied by some number. In Lean, \`a ∣ b\` is defined as \`∃ c, b = a * c\`. (Type the divides bar with \`\\mid\`—it isn't the vertical pipe \`|\` on your keyboard.) Parity works the same way: \`Even n\` means \`∃ r, n = r + r\`, and \`Odd n\` means \`∃ k, n = 2 * k + 1\`.
+
+To prove an existential statement, you supply a **witness** together with **evidence** that it satisfies the equation, wrapped in angle brackets as \`⟨witness, evidence⟩\`:
+
+\`\`\`lean
+example : 3 ∣ 12 := ⟨4, rfl⟩
+example : Even 10 := ⟨5, rfl⟩
+example : Odd 7 := ⟨3, rfl⟩
+\`\`\`
+
+In the first line, the witness is \`c = 4\` and the evidence is \`12 = 3 * 4\`, which Lean can check by computation, so \`rfl\` finishes it. The second picks \`r = 5\` to check \`10 = 5 + 5\`, and the third picks \`k = 3\` to check \`7 = 2 * 3 + 1\`. Instead of a hand-wavy claim, every proof here is concrete: a number and a verification that it works.
+
+## Unpacking a witness vs. supplying one
+
+When you *assume* \`h : a ∣ b\`, you don't know which number \`c\` does the job, yet you know one exists and you can give it a name. Running \`obtain ⟨c, hc⟩ := h\` adds \`c : Nat\` and \`hc : b = a * c\` to your context, and from there you just work with \`c\` and its equation.
+
+When you want to *prove* a divisibility goal, you work in the opposite direction. Writing \`use w\` supplies your chosen witness and tries \`rfl\` on the leftover equation. If that equation still needs real proof steps, \`refine ⟨w, ?_⟩\` plugs in the witness and leaves the equation as a clean subgoal. In short, assuming a divisibility fact means unpacking someone else's witness, while proving one means choosing your own.
+
+## Proving that divisibility is transitive
+
+Let's see that pattern in action by proving that if \`a ∣ b\` and \`b ∣ c\`, then \`a ∣ c\`.
+
+\`\`\`lean
+example (a b c : Nat) (h1 : a ∣ b) (h2 : b ∣ c) : a ∣ c := by
+  obtain ⟨m, hm⟩ := h1
+  obtain ⟨n, hn⟩ := h2
+  use m * n
+  rw [hn, hm, Nat.mul_assoc]
+\`\`\`
+
+At the start, your goal window shows:
+
+\`\`\`text
+a b c : Nat
+h1 : a ∣ b
+h2 : b ∣ c
+⊢ a ∣ c
+\`\`\`
+
+The two \`obtain\` lines unpack both divisibility hypotheses into ordinary numbers and equations:
+
+\`\`\`text
+m : Nat
+hm : b = a * m
+n : Nat
+hn : c = b * n
+⊢ a ∣ c
+\`\`\`
+
+Now the goal asks for a witness showing \`a ∣ c\`. Since \`b = a * m\` and \`c = b * n\`, substituting gives \`c = (a * m) * n\`, so \`m * n\` is the natural choice. Running \`use m * n\` turns the goal into the equation you still need to check:
+
+\`\`\`text
+⊢ c = a * (m * n)
+\`\`\`
+
+Rewriting with \`hn\` replaces \`c\` with \`b * n\`, and rewriting with \`hm\` replaces \`b\` with \`a * m\`:
+
+\`\`\`text
+⊢ a * m * n = a * (m * n)
+\`\`\`
+
+Finally, \`Nat.mul_assoc\`—the associativity law from Induction Isles—regroups the multiplication on the left, and the goal closes. Pay attention to that three-beat rhythm, because it shows up in almost every proof of this chapter: unpack the hypotheses, build a new witness out of the pieces, and prove the leftover equation.
+
+## Easy mistakes with witnesses and notation
+
+**Typing the keyboard pipe instead of \`∣\`.** If you type \`a | b\`, Lean reads the ASCII pipe as syntax for something else and throws an error. Divisibility always uses \`∣\`, entered as \`\\mid\`.
+
+**Calling \`use\` before unpacking.** The \`use\` tactic expects a term that's already in scope. If you write \`use c\` before you've unpacked the hypothesis that introduces \`c\`, Lean will tell you it doesn't recognize \`c\`. Put your \`obtain\` lines first.
+
+**Trying to unpack the goal.** \`obtain\` breaks apart a hypothesis you *have*. If the existential sits in the goal instead, reach for \`use\` or \`refine\`.
+
+**Expecting \`rfl\` to compute with an unknown witness.** After \`obtain\`, you only know the equation that \`c\` satisfies—not its numerical value. If you try \`rfl\` on an expression containing \`c\`, Lean reports that the two sides aren't definitionally equal because it can't evaluate an unknown number. Rewrite with \`hc\` instead.
+
+**Forgetting which side the variable sits on.** \`Even n\` unfolds to \`n = r + r\`, with \`n\` on the left. If your equation is flipped, a forward rewrite won't match. Check the unfolded goal before deciding whether you need \`rw [h]\` or \`rw [← h]\`.
+
+## Number theory built from quantifiers and induction
+
+Divisibility and parity aren't exotic new objects in Lean. They're named existential statements, and an existential proof is simply a dependent pair—a witness alongside evidence whose type depends on that witness. That's why a chapter on number theory relies so heavily on \`use\` and \`obtain\` from Quantifier Quay.
+
+The chapter wraps up by pulling several chapters together to prove that every natural number is either even or odd. The outer structure is induction from Induction Isles, and inside the step case you unpack \`n = r + r\` or \`n = 2 * k + 1\` and build the right witness for \`n + 1\`.
+
+In real Lean and Mathlib, \`Even\` and \`Odd\` use these same definitions, divisibility comes from the \`Dvd\` typeclass, and lemmas like \`Nat.dvd_trans\`, \`Nat.even_add\`, and \`Nat.even_or_odd\` are ready to import. Tactics like \`omega\` also solve most linear arithmetic and divisibility goals automatically. We hold those shortcuts back here so you get comfortable finding the witness yourself. Next, you'll bring every skill from the course together to state and prove theorems of your own.
+
+## When computation finishes the job—and when algebra takes over
+
+Why does \`⟨4, rfl⟩\` prove \`3 ∣ 12\` effortlessly while transitivity takes four lines of tactics? With concrete numbers, Lean can just multiply \`3 * 4\` and verify it equals \`12\`. The moment a variable enters the picture, computation stalls and algebra takes over—using associativity, commutativity, or rewrites from unpacked equations. A handy rule of thumb is to try \`rfl\` or \`use\` first on concrete numerals, and switch to equation rewriting as soon as variables appear. Spotting which world you're in saves a lot of trial and error, and it's the exact same split you met in Induction Isles between \`n + 0 = n\` (free by computation) and \`0 + n = n\` (needs a proof).`,
   guide: ['dependent-types','how-to-attack-a-proof'],
 };

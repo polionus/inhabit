@@ -255,8 +255,8 @@ function EndScreen(p: DuelPlayProps & { end: DuelEnd }) {
         {sub && <p className="muted">{sub}</p>}
         {view.endReason === 'cap' && <p className="small">The time cap passed; puzzles still open scored nothing.</p>}
         {left && <p className="notice small">{p.opponent!.name} left before finishing. Result marked: opponent left.</p>}
-        {p.mode === 'live' && <p className="muted small">Friend duels are unrated and run on the honour system.</p>}
-        {p.mode === 'challenge' && <p className="muted small">Challenge results come from the link and are on the honour system.</p>}
+        {p.mode === 'live' && <p className="muted small">Friend duels are unrated and run on the honor system.</p>}
+        {p.mode === 'challenge' && <p className="muted small">Challenge results come from the link and are on the honor system.</p>}
       </Card>
       <Comparison puzzles={p.puzzles} me={state.me} them={solo ? state.them.map(() => null) : state.them} meName={p.meName} themName={solo ? '' : p.opponent!.name} />
       {p.endExtra?.(p.end)}

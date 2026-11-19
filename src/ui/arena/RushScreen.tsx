@@ -62,7 +62,7 @@ function Picker({ onStart }: { onStart(m: RushMode): void }) {
         ))}
       </div>
       <p className="notice" role="note">
-        {`A wrong answer costs a strike in Survival (three and you are out) and ${RUSH_PENALTY_MS / 1000} seconds in the timed modes. Skipping counts as a wrong answer. Questions get harder as you go. Keys 1–4 answer.`}
+        {`A wrong answer costs a strike in Survival (three and you're out) and ${RUSH_PENALTY_MS / 1000} seconds in timed modes. Skipping counts as a miss. Questions get harder as you go—keys 1–4 answer.`}
       </p>
       {runs.length > 0 && (
         <p className="muted small">Recent: {runs.slice(-8).reverse().map((r) => `${RUSH_TITLE[r.mode]} ${r.score}`).join(' · ')}</p>

@@ -101,7 +101,7 @@ export function Success({
         </div>
         {reward && reward.stars > 0 && !review && !studied && <Stars value={reward.stars} size="lg" animate />}
       </div>
-      {studied && <p className="studied-note">You have seen how it goes. Solve it on your own when you are ready, and it will count in full.</p>}
+      {studied && <p className="studied-note">You've seen how it works. Solve it on your own when you're ready and it'll count in full.</p>}
       {note && <p className="muted small">{note}</p>}
       {!studied && xp > 0 && before && after && (
         <>

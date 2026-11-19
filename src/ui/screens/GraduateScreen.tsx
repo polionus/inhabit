@@ -28,7 +28,7 @@ export function GraduateScreen() {
       {phrasebook.length > 0 && (
         <section>
           <h2 className="section-title"><Icon name="translate" size={20} /> Phrasebook</h2>
-          <p className="muted">From the names used in the game to what you will write in Mathlib.</p>
+          <p className="muted">From the names used in the game to what you'll write in Mathlib.</p>
           <div className="table-wrap">
             <table className="phrasebook">
               <thead><tr><th scope="col">In the game</th><th scope="col">In Mathlib</th><th scope="col">Note</th></tr></thead>

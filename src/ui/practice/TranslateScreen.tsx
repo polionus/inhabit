@@ -16,8 +16,8 @@ import { mapDiagnostics } from '../lean/offsets.ts';
 import { href } from '../router.ts';
 
 const SLIP: Record<string, string> = {
-  converse: 'This looks like the converse: the two sides of the arrow are the wrong way round.',
-  'and-for-implies': 'This looks like “and” where “implies” was meant. “Every x with p x has q x” is a statement about the x that have p x, not about all x.',
+  converse: 'This looks like the converse—the two sides of the arrow are flipped.',
+  'and-for-implies': 'This uses “and” where “implies” was meant. “Every x with p x has q x” only makes a claim about the x that satisfy p x, not every x.',
 };
 
 type Mark = 'right' | 'reviewed' | 'shown' | 'skipped';
@@ -88,7 +88,7 @@ export function TranslateScreen() {
         <Card tone={right === items.length ? 'ok' : 'default'} className="practice-end">
           <h2 data-testid="practice-result">You wrote {right} of {items.length} correctly</h2>
           {marks.includes('reviewed') && <p className="muted small">Statements you judged equivalent without the checker confirming them are not counted as solved.</p>}
-          <p>{right === items.length ? 'Reading a sentence as a statement is most of formalising.' : 'The ones you looked up are worth another read: compare the shape of the sentence with the shape of the statement.'}</p>
+          <p>{right === items.length ? 'Turning a plain sentence into a Lean statement is most of formalizing.' : "The ones you looked up are worth a second read—compare how the sentence is structured with how the Lean statement is built."}</p>
           <div className="practice-actions">
             <button className="btn primary" onClick={() => setRound(round + 1)}>Another set</button>
             <a className="btn" href={href.arena()}>Back to the Arena</a>
@@ -198,7 +198,7 @@ function Statement({ item, last, onFinish }: { item: TranslateItem; last: boolea
         )}
         {unsure && (
           <div className="feedback neutral">
-            <p><strong>Well-typed, but I cannot confirm it means the same.</strong> I only compare against the statement and a set of known rewrites, so yours might still be right. Compare the two:</p>
+            <p><strong>Well-typed, though I can't confirm it means the same thing.</strong> I only compare against the reference and a set of known rewrites, so yours may still be right. Compare the two:</p>
             <div className="formalize-compare">
               <div><div className="label small muted">Yours</div><Lean code={text.trim()} /></div>
               <div><div className="label small muted">Reference</div><Lean code={task.reference} /></div>
@@ -210,7 +210,7 @@ function Statement({ item, last, onFinish }: { item: TranslateItem; last: boolea
             </div>
           </div>
         )}
-        {resolved === 'same' && <div className="feedback"><strong>Noted.</strong> The checker could not confirm that yours is equivalent, so this one does not count as solved. If it is, you read the sentence well.</div>}
+        {resolved === 'same' && <div className="feedback"><strong>Noted.</strong> The checker couldn't confirm yours is equivalent, so this one doesn't count as solved—if it matches, you read the sentence right.</div>}
         {resolved === 'different' && (
           <div className="feedback">
             <strong>A correct statement</strong>

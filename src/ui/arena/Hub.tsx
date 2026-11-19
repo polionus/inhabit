@@ -94,7 +94,7 @@ export function Hub() {
       <div className="hub-foot">
         <NameField name={name} />
         <p className="muted small honour">
-          There is no server, so your rating and results are on the honour system: they live in this browser and are included when you export your save. Nothing here is a ranking of real players.
+          There's no server, so your rating and results are on the honor system—they live in this browser and are included when you export your save. Nothing here ranks real players against each other.
         </p>
       </div>
     </div>

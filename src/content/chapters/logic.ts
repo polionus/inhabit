@@ -4,28 +4,28 @@ import type { ChapterExplainer } from '../types.ts';
 export const chapter: ChapterExplainer = {
   worldId: 'logic',
   title: 'And, or, not: how Lean builds every connective from one idea',
-  dek: 'Conjunction, disjunction, falsehood and equivalence look like four new pieces of machinery. They are four inductive types, and one pattern explains how to prove and use each of them.',
+  dek: "Conjunction, disjunction, falsehood, and equivalence look like four separate pieces of machinery. They're actually four inductive types, all following one simple pattern.",
   guide: ['inductive-types', 'propositions-as-types', 'how-to-attack-a-proof'],
-  body: `## The question
+  body: `## One blueprint for every logical connective
 
-Proposition Peaks gave you one connective, the arrow. But a real argument says "and", "or" and "not" all the time: "x is positive and even", "either the lamp is broken or the plug is out", "it is not raining". Does Lean need a separate rulebook for each?
+Proposition Peaks gave you a single connective, the arrow \`→\`. Real mathematical arguments lean on "and," "or," and "not" all the time: "\`x\` is positive and even," "either the lamp is broken or the plug is out," "it isn't raining." Does Lean need a separate built-in rulebook for each one?
 
-It does not. Every connective is an **inductive type**: a type defined by listing its **constructors**, which are the only ways to build a term of it. Once you know how a connective is built, you also know how to use it, because to use a term you must handle every way it could have been built. That single pattern, build with constructors and use by cases, is the subject of this chapter.
+It doesn't. Every connective here is an **inductive type**—a type defined by listing its **constructors**, which are the only legal ways to build a term of it. Once you see how a connective is built, you automatically know how to take it apart, because using a term means handling every constructor that could have created it. That single rhythm—build with constructors, unpack by cases—runs through the whole chapter.
 
 ## And: one constructor, two ingredients
 
-A proof of \`P ∧ Q\` is built by \`And.intro\`, which takes a proof of \`P\` and a proof of \`Q\`. The anonymous constructor \`⟨hp, hq⟩\` is a shorthand. A proof of "and" is a pair of proofs.
+A proof of \`P ∧ Q\` is built with \`And.intro\`, which takes a proof of \`P\` and a proof of \`Q\`. The angle-bracket notation \`⟨hp, hq⟩\` is shorthand for the same thing. Put plainly, a proof of "and" is a pair of proofs.
 
 \`\`\`lean
 example (P Q : Prop) (hp : P) (hq : Q) : P ∧ Q := ⟨hp, hq⟩
 example (P Q : Prop) (h : P ∧ Q) : Q ∧ P := ⟨h.2, h.1⟩
 \`\`\`
 
-The second line uses a conjunction instead of building one. \`h.1\` is its first part, \`h.2\` its second. In tactic mode, \`constructor\` splits an \`∧\` goal into two goals, and \`obtain ⟨hp, hq⟩ := h\` takes a hypothesis apart into named pieces.
+The second line unpacks a conjunction instead of building one: \`h.1\` pulls out the first proof, and \`h.2\` pulls out the second. In tactic mode, \`constructor\` splits an \`∧\` goal into two subgoals, while \`obtain ⟨hp, hq⟩ := h\` breaks a conjunction hypothesis into two named pieces.
 
 ## Or: two constructors, and you must choose
 
-\`P ∨ Q\` has two constructors, \`Or.inl\` and \`Or.inr\`. A proof records which side was chosen. To prove it, you pick a side: \`left\` or \`right\`. To *use* a disjunction, you cannot choose, because the proof might have been built either way. You have to handle both cases, which is what \`rcases h with hp | hq\` does.
+\`P ∨ Q\` has two constructors, \`Or.inl\` and \`Or.inr\`, and a proof records which side was used. To prove a disjunction, you commit to one side with \`left\` or \`right\`. To *use* a disjunction hypothesis, though, you can't pick your favorite side—the proof could have arrived from either branch. Instead you handle both possibilities with \`rcases h with hp | hq\`.
 
 \`\`\`lean
 example (P Q : Prop) : P ∨ Q → Q ∨ P := by
@@ -37,17 +37,17 @@ example (P Q : Prop) : P ∨ Q → Q ∨ P := by
     exact hq
 \`\`\`
 
-The case split is the eliminator at work. The rule is: to get something out of "P or Q", prove it from \`P\` and also prove it from \`Q\`.
+That case split is the eliminator for \`Or\` doing its job: to get a conclusion out of "\`P\` or \`Q\`," you show it follows from \`P\` and also show it follows from \`Q\`.
 
 ## False and not
 
-\`False\` is the inductive type with *no* constructors. There is no way to build a proof of it, which is exactly what you want from a contradiction. And what is the rule for using a term when there are no constructors? You handle every case, and there are none, so you are done. That is why a proof of \`False\` gives you anything: the tactic \`exfalso\` changes your goal to \`False\`, and then a contradiction finishes the job.
+\`False\` is the inductive type with *no* constructors at all. Since there's no way to construct a term of it, it behaves just like a logical contradiction should. And what happens when you use a term whose type has zero constructors? You have to handle every possible case, and since there are none, you're immediately done. That's why a proof of \`False\` lets you prove anything: \`exfalso\` swaps your current goal for \`False\`, and a contradiction closes it.
 
-Negation is defined from it. \`¬P\` is shorthand for \`P → False\`, a function that turns any proof of \`P\` into a contradiction. So proving \`¬P\` is \`intro hp\` followed by deriving \`False\`, and using \`hn : ¬P\` is applying it to a proof of \`P\`.
+Negation grows straight out of \`False\`. \`¬P\` is just shorthand for \`P → False\`—a function turning any proof of \`P\` into a contradiction. So proving \`¬P\` starts with \`intro hp\` and aims for \`False\`, while using \`hn : ¬P\` means applying \`hn\` to a proof of \`P\`.
 
-## Iff
+## If and only if: two arrows in a pair
 
-\`P ↔ Q\` has one constructor taking two proofs, \`P → Q\` and \`Q → P\`. You reach them as \`h.mp\` and \`h.mpr\`, and \`constructor\` splits an iff goal into the two directions.
+\`P ↔ Q\` has a single constructor holding two proofs, \`P → Q\` and \`Q → P\`. You access those two directions as \`h.mp\` (forward) and \`h.mpr\` (backward), and \`constructor\` splits an \`↔\` goal into both halves.
 
 \`\`\`lean
 example (P Q : Prop) : P ∧ Q ↔ Q ∧ P := by
@@ -58,11 +58,11 @@ example (P Q : Prop) : P ∧ Q ↔ Q ∧ P := by
     exact ⟨h.2, h.1⟩
 \`\`\`
 
-The two bullets are the two directions, and here they happen to be the same proof, because swapping is its own inverse. This is a good sanity check on the pattern: an iff is nothing more than a pair of implications, so every tool you have for \`→\` and for \`∧\` already applies. When you read "if and only if" in a textbook, you can read it as "I owe two proofs".
+The two bullets correspond to the two directions, and here both proofs look identical because swapping a pair undoes itself. An \`↔\` really is just a pair of implications, so every tactic you already use for \`→\` and \`∧\` works without surprises. Whenever a theorem says "if and only if," read it as "I owe two proofs."
 
-## One proof, step by step
+## Walking through disjunctive syllogism
 
-Disjunctive syllogism says: if \`A ∨ B\` and not \`A\`, then \`B\`.
+Disjunctive syllogism says that if \`A ∨ B\` holds and \`A\` doesn't, then \`B\` must hold:
 
 \`\`\`lean
 example (A B : Prop) : (A ∨ B) ∧ ¬A → B := by
@@ -74,13 +74,13 @@ example (A B : Prop) : (A ∨ B) ∧ ¬A → B := by
   · exact hb
 \`\`\`
 
-We start with:
+We start with the whole implication as our goal:
 
 \`\`\`text
 ⊢ (A ∨ B) ∧ ¬A → B
 \`\`\`
 
-\`intro h\` moves the premise into the context. It is a conjunction, so \`obtain\` splits it:
+\`intro h\` moves the premise into the context, and since it's a conjunction, \`obtain\` splits it apart:
 
 \`\`\`text
 hab : A ∨ B
@@ -88,32 +88,32 @@ hna : ¬A
 ⊢ B
 \`\`\`
 
-The goal \`B\` has no connective to work on. But \`hab\` is a disjunction, so we split it with \`rcases\`. That gives two goals, each with the same \`⊢ B\` but a different extra hypothesis:
+The goal \`B\` is a bare atom, so there's no connective to peel off on the right. Looking at our hypotheses instead, \`hab\` is a disjunction, so \`rcases\` splits on it. That leaves two goals, both targeting \`B\` but with different assumptions:
 
 \`\`\`text
 Case 1:  ha : A   ⊢ B
 Case 2:  hb : B   ⊢ B
 \`\`\`
 
-Case 2 is done by \`exact hb\`. In case 1 we hold \`ha : A\` and \`hna : ¬A\`. The goal \`B\` is unrelated, so \`exfalso\` changes it to \`False\`, and \`hna ha\` is a proof of \`False\`. The shape of each step was dictated by one thing: the top connective of the goal, or of a hypothesis.
+Case 2 closes immediately with \`exact hb\`. In case 1, we hold both \`ha : A\` and \`hna : ¬A\`. The goal \`B\` has nothing to do with \`A\`, so \`exfalso\` changes the goal to \`False\`, and \`hna ha\` hands Lean the contradiction. Notice how every move was guided by the outermost connective of either the goal or a hypothesis.
 
 ## Classical logic, honestly
 
-Everything so far is **constructive**: a proof of \`P ∨ Q\` really knows which side holds. Some familiar principles cannot be proved this way. Two of them are "\`P\` or not \`P\`" and "not not \`P\` implies \`P\`". Lean has them as the axiom \`Classical.em\`, and \`by_cases\` and \`by_contra\` use it. This is perfectly good mathematics, and Lean tracks where you relied on it. In Mathlib it is used constantly, so this is the normal way to reason there.
+Everything up to this point is **constructive**: a proof of \`P ∨ Q\` actually tells you which side holds. Some everyday reasoning principles can't be proved constructively—most famously the law of excluded middle ("\`P\` or not \`P\`") and double-negation elimination ("not not \`P\` implies \`P\`"). Lean provides them through the axiom \`Classical.em\`, which powers tactics like \`by_cases\` and \`by_contra\`. That's standard, completely sound mathematics, and Lean quietly tracks wherever a theorem depends on it. Mathlib uses classical reasoning on almost every page.
 
-## Common mistakes
+## Easy mix-ups with constructors and cases
 
-**Trying to \`rcases\` a goal.** Case splits apply to hypotheses. For a goal \`P ∨ Q\`, choose a side with \`left\` or \`right\`.
+**Running \`rcases\` on the goal.** Case splits work on hypotheses, not goals. When your *goal* is \`P ∨ Q\`, pick a side with \`left\` or \`right\`.
 
-**Choosing a side too early.** If you write \`left\` and the left side is not provable from what you have, you are stuck, and Lean will not warn you. The proof is still valid until you hit a goal you cannot close. Backtrack and think again.
+**Picking a side too soon.** If you write \`left\` when only the right side is provable from your context, Lean won't stop you—it simply hands you a goal you can't finish. When a branch looks hopeless, step back and check whether you chose the wrong side.
 
-**Forgetting a case.** After \`rcases h with ha | hb\` there are two goals. Closing one leaves "unsolved goals" showing the other.
+**Leaving a branch unfinished.** Splitting a disjunction with \`rcases h with ha | hb\` creates two goals. Closing the first one leaves an "unsolved goals" message showing the second.
 
-**Giving \`exact\` the wrong projection.** \`h.1\` and \`h.2\` are different. If Lean says type mismatch with \`P\` where \`Q\` was expected, swap them.
+**Mixing up \`.1\` and \`.2\`.** For \`h : P ∧ Q\`, \`h.1\` has type \`P\` and \`h.2\` has type \`Q\`. If Lean reports a type mismatch with the two sides flipped, swap the projections.
 
-**Reading \`¬P\` as a new kind of thing.** It is a function type. If you are stuck, \`intro\` and see what you get.
+**Treating \`¬P\` as a separate kind of connective.** Remember that \`¬P\` is just \`P → False\`. If you're stuck on a negated goal, try \`intro\` and see what appears in your context.
 
-## Where this leads
+## From connectives to quantifiers and data
 
-The idea of "constructors to build, cases to use" is not special to logic. It is how \`Nat\`, \`List\`, and every type you define work, and it is why induction exists. The next chapter, Quantifier Quay, adds statements about *all* and *some* objects. There \`∀\` becomes a dependent function and \`∃\` becomes a pair whose second part depends on the first. Same pattern, more structure.`,
+Building with constructors and unpacking by cases isn't a trick reserved for logic. It's the exact same mechanism behind \`Nat\`, \`List\`, and every custom data type you'll ever define in Lean, and it's where mathematical induction comes from. In the next chapter, Quantifier Quay, you'll add statements about *all* and *some* objects: \`∀\` turns out to be a dependent function, while \`∃\` is a pair whose second half depends on the first, extending this same pattern to richer mathematics.`,
 };

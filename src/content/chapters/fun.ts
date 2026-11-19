@@ -4,7 +4,110 @@ import type { ChapterExplainer } from '../types.ts';
 export const chapter: ChapterExplainer | undefined = {
   worldId: 'fun',
   title: "Injective, surjective, and Cantor: properties of functions as quantifiers",
-  dek: "No-collision and every-target-hit sound informal, but each unfolds into plain quantifiers, and the same habits carry you all the way to Cantor's theorem about infinite sizes.",
-  body: "## Can you say \"no two inputs collide\" so a machine can check it?\n\nEveryone understands the sentence \"this function never sends two different inputs to the same output\". Mathematicians call that property *injective*, and its mirror image, \"every possible output is hit by some input\", *surjective*. These ideas are the language of counting, of inverses, of comparing the sizes of infinite sets. The question for this chapter is how to turn each sentence into something Lean can hold, assume and prove.\n\nThe answer is that no new idea is needed. Each property is a statement built from `∀`, `∃`, `→` and `=`, and you already know how to work with those.\n\n## Composition and equality of functions\n\nThe function `g ∘ f` means \"apply `f`, then `g`\". It is defined by `fun x => g (f x)`, so applying it to a point gives the same thing as applying the two functions in turn:\n\n```lean\nexample {α β γ : Type} (f : α → β) (g : β → γ) (x : α) : (g ∘ f) x = g (f x) := rfl\n```\n\n`rfl` works because both sides compute to the same expression. To prove that two *functions* are equal, you show they agree at every point. The tactic for that is `funext x`, which turns `f = g` into `f x = g x` for an arbitrary `x`.\n\n## Injective and surjective\n\nThe definitions, written out:\n\n```text\nFunction.Injective f   :=  ∀ a b, f a = f b → a = b\nFunction.Surjective f  :=  ∀ b, ∃ a, f a = b\n```\n\nInjective says that equal outputs force equal inputs, which is the same as \"no collisions\". Surjective says that for every target `b` there is an input `a` that lands on it. Since an injectivity proof is a function from an equation to an equation, you can use it by applying it:\n\n```lean\nexample {α β : Type} (f : α → β) (h : Function.Injective f) (a b : α) (e : f a = f b) : a = b := h e\n```\n\nAnd since a surjectivity proof is a `∀` followed by an `∃`, it is a function that returns a witness with evidence:\n\n```lean\nexample {α β : Type} (f : α → β) (g : β → α) (h : ∀ b, f (g b) = b) : Function.Surjective f :=\n  fun b => ⟨g b, h b⟩\n```\n\nGiven a target `b`, the input `g b` is the witness, and `h b` is the evidence that `f` sends it to `b`. The tactic `unfold` is useful when you want to see these bodies in the goal.\n\n## One proof, step by step\n\nInjectivity passes through composition: if `f` and `g` are injective, so is `g ∘ f`. Read it as a story. If `g (f a) = g (f b)`, then `g` cannot tell `f a` and `f b` apart, so they are equal because `g` is injective, and then `a = b` because `f` is.\n\n```lean\nexample {α β γ : Type} (f : α → β) (g : β → γ)\n    (hf : Function.Injective f) (hg : Function.Injective g) :\n    Function.Injective (g ∘ f) := by\n  intro a b h\n  exact hf (hg h)\n```\n\nAt the start the goal is\n\n```text\n⊢ Function.Injective (g ∘ f)\n```\n\nAfter `intro a b h`, Lean has unfolded the definition to find the `∀` and the `→`:\n\n```text\na b : α\nh : (g ∘ f) a = (g ∘ f) b\n⊢ a = b\n```\n\nThe hypothesis `h` mentions `(g ∘ f) a`, which unfolds to `g (f a)`. So `h` is the equation `g (f a) = g (f b)`, and `hg h : f a = f b`. Then `hf` of that is `a = b`, which is the goal. Each application of an injectivity hypothesis strips off one layer of the composition.\n\n## Images, preimages and Cantor's theorem\n\nA function also acts on whole sets. The *image* `f '' A` is the set of all outputs of points in `A`: `y ∈ f '' A` means `∃ x, x ∈ A ∧ f x = y`. The *preimage* `f ⁻¹' B` is the set of all inputs that land inside `B`: `x ∈ f ⁻¹' B` is just `f x ∈ B`. Both are predicates, so Set Savanna's tools apply.\n\nThe chapter ends with one of the most famous arguments in mathematics. Cantor's theorem says that no function `f : α → Set α` is surjective: you cannot list all the subsets of `α` using elements of `α`. The proof builds the *diagonal set*\n\n```text\nD = {x | x ∉ f x}\n```\n\nwhich collects every point that is not in the set `f` assigns to it. If `f` hit `D`, there would be a point `a` with `f a = D`. Then ask whether `a ∈ D`. By the definition of `D`, `a ∈ D` means `a ∉ f a`, which is `a ∉ D`. So `a ∈ D` and `a ∉ D` are equivalent, and no statement can be equivalent to its own negation:\n\n```lean\nexample (P : Prop) : ¬(P ↔ ¬P) := by\n  intro h\n  have hn : ¬P := fun hp => h.mp hp hp\n  exact hn (h.mpr hn)\n```\n\nSuppose `P ↔ ¬P`. If `P` held, `h.mp hp` would give `¬P`, and applying it to `hp` gives a contradiction, so `¬P` holds. But then `h.mpr hn` gives `P`, contradicting `hn`. The set `D` disagrees with each `f a` at the one point `a`, and that is the whole proof.\n\n## Common mistakes\n\n**Forgetting what the definition says.** If `intro` complains, or `exact h` shows a type mismatch, write down what `Injective` or `Surjective` unfolds to. The mismatch is almost always a missing `∀` or an equation facing the wrong way.\n\n**Using `exact` with the right pieces in the wrong order.** For `Surjective`, the pair is `⟨witness, evidence⟩`. If you swap them, Lean says it expected a term of one type and got another.\n\n**Confusing image and preimage.** The image lives on the output side, the preimage on the input side. A goal `x ∈ f ⁻¹' B` is a statement about `f x`, not about `x`.\n\n**Cancelling on the wrong side.** Left-cancellation uses injectivity, right-cancellation uses surjectivity. If a proof cannot find the point it needs, you probably need the other property.\n\n## The bigger picture\n\nFunctions are where the earlier chapters meet. Sets gave us predicates, logic gave us quantifiers, and now one definition each for injective and surjective carries a lot of mathematics: a function that is both is a bijection, and in finite settings a bijection is what counting means. Cantor used this to show that there are different sizes of infinity, a theorem you have now proved.\n\nIn real Lean and Mathlib, `Function.Injective`, `Function.Surjective` and `Function.Bijective` are defined as above, and `Function.Injective.comp` is the library's version of the composition proof. Cantor's theorem is also there, under the name `Function.cantor_surjective`. The next chapter returns to numbers, where divisibility and parity are existential statements, and where witnesses do the work.",
+  dek: "Ideas like 'no two inputs collide' and 'every target gets hit' unfold into plain quantifiers—and those same proof habits carry you all the way to Cantor's theorem.",
+  body: `## Turning "no collisions" into something Lean can check
+
+Anyone can grasp the sentence "this function never sends two different inputs to the same output." Mathematicians call that property *injective*, and its partner, "every possible output gets hit by some input," *surjective*. Together, those two ideas form the vocabulary of counting, inverses, and comparing the sizes of infinite sets. The question here is how to turn those everyday descriptions into statements Lean can store, assume, and prove.
+
+The good news is you don't need any brand-new machinery. Both properties are built straight out of \`∀\`, \`∃\`, \`→\`, and \`=\`—the exact connectives and quantifiers you've already been working with.
+
+## Composing functions and proving they're equal
+
+The composite function \`g ∘ f\` means "run \`f\` first, then pass the result to \`g\`." It's defined as \`fun x => g (f x)\`, so applying \`g ∘ f\` to a point computes immediately to applying \`f\` and then \`g\`:
+
+\`\`\`lean
+example {α β γ : Type} (f : α → β) (g : β → γ) (x : α) : (g ∘ f) x = g (f x) := rfl
+\`\`\`
+
+Here \`rfl\` closes the goal right away because both sides reduce to the same expression. When you want to prove that two *functions* themselves are equal, you show they produce the same output on every input. The tactic \`funext x\` handles that step, turning a goal \`f = g\` into \`f x = g x\` for an arbitrary \`x\`.
+
+## Unpacking injectivity and surjectivity
+
+Written out in full, the two definitions look like this:
+
+\`\`\`text
+Function.Injective f   :=  ∀ a b, f a = f b → a = b
+Function.Surjective f  :=  ∀ b, ∃ a, f a = b
+\`\`\`
+
+Injectivity says that equal outputs force equal inputs—which is just a crisp way of saying "no collisions." Surjectivity says that for any target \`b\`, there's some input \`a\` that lands on it. Because a proof of injectivity is a function from an equation to an equation, you can use it simply by applying it:
+
+\`\`\`lean
+example {α β : Type} (f : α → β) (h : Function.Injective f) (a b : α) (e : f a = f b) : a = b := h e
+\`\`\`
+
+And because surjectivity is a \`∀\` followed by an \`∃\`, a proof of it is a function that hands back a witness paired with evidence:
+
+\`\`\`lean
+example {α β : Type} (f : α → β) (g : β → α) (h : ∀ b, f (g b) = b) : Function.Surjective f :=
+  fun b => ⟨g b, h b⟩
+\`\`\`
+
+Given a target \`b\`, the input \`g b\` serves as the witness, and \`h b\` is the proof that \`f\` sends it to \`b\`. Whenever you want to see these definitions spelled out in the goal window, the \`unfold\` tactic will open them up for you.
+
+## Why composing two injections stays injective
+
+Injectivity survives composition: if both \`f\` and \`g\` are injective, then \`g ∘ f\` is injective too. Think through it informally first. Suppose \`g (f a) = g (f b)\`. Because \`g\` is injective, it can't merge distinct inputs, so \`f a = f b\`. Then, because \`f\` is injective as well, \`a = b\`.
+
+\`\`\`lean
+example {α β γ : Type} (f : α → β) (g : β → γ)
+    (hf : Function.Injective f) (hg : Function.Injective g) :
+    Function.Injective (g ∘ f) := by
+  intro a b h
+  exact hf (hg h)
+\`\`\`
+
+Before any tactics run, the goal is:
+
+\`\`\`text
+⊢ Function.Injective (g ∘ f)
+\`\`\`
+
+Running \`intro a b h\` automatically unfolds \`Function.Injective\` to reveal the \`∀\` and the \`→\`:
+
+\`\`\`text
+a b : α
+h : (g ∘ f) a = (g ∘ f) b
+⊢ a = b
+\`\`\`
+
+Inside \`h\`, the expression \`(g ∘ f) a\` unfolds to \`g (f a)\`. That means \`h\` is already the equation \`g (f a) = g (f b)\`, so applying \`hg\` gives \`hg h : f a = f b\`. Passing that straight to \`hf\` produces \`a = b\`, closing the goal. Each injectivity hypothesis peels away one layer of the composition.
+
+## Images, preimages, and Cantor's diagonal argument
+
+Functions don't only act on single points; they act on whole sets too. The *image* \`f '' A\` gathers all outputs produced by points in \`A\`, so \`y ∈ f '' A\` means \`∃ x, x ∈ A ∧ f x = y\`. The *preimage* \`f ⁻¹' B\` gathers all inputs whose outputs land in \`B\`, so \`x ∈ f ⁻¹' B\` simply means \`f x ∈ B\`. Both are predicates on elements, which means every set-proof habit from Set Savanna carries straight over.
+
+The chapter builds toward one of mathematics' great surprises: Cantor's theorem. It says that no function \`f : α → Set α\` can be surjective—you can't index every subset of \`α\` using elements of \`α\` alone. The proof defines the *diagonal set*
+
+\`\`\`text
+D = {x | x ∉ f x}
+\`\`\`
+
+which collects every point that isn't inside the subset \`f\` assigns to it. Suppose for contradiction that \`f\` actually hit \`D\`, meaning some point \`a\` satisfied \`f a = D\`. Now ask whether \`a ∈ D\`. By the definition of \`D\`, \`a ∈ D\` holds if and only if \`a ∉ f a\`, which is \`a ∉ D\`. That forces a proposition to be equivalent to its own negation, and pure logic rules that out completely:
+
+\`\`\`lean
+example (P : Prop) : ¬(P ↔ ¬P) := by
+  intro h
+  have hn : ¬P := fun hp => h.mp hp hp
+  exact hn (h.mpr hn)
+\`\`\`
+
+Follow that short contradiction. Assuming \`h : P ↔ ¬P\`, if \`P\` were true (say \`hp : P\`), then \`h.mp hp\` would give \`¬P\`, and applying it to \`hp\` yields \`False\`—so \`¬P\` must hold. Yet once you have \`hn : ¬P\`, the backward direction \`h.mpr hn\` hands you \`P\`, contradicting \`hn\`. In Cantor's proof, \`D\` is engineered to disagree with each \`f a\` at the single spot \`a\`, and that's the entire argument.
+
+## Where function proofs trip people up
+
+**Losing track of the definition.** If \`intro\` refuses to run, or \`exact h\` triggers a type mismatch, pause and recall what \`Injective\` or \`Surjective\` unfolds to. Nine times out of ten, the mismatch comes from a missing \`∀\` or an equation facing backwards.
+
+**Swapping the witness and the proof.** For \`Surjective\`, the angle-bracket pair is always \`⟨witness, evidence⟩\`. Flip the two, and Lean will complain that it expected one type and received another.
+
+**Mixing up image and preimage.** The image lives on the output side, while the preimage lives on the input side. Seeing \`x ∈ f ⁻¹' B\` means you're looking at a statement about \`f x\`, not directly about \`x\`.
+
+**Canceling on the wrong side.** Left-cancellation relies on injectivity; right-cancellation relies on surjectivity. If you get halfway through a proof and can't conjure up the point you need, check whether you're holding the wrong one of the two.
+
+## Bijections, counting, and sizes of infinity
+
+Functions are where the earlier chapters click together. Sets gave you predicates, logic gave you quantifiers, and now two compact definitions—injective and surjective—carry a huge slice of mathematics. A function that's both injective and surjective is a bijection, which is what exact counting really means on finite sets. Extending that idea to infinite sets is how Cantor proved that infinity itself comes in different sizes, a theorem you get to formalize right here.
+
+In real Lean and Mathlib, \`Function.Injective\`, \`Function.Surjective\`, and \`Function.Bijective\` have the exact definitions above, \`Function.Injective.comp\` is the library's version of our composition proof, and Cantor's theorem lives under \`Function.cantor_surjective\`. Next, we head back to numbers, where divisibility and parity turn out to be existential statements driven by choosing and unpacking witnesses.`,
   guide: ['reading-theorems','dependent-types'],
 };

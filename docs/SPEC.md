@@ -371,8 +371,7 @@ use it.
 Rules for all prose:
 - Written for a curious adult with school mathematics and no Lean. Define every term at first
   use. Prefer a concrete example to an abstract description. Say *why* Lean does it this way.
-- Second person, warm, precise, plain. No hype, no exclamation marks, no filler openings, no
-  rhetorical questions as headings. American spelling. Unicode symbols in Lean (`→ ∧ ∀ ∈`).
+- Second person, warm, precise, plain, with natural contractions (`don't`, `isn't`, `you'll`). No hype, no exclamation marks, no filler openings, no boilerplate "worked example with a different statement" announcements. American spelling, `parentheses` for `()`, and Unicode symbols in Lean (`→ ∧ ∀ ∈`).
 - A lesson never contains its level's solution, and uses only what has been taught by then
   (the checker enforces this for ```lean blocks: they run under the level's inventory).
 - Every ```lean block is a complete declaration and is compiled by both engines; fragments and

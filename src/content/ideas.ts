@@ -14,7 +14,7 @@ export const ideas: TheoremIdea[] = [
     english: 'For every natural number n: n divides 0, and 1 divides n.',
     statement: 'theorem dvd_zero_one_dvd (n : Nat) : n ∣ 0 ∧ 1 ∣ n := by',
     strategy:
-      'Split the conjunction. `n ∣ 0` unfolds to `∃ c, 0 = n * c`: which c works, and does `rfl` see it? For `1 ∣ n` you need `n = 1 * n`; a lemma about `1 * n` is in your inventory.',
+      'Split the conjunction. `n ∣ 0` unfolds to `∃ c, 0 = n * c`—which `c` works, and does `rfl` see it? For `1 ∣ n` you need `n = 1 * n`, and you already have a lemma for `1 * n` in your inventory.',
     proof: `  constructor
   · exact ⟨0, rfl⟩
   · exact ⟨n, (Nat.one_mul n).symm⟩`,
@@ -98,7 +98,7 @@ export const ideas: TheoremIdea[] = [
     english: 'The sum of two odd numbers is even.',
     statement: 'theorem odd_add_odd (m n : Nat) (hm : Odd m) (hn : Odd n) : Even (m + n) := by',
     strategy:
-      'Unpack both hypotheses: `m = 2 * a + 1` and `n = 2 * b + 1`. A witness for evenness is `a + b + 1`. The final equation needs `Nat.two_mul` and then a handful of explicit `Nat.add_assoc` / `Nat.add_right_comm` rewrites; plan them on paper with both sides written out.',
+      'Unpack both hypotheses to get `m = 2 * a + 1` and `n = 2 * b + 1`. Use `a + b + 1` as your witness for `Even`. The final equality takes `Nat.two_mul` plus a handful of explicit `Nat.add_assoc` / `Nat.add_right_comm` rewrites—jot both sides down on paper first so you can plan the moves.',
     proof: `  obtain ⟨a, ha⟩ := hm
   obtain ⟨b, hb⟩ := hn
   use a + b + 1
@@ -136,12 +136,12 @@ export const ideas: TheoremIdea[] = [
     id: 'surjective-right-cancel',
     area: 'functions',
     difficulty: 2,
-    title: 'Surjective maps can be cancelled',
+    title: 'Surjective maps can be canceled',
     english: 'If f is surjective and g ∘ f = h ∘ f, then g = h.',
     statement:
       'theorem surjective_right_cancel (α β γ : Type) (f : α → β) (g h : β → γ) (hf : Function.Surjective f) (e : g ∘ f = h ∘ f) : g = h := by',
     strategy:
-      'Two functions are equal when they agree at every point: start with `funext y`. Surjectivity gives you an `x` with `f x = y`; rewrite `y` away, then use the equation `e` at `x` (`congrFun`).',
+      'Two functions are equal when they agree on every input, so start with `funext y`. Surjectivity gives you an `x` with `f x = y`; rewrite `y` away, then apply `e` at `x` using `congrFun`.',
     proof: `  funext y
   obtain ⟨x, hx⟩ := hf y
   rw [← hx]
@@ -243,7 +243,7 @@ export const ideas: TheoremIdea[] = [
     statement:
       'theorem not_forall_iff_exists (α : Type) (P : α → Prop) : (¬∀ x, P x) ↔ ∃ x, ¬P x := by',
     strategy:
-      'The backward direction is easy and constructive. The forward direction needs classical logic: assume no counterexample exists (`by_contra`), then show `∀ x, P x` by contradiction at each `x`.',
+      "The backward direction is quick and constructive. For the forward direction you need classical logic: assume no counterexample exists (`by_contra`), then prove `∀ x, P x` by contradiction at each `x`.",
     proof: `  constructor
   · intro h
     by_contra hne

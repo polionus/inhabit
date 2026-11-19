@@ -5,10 +5,10 @@ export const world: World = {
   title: 'Function Fjord',
   tagline: 'Injective, surjective, and Cantor',
   intro:
-    "Properties of functions are quantified statements, and definitions can be unfolded to read them. You will compose functions, prove that injectivity and surjectivity survive composition, meet images and preimages, and finish with Cantor's theorem: no function from a set onto its power set exists. New tools: `unfold` and `funext`.",
+    "Properties of functions are just quantified statements, and unfolding their definitions lets you read them straight off. You'll compose functions, show that injectivity and surjectivity carry through composition, work with images and preimages, and finish with Cantor's theorem: no function can map a set onto its power set. New tools: `unfold` and `funext`.",
   requires: ['sets'],
   bigIdea:
-    'Injective and surjective are just `∀` and `∃` statements about a function, and Cantor\'s theorem is the logic fact `¬(P ↔ ¬P)` applied to a diagonal set.',
+    'Injective and surjective are just `∀` and `∃` statements about a function, and Cantor\'s theorem comes down to the logic fact `¬(P ↔ ¬P)` applied to a diagonal set.',
   levels: [
     // 01
     {
@@ -16,30 +16,30 @@ export const world: World = {
       kind: 'choice',
       title: 'Composition computes',
       intro:
-        "`g ∘ f` is the function that applies `f` first, then `g`. It is *defined* as `fun x => g (f x)`. So `(g ∘ f) x` and `g (f x)` are the same term after unfolding, and `rfl` proves their equality. Look at the example, then answer.",
+        "`g ∘ f` is the function that runs `f` first, then `g`. It's *defined* as `fun x => g (f x)`, so `(g ∘ f) x` and `g (f x)` reduce to the same term and `rfl` proves they're equal. Look at the example, then answer.",
       code: `example (α β γ : Type) (f : α → β) (g : β → γ) (x : α) : (g ∘ f) x = g (f x) := rfl`,
       question: 'Why can `rfl` prove `(g ∘ f) x = g (f x)`?',
       options: [
         {
           text: '`g ∘ f` unfolds to `fun x => g (f x)`, so both sides reduce to the same term.',
           correct: true,
-          feedback: 'Yes: definitional equality. Unfold `∘`, apply the function to `x` (β-reduction), and the sides coincide.',
+          feedback: 'Yes—that\'s definitional equality. Unfold `∘`, apply the function to `x` (β-reduction), and both sides are identical.',
         },
         {
           text: '`rfl` can prove any equation that is mathematically true.',
-          feedback: '`rfl` only proves equations that hold by computation. `0 + n = n` is true, but `rfl` fails on it.',
+          feedback: '`rfl` only proves equations that hold by computation. `0 + n = n` is true, yet `rfl` rejects it.',
         },
         {
           text: '`Function.comp_apply` is an axiom that Lean assumes.',
-          feedback: 'It is an ordinary theorem, and its proof is exactly `rfl`. No axiom is needed.',
+          feedback: 'It\'s an ordinary theorem, and its proof is literally `rfl`—no axiom required.',
         },
         {
           text: 'The order matters: `rfl` works for `(g ∘ f) x` only because `f` is applied first.',
-          feedback: 'The order is part of the definition, but it is not what makes `rfl` work. Any definitional unfolding that makes both sides identical would do.',
+          feedback: 'The order is part of the definition, but it\'s not why `rfl` succeeds. Any definitional unfolding that reduces both sides to the same term works.',
         },
       ],
       outro:
-        '`Function.comp_apply : (g ∘ f) x = g (f x)` is true by `rfl`, since `∘` is a definition. Definitional equality is computation: the kernel unfolds and reduces until the terms match.',
+        '`Function.comp_apply : (g ∘ f) x = g (f x)` holds by `rfl` because `∘` is just a definition. Definitional equality is computation: the kernel unfolds definitions and reduces until both sides match.',
       unlocks: { codex: ['comp', 'comp_apply'] },
     },
     // 02
@@ -48,7 +48,7 @@ export const world: World = {
       kind: 'predict',
       title: 'Injective, unwrapped',
       intro:
-        "`Function.Injective f` unfolds to `∀ ⦃a b⦄, f a = f b → a = b`: equal outputs force equal inputs. Like `⊆`, it has strict-implicit binders, so `intro a b h` works and `hf h` infers `a` and `b`. Read the proof, then predict.",
+        "`Function.Injective f` unfolds to `∀ ⦃a b⦄, f a = f b → a = b`: equal outputs force equal inputs. Just like `⊆`, it uses strict-implicit binders, so `intro a b h` works directly and `hf h` infers `a` and `b`. Read the proof, then predict.",
       code: `theorem id_injective (α : Type) : Function.Injective (id : α → α) := by
   intro a b h
   exact h`,
@@ -58,23 +58,23 @@ export const world: World = {
         {
           text: '`a b : α`, `h : id a = id b` ⊢ `a = b`',
           correct: true,
-          feedback: 'Yes. `h` is the hypothesis of injectivity (equal outputs), the goal is equal inputs. `exact h` works because `id a` unfolds to `a`.',
+          feedback: 'Yes. `h` is the injectivity premise (equal outputs), and the goal is equal inputs. `exact h` succeeds because `id a` unfolds to `a`.',
         },
         {
           text: '`a b : α`, `h : a = b` ⊢ `id a = id b`',
-          feedback: 'That is the *converse*, which is just congruence and holds for every function. Injectivity goes from outputs back to inputs.',
+          feedback: 'That\'s the *converse*, which is just congruence and holds for every function. Injectivity goes the other way, from outputs back to inputs.',
         },
         {
           text: '`a b : α` ⊢ `id a = id b → a = b`',
-          feedback: 'That is what `intro a b` alone gives. The third name `h` introduces the implication as well.',
+          feedback: 'That\'s what `intro a b` alone would leave. Adding the third name `h` introduces the implication as well.',
         },
         {
           text: '`h : Function.Injective id` ⊢ `a = b`',
-          feedback: 'The statement being proved is consumed by `intro`; it does not become a hypothesis.',
+          feedback: 'The statement you\'re proving gets broken down by `intro`—it doesn\'t become a hypothesis.',
         },
       ],
       outro:
-        'An injectivity proof is a function: given two inputs and a proof that their outputs agree, produce a proof that the inputs agree. Using one is application: `hf h` has type `a = b`, with `a` and `b` inferred from `h`.',
+        'A proof of injectivity is a function: give it two inputs and a proof that their outputs agree, and it returns a proof that the inputs agree. Using one is just application: `hf h` has type `a = b`, with `a` and `b` inferred from `h`.',
       unlocks: { codex: ['injective'] },
     },
     // 03
@@ -84,7 +84,7 @@ export const world: World = {
       title: 'Look inside a definition',
       english: 'The identity function `id : α → α` is surjective.',
       intro:
-        "`Function.Surjective f` unfolds to `∀ b, ∃ a, f a = b`: every target is hit. The tactic `unfold Function.Surjective` replaces the name by its definition in the goal, so you can see the `∀` and `∃`. It changes how the goal looks, not what it means. Finish the proof.",
+        "`Function.Surjective f` unfolds to `∀ b, ∃ a, f a = b`: every target gets hit. The tactic `unfold Function.Surjective` replaces the name with its definition in the goal so you can see the `∀` and `∃`. It only changes how the goal looks, not what it means. Finish the proof.",
       header: 'theorem id_surjective (α : Type) : Function.Surjective (id : α → α) := by',
       starter: `  unfold Function.Surjective
   sorry`,
@@ -97,13 +97,13 @@ export const world: World = {
   exact ⟨b, rfl⟩`,
       ],
       hints: [
-        { text: 'After `unfold`, read the goal as a sentence: for every `b`, there exists an `a` with `id a = b`.' },
-        { text: 'Introduce `b`, then provide a witness for the `∃`.' },
+        { text: 'After `unfold`, read the goal as a sentence: for every `b`, there\'s an `a` such that `id a = b`.' },
+        { text: 'Introduce `b`, then supply a witness for the `∃`.' },
         { text: 'The witness is `b` itself, and `id b = b` holds by `rfl`.' },
         { text: '`intro b`, then `exact ⟨b, rfl⟩`.' },
       ],
       outro:
-        '`unfold` exposed `∀ b, ∃ a, id a = b`: surjectivity is a quantifier statement, and a proof is a function returning a dependent pair (a witness with evidence). Note the tactics you reused: `intro`, anonymous constructor, `rfl`.',
+        '`unfold` revealed `∀ b, ∃ a, id a = b`: surjectivity is a quantified statement, and proving it means writing a function that returns a dependent pair (a witness plus evidence). Notice the familiar tactics you reused: `intro`, the anonymous constructor, and `rfl`.',
       unlocks: { tactics: ['unfold'], codex: ['unfold', 'surjective'] },
     },
     // 04
@@ -113,18 +113,18 @@ export const world: World = {
       title: 'Injective composes',
       english: 'If `f` and `g` are injective, so is `g ∘ f`.',
       intro:
-        "Take `a b` with `(g ∘ f) a = (g ∘ f) b`. The goal is `a = b`. Using `hf : Injective f` as a tactic, `apply hf` changes the goal to `f a = f b`, because `hf` is an implication. Then `apply hg` changes it again. Arrange the lines.",
+        "Start with `a` and `b` satisfying `(g ∘ f) a = (g ∘ f) b`; your goal is `a = b`. Because `hf : Injective f` is an implication, `apply hf` shifts the goal to `f a = f b`, and `apply hg` shifts it one step further. Arrange the lines.",
       header:
         'theorem Injective.comp {α β γ : Type} {g : β → γ} {f : α → β} (hg : Function.Injective g) (hf : Function.Injective f) : Function.Injective (g ∘ f) := by',
       lines: ['  intro a b h', '  apply hf', '  apply hg', '  exact h'],
       distractors: ['  exact hf h', '  intro h'],
       hints: [
-        { text: 'Begin by introducing everything. Then think backwards from `a = b`: which hypothesis concludes an equality of inputs?' },
-        { text: 'Two `apply` steps, one per injectivity hypothesis. The outermost function applied is `g`, but the *goal* is about inputs of `f`.' },
-        { text: '`hf` first (goal `f a = f b`), then `hg` (goal `g (f a) = g (f b)`), which is `h` up to unfolding `∘`.' },
+        { text: 'Start by introducing everything. Then work backward from `a = b`: which hypothesis concludes an equality of inputs?' },
+        { text: 'You need two `apply` steps, one for each injectivity hypothesis. `g` is on the outside of the composition, while the *goal* starts at the inputs of `f`.' },
+        { text: 'Apply `hf` first (giving `f a = f b`), then `hg` (giving `g (f a) = g (f b)`), which matches `h` once `∘` unfolds.' },
       ],
       outro:
-        'Working backwards, each `apply` peels one function off. The result is a composite of the two proofs, which is `Function.Injective.comp` in Lean\'s library (as `hg.comp hf`).',
+        'Working backward, each `apply` peels off one function. The proof composes the two injectivity arguments, and in Lean\'s library it\'s `Function.Injective.comp` (often written `hg.comp hf`).',
       unlocks: { lemmas: ['Function.Injective.comp'] },
     },
     // 05
@@ -134,7 +134,7 @@ export const world: World = {
       title: 'Surjective composes',
       english: 'If `f` and `g` are surjective, so is `g ∘ f`.',
       intro:
-        "Now the existential version. Given `c`, `hg c` produces a `b` with `g b = c`; then `hf b` produces `a` with `f a = b`. The witness for `g ∘ f` is that `a`. `obtain ⟨b, hb⟩ := hg c` takes an existential apart, and `use` supplies a witness. `Function.comp_apply` lets `rw` see `g (f a)`.",
+        "Now for the existential version. Given `c`, `hg c` hands you a `b` with `g b = c`; then `hf b` hands you an `a` with `f a = b`. That `a` is your witness for `g ∘ f`. Use `obtain ⟨b, hb⟩ := hg c` to unpack an existential, `use` to give a witness, and `Function.comp_apply` so `rw` can see `g (f a)`.",
       header:
         'theorem Surjective.comp {α β γ : Type} {g : β → γ} {f : α → β} (hg : Function.Surjective g) (hf : Function.Surjective f) : Function.Surjective (g ∘ f) := by',
       starter: '  sorry',
@@ -151,13 +151,13 @@ export const world: World = {
   exact ⟨a, (congrArg g ha).trans hb⟩`,
       ],
       hints: [
-        { text: 'Introduce the target `c`. What do you know about hitting `c`? Which hypothesis is about hitting things?' },
-        { text: '`hg c` is an existential: take it apart with `obtain`. Then do the same with `hf`.' },
-        { text: 'Choose `a` as the witness. The goal is `(g ∘ f) a = c`; rewrite with `Function.comp_apply`, then with your two equations.' },
+        { text: 'Introduce the target `c`. Which hypothesis tells you how to hit `c`?' },
+        { text: '`hg c` is an existential—unpack it with `obtain`, then do the same with `hf`.' },
+        { text: 'Pick `a` as your witness. The goal becomes `(g ∘ f) a = c`; rewrite with `Function.comp_apply`, then with both equations.' },
         { text: '`rw [Function.comp_apply, ha, hb]` after `use a`.' },
       ],
       outro:
-        'Chaining witnesses: the witness for the composite is built from the two witnesses, in order. A proof of surjectivity is a function returning a dependent pair, and composition composes those functions. This is `Function.Surjective.comp`.',
+        'You chained the two witnesses in order to build the witness for the composite. A surjectivity proof is a function returning a dependent pair, and composition chains those functions together. This is `Function.Surjective.comp`.',
       unlocks: { lemmas: ['Function.Surjective.comp'] },
     },
     // 06
@@ -167,7 +167,7 @@ export const world: World = {
       title: 'Equal at every point',
       english: 'If `f x = x` for every `x`, then `f = id`.',
       intro:
-        "Two functions are equal when they agree on every input. The tactic `funext x` turns a goal `f = g` into `f x = g x` for an arbitrary `x`. This is function extensionality. The rules of λ-calculus alone do not give it; Lean proves it from its quotient axiom. The first line is written.",
+        "Two functions are equal if they agree on every input. The tactic `funext x` turns a goal `f = g` into `f x = g x` for an arbitrary `x`. That's function extensionality—the basic rules of λ-calculus don't give it to you, so Lean proves it from its quotient axiom. The first line is already there.",
       header: 'theorem eq_id_of_fixed {α : Type} (f : α → α) (h : ∀ x, f x = x) : f = id := by',
       starter: `  funext x
   sorry`,
@@ -179,11 +179,11 @@ export const world: World = {
       ],
       hints: [
         { text: 'After `funext x`, read the goal. What does `id x` unfold to?' },
-        { text: 'Your hypothesis `h` talks about `f x`. Which instance of it do you need?' },
-        { text: '`exact h x` (the goal `f x = id x` matches `f x = x` by unfolding `id`).' },
+        { text: 'Your hypothesis `h` tells you about `f x`. Which instance do you need?' },
+        { text: '`exact h x` (Lean matches `f x = id x` with `f x = x` by unfolding `id`).' },
       ],
       outro:
-        '`funext` says pointwise equality implies equality of functions. It cannot be derived from the basic rules alone; Lean proves it from its quotient axiom `Quot.sound` (it is one half of what `Set.ext` rests on). As a term: `funext h`.',
+        '`funext` turns pointwise equality into equality of functions. It doesn\'t follow from the core rules alone—Lean derives it from its quotient axiom `Quot.sound`, and it\'s one half of what `Set.ext` relies on. In term mode, it\'s just `funext h`.',
       unlocks: { tactics: ['funext'], codex: ['funext'] },
     },
     // 07
@@ -193,7 +193,7 @@ export const world: World = {
       title: 'Undo implies injective',
       english: 'If `g` undoes `f` (`g (f x) = x` for all `x`), then `f` is injective.',
       intro:
-        "`Function.LeftInverse g f` unfolds to `∀ x, g (f x) = x`: `g` undoes `f`. If `f a = f b`, apply `g` to both sides, then undo `f` on each side. The `have` line is written (it uses `congrArg` from Equality Estuary). Finish with `rw`.",
+        "`Function.LeftInverse g f` unfolds to `∀ x, g (f x) = x`, meaning `g` undoes `f`. If `f a = f b`, apply `g` to both sides and then undo `f` on each side. The `have` line is already written (using `congrArg` from Equality Estuary); finish with `rw`.",
       header:
         'theorem LeftInverse.injective {α β : Type} {g : β → α} {f : α → β} (h : Function.LeftInverse g f) : Function.Injective f := by',
       starter: `  intro a b hab
@@ -211,12 +211,12 @@ export const world: World = {
     _ = b := h b`,
       ],
       hints: [
-        { text: 'Look at `h2`. What does `h` say about `g (f a)`?' },
-        { text: '`h a : g (f a) = a`. You can rewrite with it even though `h` is stated with `LeftInverse`.' },
-        { text: '`rw [h a, h b] at h2`, then `h2` is the goal.' },
+        { text: 'Look at `h2`. What does `h` tell you about `g (f a)`?' },
+        { text: '`h a : g (f a) = a`. You can rewrite with it directly even though `h` is written using `LeftInverse`.' },
+        { text: '`rw [h a, h b] at h2`, and then `h2` matches the goal.' },
       ],
       outro:
-        'A left inverse recovers the input, so the input cannot be confused with another: the proof is a short chain of rewrites. This is `Function.LeftInverse.injective`. Notice `h a` worked: `LeftInverse` unfolds to a `∀`, so it applies like a function.',
+        'Because a left inverse recovers the input, two different inputs can\'t collide—the proof is just a short chain of rewrites. This is `Function.LeftInverse.injective`. Notice that `h a` worked directly because `LeftInverse` unfolds to a `∀`, so it applies like a function.',
       unlocks: { codex: ['left-inverse'], lemmas: ['Function.LeftInverse.injective'] },
     },
     // 08
@@ -226,33 +226,33 @@ export const world: World = {
       title: 'A fixed point',
       english: 'The function `f : α → α` has a fixed point (a point that `f` leaves where it is).',
       intro:
-        "Formalize in Lean: \"f has a fixed point\". Say it in words first: *there is* an `x` such that `f` sends `x` to itself. Mark the quantifier, then write it.",
+        "Formalize in Lean: \"f has a fixed point\". Say it in plain English first: *there is* an `x` that `f` sends to itself. Pick the right quantifier, then write the statement.",
       binders: '(α : Type) (f : α → α)',
       accept: ['∃ x, f x = x', '∃ x, x = f x'],
       mistakes: [
         {
           statement: '∀ x, f x = x',
-          feedback: 'That says *every* point is fixed, which means `f` is the identity. A fixed point needs only one.',
+          feedback: 'That says *every* point is fixed, which makes `f` the identity. Having a fixed point only requires one.',
         },
         {
           statement: 'f = id',
-          feedback: 'Again this says every point is fixed. "Has a fixed point" is existential.',
+          feedback: 'Again, this says every point is fixed. "Has a fixed point" is an existential claim.',
         },
         {
           statement: '∃ x y, f x = y',
-          feedback: 'Every function satisfies this: take any `x` and `y := f x`. It does not say `f x` equals `x`.',
+          feedback: 'Every function satisfies this—just pick any `x` and let `y := f x`. It doesn\'t say `f x` equals `x`.',
         },
         {
           statement: 'Function.Injective f',
-          feedback: 'Injectivity is a different property of `f`; it says nothing about points being fixed.',
+          feedback: 'Injectivity is a different property altogether; it doesn\'t say any point stays fixed.',
         },
       ],
       hints: [
-        { text: 'Which quantifier: for all, or there exists? Ask whether you need all points to be fixed.' },
-        { text: '`∃ x, …` where the body says `f` maps `x` to `x`.' },
+        { text: 'Which quantifier fits: for all, or there exists? Ask whether every point has to be fixed.' },
+        { text: '`∃ x, …`, where the body says `f` sends `x` to `x`.' },
       ],
       outro:
-        '"For all" versus "there exists" is the whole difference between the identity function and a function with a fixed point. In type theory it is a Π-type versus a Σ-type (a dependent function versus a dependent pair).',
+        '"For all" versus "there exists" is the entire difference between the identity function and a function with a fixed point. In type theory, that\'s a Π-type versus a Σ-type (a dependent function versus a dependent pair).',
     },
     // 09
     {
@@ -263,18 +263,18 @@ export const world: World = {
       title: 'Image and preimage',
       english: 'Every `x` in `A` lies in the preimage of the image of `A`: `A ⊆ f ⁻¹\' (f \'\' A)`.',
       intro:
-        "The image `f '' A` is `{y | ∃ x, x ∈ A ∧ f x = y}`. The preimage `f ⁻¹' B` is `{x | f x ∈ B}`. So `x ∈ f ⁻¹' (f '' A)` unfolds to `∃ a, a ∈ A ∧ f a = f x`. A witness is `x` itself. Write it as a term: `fun x hx => ⟨_, _, _⟩`.",
+        "The image `f '' A` is `{y | ∃ x, x ∈ A ∧ f x = y}`, and the preimage `f ⁻¹' B` is `{x | f x ∈ B}`. So `x ∈ f ⁻¹' (f '' A)` unfolds to `∃ a, a ∈ A ∧ f a = f x`, where `x` itself is a witness. Write the proof as a term: `fun x hx => ⟨_, _, _⟩`.",
       header:
         "theorem subset_preimage_image {α β : Type} (f : α → β) (A : Set α) : A ⊆ f ⁻¹' (f '' A) :=",
       starter: '  sorry',
       solutions: ['  fun x hx => ⟨x, hx, rfl⟩'],
       hints: [
-        { text: 'Begin with the function for `⊆`. Then unfold the goal membership: preimage, then image, until you see an `∃`.' },
-        { text: 'The existential has three pieces: a witness, a proof it lies in `A`, and an equation. Anonymous constructors nest to the right.' },
+        { text: 'Start with the function for `⊆`. Then unfold the membership in the goal—preimage first, then image—until you see an `∃`.' },
+        { text: 'The existential takes three pieces: a witness, a proof that it\'s in `A`, and an equation. Anonymous constructors nest to the right.' },
         { text: '`fun x hx => ⟨x, hx, rfl⟩`' },
       ],
       outro:
-        'Both definitions are just predicates: preimage is composition with `f`, image is an existential. The proof term is a function returning nested pairs. Image and preimage are the Galois connection of set maps; this is `Set.subset_preimage_image`.',
+        'Both definitions are just predicates: preimage composes with `f`, and image adds an existential. The proof term is a function returning nested pairs. Image and preimage form a Galois connection between sets, and this lemma is `Set.subset_preimage_image`.',
       unlocks: {
         codex: ['image', 'preimage', 'mem_image', 'mem_preimage'],
         lemmas: ['Set.subset_preimage_image'],
@@ -288,7 +288,7 @@ export const world: World = {
       title: 'Preimage respects intersection',
       english: '`f ⁻¹\' (A ∩ B) = f ⁻¹\' A ∩ f ⁻¹\' B`.',
       intro:
-        "Side quest. After `ext x`, both sides unfold to `f x ∈ A ∧ f x ∈ B`. The two directions are then the identity function on that proposition. You can finish each with `exact`.",
+        "Side quest. After `ext x`, both sides unfold to `f x ∈ A ∧ f x ∈ B`, so each direction is just the identity on that proposition. You can close both with `exact`.",
       header:
         "theorem preimage_inter {α β : Type} (f : α → β) (A B : Set β) : f ⁻¹' (A ∩ B) = f ⁻¹' A ∩ f ⁻¹' B := by",
       starter: '  sorry',
@@ -302,11 +302,11 @@ export const world: World = {
     exact h`,
       ],
       hints: [
-        { text: 'Begin with the tactic for set equality. Then compare both sides of the `↔` after unfolding.' },
-        { text: 'They unfold to the same statement, so `exact` with the hypothesis works.' },
+        { text: 'Start with the tactic for set equality, then compare both sides of the `↔` once they unfold.' },
+        { text: 'Both sides unfold to the exact same statement, so `exact` with the hypothesis closes each branch.' },
       ],
       outro:
-        'Both sides are the same proposition after unfolding, so each direction is the identity. Preimages commute with every set operation because they only precompose with `f`. This is `Set.preimage_inter`.',
+        'Both sides unfold to the exact same proposition, so each direction is just the identity. Preimages respect every set operation because they only precompose with `f`. This is `Set.preimage_inter`.',
       unlocks: { lemmas: ['Set.preimage_inter'] },
     },
     // 11
@@ -316,7 +316,7 @@ export const world: World = {
       title: 'Cancelling on the left',
       english: 'If `g ∘ f` is surjective, then `g` is surjective.',
       intro:
-        "A cancellation theorem: from a property of a composite, deduce a property of one factor. If every `c` is hit by `g ∘ f`, then every `c` is hit by `g`, using the point `f a`. Take apart the hypothesis `h c`, then supply the witness.",
+        "Here's a cancellation theorem: deduce a property of one function from a property of the composite. If `g ∘ f` hits every `c`, then `g` hits every `c` too—using `f a` as the witness. Unpack `h c`, then supply that witness.",
       header:
         'theorem Surjective.of_comp {α β γ : Type} {g : β → γ} {f : α → β} (h : Function.Surjective (g ∘ f)) : Function.Surjective g := by',
       starter: '  sorry',
@@ -327,12 +327,12 @@ export const world: World = {
   exact ⟨f a, ha⟩`,
       ],
       hints: [
-        { text: 'The goal is `∀ c, ∃ b, g b = c`. Introduce `c` and see what `h` offers at `c`.' },
-        { text: '`h c` gives some `a` with `(g ∘ f) a = c`. Which element of `β` does `g` hit in that equation?' },
-        { text: 'Use `f a` as the witness; `ha` proves the equation after unfolding `∘`.' },
+        { text: 'The goal is `∀ c, ∃ b, g b = c`. Introduce `c` and check what `h` gives you at `c`.' },
+        { text: '`h c` gives an `a` with `(g ∘ f) a = c`. Which element of `β` does `g` take to `c` in that equation?' },
+        { text: 'Use `f a` as the witness; `ha` proves the equation once `∘` unfolds.' },
       ],
       outro:
-        'The witness `f a` is the point where `g` actually lands. Cancellation works on the *outer* function for surjectivity and on the *inner* one for injectivity, since the composite hits whatever `g` hits. This is `Function.Surjective.of_comp`.',
+        'The witness `f a` is the point where `g` actually acts. Cancellation works on the *outer* function for surjectivity and on the *inner* function for injectivity, since anything the composite hits must be hit by `g`. This is `Function.Surjective.of_comp`.',
       unlocks: { lemmas: ['Function.Surjective.of_comp'] },
     },
     // 12 optional
@@ -343,7 +343,7 @@ export const world: World = {
       title: 'Cancelling on the right',
       english: 'If `f ∘ g` is injective, then `g` is injective.',
       intro:
-        "The dual cancellation. If `g a = g b`, then `f (g a) = f (g b)`, and injectivity of the composite finishes. Use `apply` on the hypothesis to turn the goal into an equation about `f ∘ g`.",
+        "Now for the dual cancellation. If `g a = g b`, then `f (g a) = f (g b)`, and injectivity of the composite finishes the proof. Use `apply` on the hypothesis to turn the goal into an equation about `f ∘ g`.",
       header:
         'theorem Injective.of_comp {α β γ : Type} {f : β → γ} {g : α → β} (h : Function.Injective (f ∘ g)) : Function.Injective g := by',
       starter: '  sorry',
@@ -355,11 +355,11 @@ export const world: World = {
       ],
       hints: [
         { text: 'After `intro a b hab`, which hypothesis concludes `a = b`?' },
-        { text: '`apply h` leaves a goal `(f ∘ g) a = (f ∘ g) b`. Which equation do you have to start from?' },
+        { text: '`apply h` turns the goal into `(f ∘ g) a = (f ∘ g) b`. Which equation do you already have to start from?' },
         { text: '`exact congrArg f hab`' },
       ],
       outro:
-        'If the composite never confuses two inputs, neither can its first stage. This is `Function.Injective.of_comp`.',
+        'If the composite never maps two distinct inputs to the same output, its first stage can\'t either. This is `Function.Injective.of_comp`.',
       unlocks: { lemmas: ['Function.Injective.of_comp'] },
     },
     // 13
@@ -369,7 +369,7 @@ export const world: World = {
       title: 'Compose, then compare',
       english: 'If `f` and `g` agree at every point, then `k ∘ f = k ∘ g`.',
       intro:
-        `Equal functions are equal at every point, and \`funext\` from earlier in this world is how you say so. After it, use \`change\` from Set Savanna to see the composition applied to \`x\`, then rewrite with the hypothesis.`,
+        `Equal functions agree at every input, and \`funext\` from earlier in this world is how you prove that. Next, use \`change\` from Set Savanna to expose the composition applied to \`x\`, then rewrite with the hypothesis.`,
       header:
         'theorem comp_congr {α β γ : Type} (f g : α → β) (k : β → γ) (h : ∀ x, f x = g x) : k ∘ f = k ∘ g := by',
       starter: '  sorry',
@@ -383,12 +383,12 @@ export const world: World = {
   rw [h x]`,
       ],
       hints: [
-        { text: 'The goal is an equation between functions. Which tactic reduces it to an equation about one input?' },
-        { text: 'After `funext x`, the goal is `(k ∘ f) x = (k ∘ g) x`. Restate it with `change` so you can see where `f x` sits.' },
-        { text: 'The hypothesis `h x` rewrites `f x`. After the rewrite, both sides match and `rw` closes the goal.' },
+        { text: 'The goal is an equation between functions. Which tactic reduces it to an equation at a single input?' },
+        { text: 'After `funext x`, the goal is `(k ∘ f) x = (k ∘ g) x`. Restate it with `change` so you can see `f x` directly.' },
+        { text: 'The hypothesis `h x` rewrites `f x`. Once both sides match, `rw` closes the goal automatically.' },
       ],
       outro:
-        `Pointwise equality gave equality of functions, and the composition unfolded because \`(k ∘ f) x\` is by definition \`k (f x)\`. Notice that \`rw\` closed the goal by itself: after the rewrite both sides were identical.`,
+        `Pointwise equality gave you equality of functions, and the composition unfolded because \`(k ∘ f) x\` is \`k (f x)\` by definition. Notice that \`rw\` finished the goal on its own once both sides matched.`,
     },
     {
       id: 'fun-14c',
@@ -396,7 +396,7 @@ export const world: World = {
       title: 'Nothing comes from nothing',
       english: 'If `y` is in the image of the empty set, then `y` is in any set `S`.',
       intro:
-        `An element of \`f '' ∅\` would come from an element of \`∅\`, and there is none. Unpack the image with \`obtain\`, then use \`exfalso\` from Connective Canyon: the goal does not matter once you hold a contradiction.`,
+        `Any element of \`f '' ∅\` would have to come from an element of \`∅\`, and there aren't any. Unpack the image with \`obtain\`, then use \`exfalso\` from Connective Canyon: once you hold a contradiction, the goal doesn't matter.`,
       header:
         'theorem mem_of_mem_image_empty {α β : Type} (f : α → β) (S : Set β) (y : β) (h : y ∈ f \'\' (∅ : Set α)) : y ∈ S := by',
       starter: '  sorry',
@@ -409,12 +409,12 @@ export const world: World = {
   contradiction`,
       ],
       hints: [
-        { text: 'The goal `y ∈ S` is unrelated to everything you know. Unpack `h` first and look at what it gives you.' },
-        { text: 'An image membership gives `x`, a proof `hx : x ∈ ∅`, and an equation. The element `x ∈ ∅` unfolds to `False`.' },
-        { text: 'Once you hold a proof of `False`, you may discard the goal. Which tactic does that?' },
+        { text: 'The goal `y ∈ S` has nothing to do with your hypotheses yet. Unpack `h` first and see what comes out.' },
+        { text: 'Membership in an image gives an `x`, a proof `hx : x ∈ ∅`, and an equation—and `x ∈ ∅` unfolds to `False`.' },
+        { text: 'Once you have a proof of `False`, you can throw away the current goal. Which tactic does that?' },
       ],
       outro:
-        `Statements about the empty set are often vacuous: there is nothing to check. Once \`hx : x ∈ ∅\` appeared you held a proof of \`False\`, and from \`False\` anything follows.`,
+        `Claims about the empty set are often vacuously true because there's nothing to check. The moment \`hx : x ∈ ∅\` appeared, you held a proof of \`False\`, and anything follows from \`False\`.`,
     },
     {
       id: 'fun-14d',
@@ -422,7 +422,7 @@ export const world: World = {
       title: 'Surjective means the image covers',
       english: 'If `f` is surjective, then every `S ⊆ β` satisfies `S ⊆ f \'\' (f ⁻¹\' S)`.',
       intro:
-        `Take \`y\` in \`S\`. Surjectivity gives an \`x\` with \`f x = y\`. Give \`use\` the witness, split the pair that remains, and use \`change\` to see what the first part means. \`rwa\` rewrites and then closes the goal from the context.`,
+        `Take \`y\` in \`S\`. Surjectivity gives an \`x\` with \`f x = y\`. Pass that witness to \`use\`, split the remaining pair, and use \`change\` to expose what the first half means. \`rwa\` rewrites and then closes the goal from your context.`,
       header:
         'theorem subset_image_preimage {α β : Type} (f : α → β) (hf : Function.Surjective f) (S : Set β) : S ⊆ f \'\' (f ⁻¹\' S) := by',
       starter: '  sorry',
@@ -440,12 +440,12 @@ export const world: World = {
   exact ⟨x, by rw [Set.mem_preimage, hx]; exact hy, hx⟩`,
       ],
       hints: [
-        { text: 'Start with `intro y hy`, then use surjectivity at `y` to get a preimage point `x`.' },
-        { text: 'The goal is `∃ x, x ∈ f ⁻¹\' S ∧ f x = y`. `use x` supplies the witness and leaves a pair to build; split it with `constructor`.' },
-        { text: 'The first part is `x ∈ f ⁻¹\' S`, which means `f x ∈ S`. With `hx : f x = y` in hand, rewrite and look for `hy`.' },
+        { text: 'Start with `intro y hy`, then apply surjectivity at `y` to get a preimage point `x`.' },
+        { text: 'The goal is `∃ x, x ∈ f ⁻¹\' S ∧ f x = y`. `use x` supplies the witness and leaves a conjunction, which `constructor` splits.' },
+        { text: 'The first part is `x ∈ f ⁻¹\' S`, meaning `f x ∈ S`. With `hx : f x = y` in hand, rewrite and match it with `hy`.' },
       ],
       outro:
-        `The image of a preimage is the part of \`S\` that \`f\` actually reaches. Surjectivity says it reaches everything, so nothing is lost. \`rwa\` saved a separate \`exact\` at the end.`,
+        `The image of a preimage is the slice of \`S\` that \`f\` actually reaches. Surjectivity guarantees nothing gets missed, and \`rwa\` saved you from writing a separate \`exact\` at the end.`,
     },
     // 15 boss
     {
@@ -454,7 +454,7 @@ export const world: World = {
       title: 'Nothing is its own opposite',
       english: 'No proposition is equivalent to its own negation: `¬(P ↔ ¬P)`.',
       intro:
-        "The engine of Cantor's argument is pure logic: `P ↔ ¬P` is contradictory. Assume `h : P ↔ ¬P`. First show `¬P`: if `P` held, `h` would give `¬P`, applied to `P`, contradiction. Then `h` turns `¬P` back into `P`. This is `iff_not_self` in Lean's library.",
+        "The engine behind Cantor's argument is pure logic: `P ↔ ¬P` is impossible. Assume `h : P ↔ ¬P`. First show `¬P`: if `P` held, `h` would give `¬P`, which applied to `P` gives a contradiction. Then `h` turns `¬P` right back into `P`. This is `iff_not_self` in Lean's library.",
       header: 'theorem iff_not_self {P : Prop} : ¬(P ↔ ¬P) := by',
       starter: `  intro h
   have hn : ¬P := by
@@ -470,12 +470,12 @@ export const world: World = {
       ],
       hints: [
         { text: 'For `hn`, assume `P` and aim for `False`. What does `h.mp` do to a proof of `P`?' },
-        { text: '`h.mp hp : ¬P`, a function from `P` to `False`. Apply it to `hp`.' },
-        { text: 'Once you have `hn : ¬P`, `h.mpr hn` is a proof of `P`. Combine them.' },
+        { text: '`h.mp hp : ¬P` is a function from `P` to `False`. Apply it to `hp`.' },
+        { text: 'Once you have `hn : ¬P`, `h.mpr hn` gives you a proof of `P`. Put them together.' },
         { text: '`exact (h.mp hp) hp` inside `hn`, then `exact hn (h.mpr hn)`.' },
       ],
       outro:
-        'To get a contradiction from `P ↔ ¬P` you used `P` and `¬P` against each other. This is Russell-style self-reference, and it is all of Cantor\'s proof. It is `iff_not_self` in core Lean, now in your inventory.',
+        'To draw a contradiction from `P ↔ ¬P`, you turned `P` and `¬P` against each other. That Russell-style self-reference is the entire engine of Cantor\'s proof. It\'s `iff_not_self` in core Lean, and it\'s now in your inventory.',
       unlocks: { lemmas: ['iff_not_self'] },
     },
     // 14
@@ -485,7 +485,7 @@ export const world: World = {
       title: 'The diagonal set',
       english: 'If `f a` equals the diagonal set `{x | x ∉ f x}`, we have a contradiction.',
       intro:
-        "Given `f : α → Set α`, define the *diagonal set* `D = {x | x ∉ f x}`: the elements that do not belong to their own image. Suppose some `a` has `f a = D`. Is `a ∈ f a`? Rewriting with `ha` shows `a ∈ f a ↔ a ∈ D`, and `a ∈ D` unfolds to `a ∉ f a`. Complete the proof.",
+        "Given `f : α → Set α`, build the *diagonal set* `D = {x | x ∉ f x}`—the elements that don't belong to their own image. Suppose some `a` satisfies `f a = D`. Is `a ∈ f a`? Rewriting with `ha` gives `a ∈ f a ↔ a ∈ D`, and `a ∈ D` unfolds to `a ∉ f a`. Finish the proof.",
       header:
         'theorem diagonal_clash {α : Type} (f : α → Set α) (a : α) (ha : f a = {x | x ∉ f x}) : False := by',
       starter: `  have key : a ∈ f a ↔ a ∈ {x | x ∉ f x} := by
@@ -498,12 +498,12 @@ export const world: World = {
   exact iff_not_self key`,
       ],
       hints: [
-        { text: 'Look at `key`: the two sides differ only in `f a` versus the diagonal set. Which hypothesis connects them?' },
-        { text: '`rw [ha]` replaces `f a` by the diagonal set and the sides become identical. Then use the lemma from the previous level.' },
-        { text: '`exact iff_not_self key`: Lean accepts `a ∈ {x | x ∉ f x}` as `¬ (a ∈ f a)` by unfolding.' },
+        { text: 'Look at `key`: the two sides differ only in `f a` versus the diagonal set. Which hypothesis links them?' },
+        { text: '`rw [ha]` replaces `f a` with the diagonal set so both sides match. Then apply the lemma from the previous level.' },
+        { text: '`exact iff_not_self key`: Lean unfolds `a ∈ {x | x ∉ f x}` to `¬ (a ∈ f a)` automatically.' },
       ],
       outro:
-        'The diagonal set is built to disagree with every `f a` about the element `a` itself, so it cannot equal any `f a`. That `a ∈ {x | x ∉ f x}` is accepted as `a ∉ f a` is definitional unfolding at work.',
+        'The diagonal set is constructed to disagree with every `f a` on the element `a` itself, so it can\'t equal any `f a`. Letting `a ∈ {x | x ∉ f x}` count as `a ∉ f a` is definitional unfolding doing the heavy lifting.',
       unlocks: { codex: ['diagonal'] },
     },
     {
@@ -514,7 +514,7 @@ export const world: World = {
       title: "Cantor's theorem",
       english: 'No function `f : α → Set α` is surjective: there are more sets of elements than elements.',
       intro:
-        "Boss. A surjection onto `Set α` would hit the diagonal set `{x | x ∉ f x}`. Assemble: assume surjectivity, apply it to the diagonal set to get an `a`, and use what you built in the last two levels. There is no scaffolding.",
+        "Boss level. A surjection onto `Set α` would have to hit the diagonal set `{x | x ∉ f x}`. Put the pieces together: assume `f` is surjective, apply it to the diagonal set to get an `a`, and finish using what you proved in the last two levels. No scaffolding this time.",
       header: 'theorem cantor (α : Type) (f : α → Set α) : ¬ Function.Surjective f := by',
       starter: '  sorry',
       mode: 'tactic',
@@ -526,13 +526,13 @@ export const world: World = {
   exact iff_not_self key`,
       ],
       hints: [
-        { text: 'The goal is a negation: what do you assume? Then what does surjectivity let you do with a particular set?' },
-        { text: 'Apply `hf` to the diagonal set. Take apart the result and recognize the situation from the previous level.' },
-        { text: 'You need an equivalence between `a ∈ f a` and `a ∈ {x | x ∉ f x}`, from the equation `ha`.' },
+        { text: 'The goal is a negation—what do you assume? And what does surjectivity let you do with a chosen set?' },
+        { text: 'Apply `hf` to the diagonal set, unpack the result, and notice you\'re right back in the previous level.' },
+        { text: 'Build an equivalence between `a ∈ f a` and `a ∈ {x | x ∉ f x}` using the equation `ha`.' },
         { text: '`intro hf`, `obtain ⟨a, ha⟩ := hf {x | x ∉ f x}`, then `have key … := by rw [ha]` and `exact iff_not_self key`.' },
       ],
       outro:
-        "Cantor's theorem: a diagonal set built from `f` disagrees with every `f a`, so `f` misses it. Logic supplied `¬(P ↔ ¬P)`, sets supplied the diagonal. In Lean it is `Function.cantor_surjective`, and with it you have walked from basic type theory to a classical theorem.",
+        "Cantor's theorem: a diagonal set built from `f` disagrees with every `f a`, so `f` has to miss it. Logic gave you `¬(P ↔ ¬P)`, and sets gave you the diagonal. In Lean this is `Function.cantor_surjective`—you've walked all the way from basic type theory to a classic theorem.",
       unlocks: { codex: ['cantor'], lemmas: ['Function.cantor_surjective'] },
     },
   ],
@@ -543,7 +543,7 @@ export const world: World = {
       kind: 'symbol',
       name: '∘',
       summary: '`g ∘ f` is the function `fun x => g (f x)`.',
-      body: 'Composition: apply `f` first, then `g`. It is a definition, so `(g ∘ f) x = g (f x)` holds by `rfl`.',
+      body: 'Composition: apply `f` first, then `g`. Because it\'s a definition, `(g ∘ f) x = g (f x)` holds by `rfl`.',
       input: '\\comp',
     },
     {
@@ -551,7 +551,7 @@ export const world: World = {
       kind: 'definition',
       name: 'Function.comp_apply',
       summary: '`(g ∘ f) x = g (f x)`, by `rfl`.',
-      body: 'The unfolding lemma for composition. Use it with `rw` when `(g ∘ f) x` appears in a goal and you want to see `g (f x)`.',
+      body: 'The unfolding lemma for composition. Pass it to `rw` whenever `(g ∘ f) x` sits in a goal and you want to expose `g (f x)`.',
       example: `example (α β γ : Type) (f : α → β) (g : β → γ) (x : α) : (g ∘ f) x = g (f x) := Function.comp_apply`,
       mathlib: '`Function.comp_apply`',
     },
@@ -561,7 +561,7 @@ export const world: World = {
       name: 'Function.Injective',
       summary: '`Injective f` is `∀ ⦃a b⦄, f a = f b → a = b`.',
       body:
-        'Equal outputs force equal inputs. To prove it, `intro a b h`; to use `hf : Injective f` on `h : f a = f b`, write `hf h : a = b`. The binders are strict-implicit.',
+        'Equal outputs force equal inputs. To prove it, use `intro a b h`; to use `hf : Injective f` on `h : f a = f b`, write `hf h : a = b`. The binders are strict-implicit.',
       example: `example (α β : Type) (f : α → β) (hf : Function.Injective f) (a b : α) (h : f a = f b) : a = b := hf h`,
       mathlib: '`Function.Injective`',
     },
@@ -570,7 +570,7 @@ export const world: World = {
       kind: 'definition',
       name: 'Function.Surjective',
       summary: '`Surjective f` is `∀ b, ∃ a, f a = b`.',
-      body: 'Every target has a preimage. To prove it, `intro b` then give a witness; to use it, `obtain ⟨a, ha⟩ := hf b`.',
+      body: 'Every target has a preimage. To prove it, run `intro b` and supply a witness; to use it, unpack with `obtain ⟨a, ha⟩ := hf b`.',
       example: `example (α β : Type) (f : α → β) (hf : Function.Surjective f) (b : β) : ∃ a, f a = b := hf b`,
       mathlib: '`Function.Surjective`',
     },
@@ -578,9 +578,9 @@ export const world: World = {
       id: 'unfold',
       kind: 'tactic',
       name: 'unfold',
-      summary: 'Replace a defined name by its definition.',
+      summary: 'Replace a defined name with its definition.',
       body:
-        '`unfold Function.Surjective` rewrites the goal so the body of the definition is visible. `unfold f at h` does it in a hypothesis. It changes appearance only: the new statement is definitionally equal.',
+        '`unfold Function.Surjective` rewrites the goal so the body of the definition is visible, and `unfold f at h` does the same inside a hypothesis. It only changes appearance—the new statement is definitionally equal.',
       example: `example (α : Type) : Function.Surjective (id : α → α) := by
   unfold Function.Surjective
   intro b
@@ -594,7 +594,7 @@ export const world: World = {
       name: 'funext',
       summary: 'Prove `f = g` by proving `f x = g x` for arbitrary `x`.',
       body:
-        '`funext x` applies function extensionality. In Lean it is a theorem resting on the quotient axiom `Quot.sound` (the other half of what `Set.ext` is built from). `ext x` does the same for functions.',
+        '`funext x` applies function extensionality. In Lean, it\'s a theorem proved from the quotient axiom `Quot.sound` (the other half of what `Set.ext` relies on). `ext x` does the same thing for functions.',
       example: `example (α : Type) (f : α → α) (h : ∀ x, f x = x) : f = id := by
   funext x
   exact h x`,
@@ -631,7 +631,7 @@ export const world: World = {
       kind: 'definition',
       name: 'Set.mem_image',
       summary: '`y ∈ f \'\' A ↔ ∃ x, x ∈ A ∧ f x = y`.',
-      body: 'True by definition. To use `hy : y ∈ f \'\' A`, `obtain ⟨x, hx, hxy⟩ := hy`.',
+      body: 'True by definition. To use `hy : y ∈ f \'\' A`, unpack it with `obtain ⟨x, hx, hxy⟩ := hy`.',
       example: `example (α β : Type) (f : α → β) (A : Set α) (y : β) : y ∈ f '' A ↔ ∃ x, x ∈ A ∧ f x = y := Set.mem_image f A y`,
       mathlib: '`Set.mem_image`',
     },
@@ -650,14 +650,14 @@ export const world: World = {
       name: 'The diagonal construction',
       summary: 'Build an object that differs from the i-th object at position i.',
       body:
-        'Given `f : α → Set α`, the diagonal set `{x | x ∉ f x}` disagrees with `f a` about whether `a` is a member. So it equals no `f a`. This idea proves Cantor\'s theorem, and also the uncountability of the reals and the undecidability of the halting problem.',
+        'Given `f : α → Set α`, the diagonal set `{x | x ∉ f x}` disagrees with `f a` on whether `a` belongs to it, so it can\'t equal any `f a`. The same diagonal trick proves Cantor\'s theorem, the uncountability of the reals, and the undecidability of the halting problem.',
     },
     {
       id: 'cantor',
       kind: 'concept',
       name: "Cantor's theorem",
       summary: 'No function `α → Set α` is surjective.',
-      body: 'Every set has strictly more subsets than elements. Proof: diagonal set plus `¬(P ↔ ¬P)`. In Mathlib: `Function.cantor_surjective`.',
+      body: 'Every set has strictly more subsets than elements, proved by combining the diagonal set with `¬(P ↔ ¬P)`. In Mathlib: `Function.cantor_surjective`.',
       mathlib: '`Function.cantor_surjective`',
     },
   ],

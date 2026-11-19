@@ -73,7 +73,7 @@ function MakeRun({ seed, format }: { seed: string; format: DuelFormat }) {
         return (
           <Card as="section" aria-label="Your challenge link" tone="primary">
             <h2>Send this to a friend</h2>
-            <p className="muted small">The link carries the seed and your result, nothing more. Your result is on the honour system.</p>
+            <p className="muted small">The link carries the seed and your result, nothing more. Your result is on the honor system.</p>
             <LinkBox url={link} shareTitle="A duel challenge on Inhabit" shareText={`I scored ${e.view.scores.me} of ${puzzles.length} on an Inhabit ${DUEL_FORMATS[format].title} set. Can you beat it?`} />
           </Card>
         );
@@ -102,7 +102,7 @@ export function ChallengeScreen({ code }: { code?: string }) {
         <Card tone="flat">
           <div role="alert">
           <h1>Made with a different version of the game</h1>
-          <p>{c.from} sent this link from another version of Inhabit, so the puzzles in it are not the ones you would get here, and your results cannot be compared fairly.</p>
+          <p>{c.from} sent this link from a different version of Inhabit, so the puzzles don't match what you'd get here and your results can't be compared fairly.</p>
           </div>
           <div className="dl-actions">
             <button className="btn primary" onClick={() => { nav.format = c.format; navigate('#/arena/duel/make'); }}>Make a fresh {DUEL_FORMATS[c.format].title} challenge instead</button>
@@ -133,7 +133,7 @@ function ReplyView({ c }: { c: Challenge }) {
           <span className="dl-vs" aria-hidden="true">:</span>
           <div className="dl-side"><span>{c.from}</span><strong className="tnum">{a}</strong></div>
         </div>
-        <p className="muted small">Both results come from links and are on the honour system.</p>
+        <p className="muted small">Both results come from links and are on the honor system.</p>
       </Card>
       <Comparison puzzles={puzzles} me={vs.results} them={c.results} meName={vs.from} themName={c.from} />
       <div className="dl-actions">
@@ -154,7 +154,7 @@ function PlayChallenge({ c }: { c: Challenge }) {
         <h1>{c.from} challenged you</h1>
         <Card as="section" aria-label="The challenge">
           <p><strong>{DUEL_FORMATS[c.format].title}</strong>: {DUEL_FORMATS[c.format].desc} Up to {DUEL_CAP_MS[c.format] / 60_000} minutes.</p>
-          <p className="muted">{c.from}&apos;s score stays hidden until you finish. Their result comes from the link, on the honour system; the duel is unrated.</p>
+          <p className="muted">{c.from}&apos;s score stays hidden until you finish. Their result comes from the link, on the honor system; the duel is unrated.</p>
           <NameField />
         </Card>
         <div className="dl-actions">

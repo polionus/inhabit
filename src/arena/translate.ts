@@ -141,11 +141,11 @@ export interface Equivalent {
   note: string;
 }
 
-const NOTE_BUNDLE = "You bundled the hypotheses with ∧; Lean's convention is to chain them with →, but both say the same thing.";
-const NOTE_ORDER = 'You listed the hypotheses in a different order. That says the same thing, since each → just takes the next fact in turn.';
-const NOTE_NOT_EX = 'You used ¬∃ where the sentence reads as ∀ … ¬ (or the other way round). “No x has it” and “every x lacks it” say the same thing.';
-const NOTE_IFF = 'You swapped the two sides of ↔. An “if and only if” reads the same in both directions.';
-const NOTE_COMM = 'You swapped the two sides of ∧ (or ∨). Order does not change what “and” and “or” say.';
+const NOTE_BUNDLE = "You bundled the hypotheses with ∧; Lean's convention is to chain them with →, though both say the same thing.";
+const NOTE_ORDER = 'You listed the hypotheses in a different order. That says the same thing, since each → just takes the next assumption in turn.';
+const NOTE_NOT_EX = 'You wrote ¬∃ where the sentence reads as ∀ … ¬ (or the other way around). “No x has it” and “every x lacks it” mean the same thing.';
+const NOTE_IFF = 'You flipped the two sides of ↔. An “if and only if” works in both directions.';
+const NOTE_COMM = "You swapped the two sides of ∧ (or ∨). Order doesn't change what “and” and “or” mean.";
 
 const BINARY = [' → ', ' ↔ ', ' ∧ ', ' ∨ '];
 const hasTopBinary = (s: string) => BINARY.some((b) => topLevel(s, b).length > 0);

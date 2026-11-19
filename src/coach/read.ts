@@ -307,23 +307,23 @@ function describeMem(x: string, sRaw: string, env: Env): Described {
   const X = c(x);
   switch (s.kind) {
     case 'inter':
-      return { say: `The goal says ${X} is in both ${c(s.a ?? '')} and ${c(s.b ?? '')}.`, ask: 'Being in an intersection means being in each set. Which of the two memberships can you already show, and which is left?' };
+      return { say: `You need to show ${X} is in both ${c(s.a ?? '')} and ${c(s.b ?? '')}.`, ask: "Being in an intersection means being in each set. Which of the two can you already prove, and what's left?" };
     case 'union':
-      return { say: `The goal says ${X} is in ${c(s.a ?? '')} or in ${c(s.b ?? '')}.`, ask: 'It is enough to be in one of them. Which one can you actually justify from what you have?' };
+      return { say: `You need to show ${X} is in ${c(s.a ?? '')} or in ${c(s.b ?? '')}.`, ask: "Being in either set is enough. Which one can you actually prove from what you have?" };
     case 'compl':
-      return { say: `The goal says ${X} is not in ${c(s.a ?? '')}.`, ask: `Not being in a set is a statement that ${c(x + ' ∈ ' + (s.a ?? ''))} would be impossible. What do you get to assume, and what must you reach?` };
+      return { say: `You need to show ${X} is not in ${c(s.a ?? '')}.`, ask: `Not being in a set means ${c(x + ' ∈ ' + (s.a ?? ''))} leads to a contradiction. What do you get to assume, and what do you need to reach?` };
     case 'diff':
-      return { say: `The goal says ${X} is in ${c(s.a ?? '')} but not in ${c(s.b ?? '')}.`, ask: 'That is two claims in one: a membership and a non-membership. Which is easier to show first?' };
+      return { say: `You need to show ${X} is in ${c(s.a ?? '')} and not in ${c(s.b ?? '')}.`, ask: "That's two claims at once—a membership and a non-membership. Which one is easier to handle first?" };
     case 'empty':
-      return { say: `The goal says ${X} is in the empty set. Nothing is, so the hypotheses must contradict each other.`, ask: 'Which two of your hypotheses cannot both be true?' };
+      return { say: `You're asked to show ${X} is in the empty set. Nothing is, so your hypotheses must contradict each other.`, ask: "Which two hypotheses can't both be true?" };
     case 'setof':
-      return { say: `The goal says ${X} satisfies the condition that defines the set ${c(s.text)}.`, ask: 'What does the condition say about this particular element? Can you see it written out?' };
+      return { say: `You need to show ${X} satisfies the rule defining ${c(s.text)}.`, ask: 'What does that condition actually say for this element once you write it out?' };
     case 'image':
-      return { say: `The goal says ${X} is a value of ${c(s.a ?? '')} at some element of ${c(s.b ?? '')}.`, ask: 'Which element would you feed in, and why is it in the set?' };
+      return { say: `You need to show ${X} is the output of ${c(s.a ?? '')} on some element of ${c(s.b ?? '')}.`, ask: 'Which input element would work, and why is it in the set?' };
     case 'preimage':
-      return { say: `The goal says that ${c(s.a ?? '')} applied to ${X} lands in ${c(s.b ?? '')}.`, ask: 'After unfolding that, which fact about the output do you need?' };
+      return { say: `You need to show ${c(s.a ?? '')} sends ${X} into ${c(s.b ?? '')}.`, ask: 'Once you unfold that, what fact about the output do you need?' };
     default:
-      return { say: `The goal says ${X} belongs to the set ${c(sRaw)}.`, ask: 'Is there a hypothesis that says this, or one that gives you this membership from something else?' };
+      return { say: `You need to show ${X} belongs to ${c(sRaw)}.`, ask: 'Do you have a hypothesis that gives this directly, or one that leads to it?' };
   }
 }
 
@@ -334,50 +334,50 @@ function describe(gp: Parsed, env: Env, g: Goal): Described {
     case 'forall': {
       const v = gp.vars?.[0] ?? 'x';
       return {
-        say: `The goal is a "for every" statement: ${c(gp.text)} has to hold for every ${c(v)}.`,
-        ask: `You cannot check every ${c(v)} one by one. If you let ${c(v)} stand for any single value, what is left to show?`,
+        say: `You need ${c(gp.text)} to hold for every ${c(v)}.`,
+        ask: `You can't check every ${c(v)} one by one—so pick an arbitrary ${c(v)}. Once you have it in hand, what's left to prove?`,
       };
     }
     case 'imp':
       return {
         say: `The goal is an implication: if ${A} then ${B}.`,
-        ask: 'To prove an implication you may assume its left side. What would you then have, and what would be left to show?',
+        ask: "To prove an implication, you get to assume its left side. What would you then have, and what's left to show?",
       };
     case 'iff':
       return {
-        say: `The goal is an "if and only if": ${A} and ${B} must each give the other.`,
-        ask: 'That is two implications in one. Which direction will you prove first, and what do you start from in it?',
+        say: `You're proving an "if and only if": ${A} and ${B} each have to imply the other.`,
+        ask: "That's two implications packed together. Which direction looks easier first, and what do you assume in it?",
       };
     case 'and':
       return {
-        say: `The goal is a conjunction: it needs both ${A} and ${B}.`,
-        ask: 'A conjunction is proved by proving both parts. Which part can you already see how to prove?',
+        say: `This is a conjunction: you need to prove both ${A} and ${B}.`,
+        ask: 'You have to prove both halves. Which half do you already see how to build?',
       };
     case 'or':
       return {
-        say: `The goal is a disjunction: proving one of ${A} or ${B} is enough.`,
-        ask: 'Which side can you actually prove from what you have? If neither is clear yet, does one of your hypotheses let you split the problem in two?',
+        say: `This is a disjunction: proving either ${A} or ${B} is enough.`,
+        ask: 'Which side can you actually prove from your hypotheses? If neither is clear yet, does one of your hypotheses split the problem in two?',
       };
     case 'not':
       return {
-        say: `The goal ${c(gp.text)} says that ${A} cannot be true.`,
-        ask: `To show something is impossible you suppose it. If ${A} held, what would you be able to use, and what would you have to reach?`,
+        say: `You're trying to show ${c(gp.text)}—that ${A} cannot be true.`,
+        ask: `Assume ${A} is true anyway and see what breaks. If you had ${A}, what could you do with it to reach a contradiction?`,
       };
     case 'ne':
       return {
-        say: `The goal ${c(gp.text)} says the two sides are different.`,
-        ask: `Suppose they were equal, ${c((gp.a ?? '') + ' = ' + (gp.b ?? ''))}. What would then go wrong?`,
+        say: `You're showing ${c(gp.text)}: the two sides are different.`,
+        ask: `Suppose they were equal, ${c((gp.a ?? '') + ' = ' + (gp.b ?? ''))}. What goes wrong?`,
       };
     case 'nmem':
       return {
-        say: `The goal says ${c(gp.a ?? '')} is not in ${c(gp.b ?? '')}.`,
-        ask: 'Suppose it were in there. What would that let you use, and what would you have to reach?',
+        say: `You need to show ${c(gp.a ?? '')} is not in ${c(gp.b ?? '')}.`,
+        ask: 'Suppose it were in there. What would that let you use, and what contradiction would you aim for?',
       };
     case 'exists': {
       const v = gp.vars?.[0] ?? 'x';
       return {
-        say: `The goal says there is some ${c(v)} with ${c(gp.b ?? '')}.`,
-        ask: `You have to name a specific ${c(v)}. Which value in front of you looks like it would work, and what would be left to check?`,
+        say: `You need to show there is some ${c(v)} with ${c(gp.b ?? '')}.`,
+        ask: `You have to pick a concrete ${c(v)}. Which value in front of you looks like it works, and what's left to check for it?`,
       };
     }
     case 'eq': {
@@ -385,62 +385,62 @@ function describe(gp: Parsed, env: Env, g: Goal): Described {
       const r = gp.b ?? '';
       if (isSetExpr(l, env) || isSetExpr(r, env)) {
         return {
-          say: `The goal says the two sets ${c(l)} and ${c(r)} are equal, which means they have exactly the same elements.`,
-          ask: 'How would you show two sets have the same members? What would you check for one arbitrary element?',
+          say: `You're proving the sets ${c(l)} and ${c(r)} are equal, meaning they have the exact same elements.`,
+          ask: 'To show two sets have the same elements, pick an arbitrary element—what do you need to check about it?',
         };
       }
       if (isFunExpr(l, env) || isFunExpr(r, env)) {
         return {
-          say: `The goal says the two functions ${c(l)} and ${c(r)} are equal, which means they agree on every input.`,
-          ask: 'What would you check for one arbitrary input?',
+          say: `You're proving the functions ${c(l)} and ${c(r)} are equal, meaning they give the same output on every input.`,
+          ask: 'Pick an arbitrary input—what equation do you need to show for it?',
         };
       }
-      if (sameProp(l, r)) return { say: `The goal is an equation, and both sides are the same: ${c(gp.text)}.`, ask: 'When the two sides are identical, does anything more need proving?' };
+      if (sameProp(l, r)) return { say: `This is an equation whose two sides are already identical: ${c(gp.text)}.`, ask: 'When both sides are the exact same expression, is there anything left to prove?' };
       return {
-        say: `The goal is an equation: ${c(l)} has to equal ${c(r)}.`,
-        ask: 'Are the two sides already the same once you compute? If not, which hypothesis says one side equals something else?',
+        say: `You're proving an equation: ${c(l)} equals ${c(r)}.`,
+        ask: 'Do both sides already simplify to the same thing? If not, which hypothesis lets you rewrite one side?',
       };
     }
     case 'mem':
       return describeMem(gp.a ?? '', gp.b ?? '', env);
     case 'subset':
       return {
-        say: `The goal says every element of ${A} is also in ${B}.`,
-        ask: 'Take one arbitrary element of the first set. What do you know about it, and what must you show about it?',
+        say: `You need to show every element of ${A} is also in ${B}.`,
+        ask: 'Take an arbitrary element of the first set. What do you know about it, and what do you need to show?',
       };
     case 'dvd':
       return {
-        say: `The goal ${c(gp.text)} says ${B} is a multiple of ${A}: ${B} equals ${A} times something.`,
-        ask: 'Which number times the divisor gives the target?',
+        say: `${c(gp.text)} means ${B} is a multiple of ${A}: ${B} equals ${A} times some number.`,
+        ask: 'Which multiplier gives the target?',
       };
     case 'false':
       return {
-        say: 'The goal is False: you are looking for a contradiction.',
-        ask: 'Do two of your hypotheses disagree? Is there a negation you could feed a proof to?',
+        say: "The goal is False, so you're looking for a contradiction.",
+        ask: 'Do two of your hypotheses clash? Or is there a negation you can feed a proof to?',
       };
     case 'true':
-      return { say: 'The goal is True, which needs no assumptions.', ask: 'Is there a basic fact that proves True outright?' };
+      return { say: 'The goal is True, which holds with no assumptions.', ask: 'Which basic fact closes True right away?' };
     case 'pred': {
       const info = PREDICATES[gp.head ?? ''];
       const args = splitArgs(gp.args ?? '');
       const means = info ? predWords(info.means, args) : null;
       return {
-        say: means ? `The goal ${c(gp.text)} is a definition: ${means}.` : `The goal ${c(gp.text)} is a definition.`,
-        ask: 'If you write out what the definition says, what is the statement you actually have to prove?',
+        say: means ? `${c(gp.text)} is a definition: ${means}.` : `${c(gp.text)} is a definition.`,
+        ask: "Once you expand what that definition means, what's the statement you actually need to prove?",
       };
     }
     case 'rel':
-      return { say: `The goal is a comparison: ${c(gp.text)}.`, ask: 'What do you know about the two sides that would settle it?' };
+      return { say: `You're proving a comparison: ${c(gp.text)}.`, ask: 'What do you know about the two sides that settles it?' };
     default: {
       const match = env.proofs.find((h) => sameProp(h.type, g.target));
-      if (!match && findClash(env)) return { say: `The goal is ${c(gp.text)}, and it does not break into smaller parts.`, ask: 'Do two of your hypotheses contradict each other? And what follows from a contradiction?' };
-      if (match) return { say: `The goal is ${c(gp.text)}, and it does not break into smaller parts.`, ask: 'One of your hypotheses has exactly this shape. Which one?' };
+      if (!match && findClash(env)) return { say: `The goal is ${c(gp.text)}, and it doesn't break down into smaller parts.`, ask: 'Do two of your hypotheses contradict each other—and what follows from a contradiction?' };
+      if (match) return { say: `The goal is ${c(gp.text)}, and it doesn't break down into smaller parts.`, ask: 'One of your hypotheses already has this exact type. Which one?' };
       const ends = env.proofs.find((h) => {
         const t = telescope(h.type, env.locals);
         return (t.premises.length > 0 || t.binders.length > 0) && matchBind(t.conclusion, t.binders.map((b) => b.name), g.target) !== null;
       });
-      if (ends) return { say: `The goal is ${c(gp.text)}, and it does not break into smaller parts.`, ask: 'A hypothesis ends in exactly this. What would you need to supply to get there?' };
-      return { say: `The goal is ${c(gp.text)}, and it does not break into smaller parts.`, ask: 'Which of your hypotheses lead to it, directly or in a few steps?' };
+      if (ends) return { say: `The goal is ${c(gp.text)}, and it doesn't break down into smaller parts.`, ask: 'One of your hypotheses ends in this exact goal. What does it need from you to get there?' };
+      return { say: `The goal is ${c(gp.text)}, and it doesn't break down into smaller parts.`, ask: 'Which hypotheses can build it, directly or in a couple of steps?' };
     }
   }
 }
@@ -602,8 +602,8 @@ function goalTools(gp: Parsed, g: Goal, env: Env, T: Collector): void {
         T.add({
           tactics: [['rfl', 'rfl']],
           term: 'rfl',
-          says: same ? `${c('rfl')} closes the goal: both sides are the same.` : `${c('rfl')} closes the goal if the two sides are the same once everything is computed. It fails if they are not.`,
-          termSays: same ? `${c('rfl')} proves it: both sides are the same.` : `${c('rfl')} proves it if the two sides are the same once everything is computed. It fails if they are not.`,
+          says: same ? `${c('rfl')} closes the goal because both sides are already the same.` : `${c('rfl')} closes the goal if both sides compute to the same thing, and fails if they don't.`,
+          termSays: same ? `${c('rfl')} proves it because both sides are already the same.` : `${c('rfl')} proves it if both sides compute to the same thing, and fails if they don't.`,
           about: 'goal',
           score: same ? 95 : mentionsNumber(l + r) ? 60 : 45,
         });
@@ -1069,7 +1069,7 @@ function analyseHyp(h: HypInfo, gp: Parsed, g: Goal, env: Env, T: Collector, cla
       break;
     }
     case 'or': {
-      out.use = { text: `${H} says ${c(p.a ?? '')} or ${c(p.b ?? '')}. You do not know which, so the proof has to work in both cases.`, score: 76 };
+      out.use = { text: `${H} says ${c(p.a ?? '')} or ${c(p.b ?? '')}. You don't know which, so your proof has to work in both cases.`, score: 76 };
       T.add({
         tactics: [[`cases ${h.name}`, 'cases'], [`rcases ${h.name} with ${fresh(env, 'hp', 'h1')} | ${fresh(env, 'hq', 'h2')}`, 'rcases'], [`obtain ${fresh(env, 'hp', 'h1')} | ${fresh(env, 'hq', 'h2')} := ${h.name}`, 'obtain']],
         term: `Or.elim ${h.name} (fun hp => _) (fun hq => _)`,

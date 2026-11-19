@@ -18,7 +18,7 @@ function randomId(n: number): string {
 const reasonOf = (e: unknown): string => {
   const type = typeof e === 'object' && e && 'type' in e ? String((e as { type: unknown }).type) : '';
   if (type === 'peer-unavailable') return 'That room does not exist any more (or the host closed it).';
-  if (type === 'network' || type === 'server-error' || type === 'socket-error' || type === 'socket-closed') return 'Could not reach the signalling service. Check your connection, or try a challenge link instead.';
+  if (type === 'network' || type === 'server-error' || type === 'socket-error' || type === 'socket-closed') return "Couldn't reach the signaling service. Check your connection, or try a challenge link instead.";
   if (type === 'browser-incompatible') return 'This browser cannot make direct connections.';
   return 'The connection failed. Some networks block direct connections; a challenge link works anywhere.';
 };
@@ -82,7 +82,7 @@ export class PeerTransport implements DuelTransport {
     try { peer = await this.makePeer(id); } catch (e) { this.fail(reasonOf(e)); throw new Error(reasonOf(e)); }
     this.peer = peer;
     return new Promise<string>((resolve, reject) => {
-      const t = setTimeout(() => { const m = 'Could not reach the signalling service in time.'; this.fail(m); reject(new Error(m)); }, this.timeoutMs);
+      const t = setTimeout(() => { const m = "Couldn't reach the signaling service in time."; this.fail(m); reject(new Error(m)); }, this.timeoutMs);
       peer.on('open', (pid) => { clearTimeout(t); resolve(pid); });
       peer.on('error', (e) => { clearTimeout(t); const m = reasonOf(e); this.fail(m); reject(new Error(m)); });
       peer.on('connection', (conn) => {

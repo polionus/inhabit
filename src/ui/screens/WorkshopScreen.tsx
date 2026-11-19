@@ -33,7 +33,7 @@ export const fullSource = (w: Pick<WorkshopDraft, 'name' | 'binders' | 'statemen
   w.source !== undefined ? w.source.replace(/\s+$/, '') : [w.defs.trim(), theoremHeader(w) + '\n' + w.proof.replace(/\s+$/, '')].filter(Boolean).join('\n\n');
 
 function GraduateNote() {
-  return <p className="notice">That needs something the game’s Lean does not have (real numbers, finite sets, and so on). You can still do it in real Lean with Mathlib: see <a href="#/graduate">Graduate</a>.</p>;
+  return <p className="notice">That needs something the game’s Lean doesn’t have (real numbers, finite sets, and so on). You can still prove it in real Lean with Mathlib—see <a href="#/graduate">Graduate</a>.</p>;
 }
 
 function Wizard() {
@@ -103,14 +103,14 @@ function Wizard() {
           <input className="wide" value={w.binders} onChange={(e) => set({ binders: e.target.value })} aria-label="Binders" placeholder="(n : Nat) (A B : Set Nat)" spellCheck={false} />
           {binderRes?.ok && <p className="ok-line">✓ Lean accepts these types.</p>}
           {binderRes && !binderRes.ok && <ul className="diags">{binderRes.diagnostics.map((d, i) => <DiagnosticItem key={i} d={d} />)}</ul>}
-          {binderNeedsDef && <p className="tip">Using a name of your own, like a predicate you are about to define? Go on to step 3, define it there, and these types will check once it exists.</p>}
+          {binderNeedsDef && <p className="tip">Using a name of your own, like a predicate you’re about to define? Head to step 3, define it there, and these types will check once it exists.</p>}
           {unsupported && <GraduateNote />}
         </section>
       )}
       {w.step === 3 && (
         <section>
           <h2>3. Define it</h2>
-          <p className="muted">Is there a notion Lean does not already know? Make it a <code className="inline">def</code>, usually a predicate. Skip this if you need none.</p>
+          <p className="muted">Need a concept Lean doesn’t already know? Write a <code className="inline">def</code> (usually a predicate), or skip this step if you don’t need one.</p>
           <textarea rows={4} value={w.defs} onChange={(e) => set({ defs: e.target.value })} aria-label="Definitions" placeholder="def IsSquare (n : Nat) : Prop := ∃ k, n = k * k" spellCheck={false} />
           {defsRes?.result.ok && <p className="ok-line">✓ Definitions accepted.</p>}
           {defsRes && !defsRes.result.ok && <ul className="diags">{defsRes.result.diagnostics.map((d, i) => <DiagnosticItem key={i} d={d} />)}</ul>}

@@ -122,7 +122,7 @@ export function FormalizeLevelView({ run, level }: { run: Run; level: FormalizeL
           )}
           {verdict?.kind === 'unmatched' && !resolved && (
             <div className="feedback neutral">
-              <p><strong>Well-typed, but I cannot confirm it means the same.</strong> I only compare against a few known answers, so yours might still be right. Compare it to the model answer:</p>
+              <p><strong>Well-typed, though I can't confirm it means the same thing.</strong> I only check against a few known answers, so yours may still be right. Compare it with the model answer:</p>
               <div className="side-by-side">
                 <div><div className="label">Yours</div><Lean code={text} /></div>
                 <div><div className="label">Model answer</div><Lean code={level.accept[0]} /></div>

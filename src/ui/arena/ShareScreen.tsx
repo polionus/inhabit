@@ -101,9 +101,9 @@ export function ShareScreen({ code }: { code: string }) {
       <Card as="section" aria-label="Verdict" tone={verdict?.kind === 'complete' ? 'ok' : 'flat'} className="share-verdict">
         {verdict === null && <p role="status"><Icon name="clock" size={16} /> Checking in your browser…</p>}
         {verdict?.kind === 'complete' && <p role="status"><Icon name="check-circle" size={18} /> <strong>Checked in your browser just now: this proof is complete.</strong></p>}
-        {verdict?.kind === 'sorry' && <div role="status"><p><Icon name="warn" size={18} /> <strong>Checked in your browser just now: this contains <code>sorry</code>, so it is not a finished proof.</strong></p></div>}
-        {verdict?.kind === 'fails' && <div role="status"><p><Icon name="warn" size={18} /> <strong>This proof does not check.</strong></p><p className="small">First error, in your browser&apos;s checker:</p><pre className="code share-err">{verdict.message}</pre></div>}
-        {verdict?.kind === 'incomplete' && <p role="status"><Icon name="warn" size={18} /> <strong>This proof does not check.</strong> {verdict.message}</p>}
+        {verdict?.kind === 'sorry' && <div role="status"><p><Icon name="warn" size={18} /> <strong>Checked in your browser just now: this contains <code>sorry</code>, so it's not a finished proof.</strong></p></div>}
+        {verdict?.kind === 'fails' && <div role="status"><p><Icon name="warn" size={18} /> <strong>This proof doesn't check.</strong></p><p className="small">First error, in your browser&apos;s checker:</p><pre className="code share-err">{verdict.message}</pre></div>}
+        {verdict?.kind === 'incomplete' && <p role="status"><Icon name="warn" size={18} /> <strong>This proof doesn't check.</strong> {verdict.message}</p>}
         <p className="muted small">The sender&apos;s claim means nothing here: your copy of the game checked it itself. It uses Inhabit&apos;s small Lean engine, which is close to real Lean but not the same program.</p>
       </Card>
 

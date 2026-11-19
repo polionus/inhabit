@@ -19,6 +19,6 @@ export function DuelRoutes({ sub, arg }: { sub: string; arg?: string }) {
     case 'make':
       return <MakeChallenge />;
     default:
-      return <div className="page narrow"><EmptyState glyph="?" title="Nothing here" action={<a className="btn primary" href="#/arena/duel">Back to duels</a>}>That duel page does not exist.</EmptyState></div>;
+      return <div className="page narrow"><EmptyState glyph="?" title="Nothing here" action={<a className="btn primary" href="#/arena/duel">Back to duels</a>}>That duel page doesn't exist.</EmptyState></div>;
   }
 }

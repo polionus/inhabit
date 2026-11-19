@@ -3,9 +3,9 @@ import type { AboutCopy, HomeCopy } from './types.ts';
 /** Copy for the Home page. Field limits are documented in `types.ts` ("Site copy"). */
 export const home: HomeCopy = {
   hero: {
-    eyebrow: 'A free browser game that teaches Lean 4',
+    eyebrow: 'A free browser game for learning Lean 4',
     headline: 'Learn to write proofs a computer can check',
-    lede: '**Lean** is a theorem prover: you write a proof, and it checks every step. In 133 short levels, each with a lesson beside it, you learn to write proofs yourself, then prove a theorem of your own. The Guide and an optional Arena go further.',
+    lede: '**Lean** is a theorem prover: you write a proof, and it checks every step. Across 133 short levels—each with a lesson right beside it—you learn to read Lean, write proofs of your own, and formalize a theorem from scratch. There is also a long-form Guide and an optional Arena when you want more practice.',
     startLabel: 'Start level one',
     continueLabel: 'Continue',
     aboutLabel: 'New to Lean? Read the introduction',
@@ -15,7 +15,7 @@ export const home: HomeCopy = {
   demo: {
     heading: 'A real Lean proof, one line at a time',
     intro:
-      'Step through the proof below. After each line, the panel shows the facts you have (above the `⊢`) and what is still left to prove (after it).',
+      'Step through the proof below. After each line, the panel shows what you know (above the `⊢`) and what you still have to prove (after it).',
     english: 'For any sets A and B of natural numbers, A ∩ B is a subset of B ∩ A: anything in both A and B is in both B and A.',
     code: `theorem inter_swap (A B : Set Nat) : A ∩ B ⊆ B ∩ A := by
   intro x hx
@@ -26,32 +26,32 @@ export const home: HomeCopy = {
     steps: [
       {
         line: 2,
-        note: 'Take any number `x` and assume `x ∈ A ∩ B`, naming that fact `hx`. Now show `x ∈ B ∩ A`.',
+        note: 'Pick an arbitrary number `x` and assume `x ∈ A ∩ B`, calling that fact `hx`. Now you need to show `x ∈ B ∩ A`.',
       },
       {
         line: 3,
-        note: 'Being in `A ∩ B` means being in `A` and in `B`. Split `hx` into those two facts, `ha` and `hb`.',
+        note: 'Being in `A ∩ B` means being in `A` and in `B`. Split `hx` into those two separate facts, `ha` and `hb`.',
       },
       {
         line: 4,
-        note: 'Being in `B ∩ A` means being in both, so the goal splits in two: `x ∈ B` and `x ∈ A`.',
+        note: 'To prove `x ∈ B ∩ A`, you have to prove both halves, so the goal splits into `x ∈ B` and `x ∈ A`.',
       },
       {
         line: 5,
-        note: 'The first goal, `x ∈ B`, is exactly the fact `hb`. One goal is left.',
+        note: 'The first goal, `x ∈ B`, matches `hb` directly. One goal left.',
       },
       {
         line: 6,
-        note: 'The last goal, `x ∈ A`, is exactly the fact `ha`. Nothing is left to prove.',
+        note: 'The second goal, `x ∈ A`, matches `ha`. Nothing left to prove.',
       },
     ],
     closing:
-      'That is a complete proof: every step was checked, and nothing was taken on trust. In the game you write lines like these yourself, starting with much smaller goals.',
+      "That's a complete proof: every step was checked, and nothing was taken on trust. You'll write proofs like this yourself, starting from much smaller pieces.",
   },
 
   whatIsLean: {
     heading: 'What is Lean?',
-    body: '**Lean** is an open-source programming language and *proof assistant*. You write a mathematical statement and its proof in a precise language, and Lean checks every step mechanically. When a step does not follow, it tells you, and it always shows exactly what is still unproved. Mathematicians use it to verify proofs and to build **Mathlib**, a large library of formalized mathematics written by its community. Computer scientists use it to verify software. Writing for Lean teaches you to say exactly what you mean.',
+    body: "**Lean** is an open-source programming language and *proof assistant*. You write a mathematical claim and its proof in a precise language, and Lean checks every step mechanically. Whenever a step doesn't follow, Lean tells you right away and shows exactly what's still unproved. Mathematicians use it to verify proofs and build **Mathlib**, a shared library of formalized mathematics. Computer scientists use it to verify software. Even if you just try it out of curiosity, writing for Lean has a way of clarifying your own thinking.",
   },
 
   outcomes: {
@@ -59,19 +59,19 @@ export const home: HomeCopy = {
     items: [
       {
         title: 'Read and write Lean',
-        body: 'Follow a Lean proof line by line, and write your own with the core tactics of real Lean: `intro`, `obtain`, `constructor`, `rw`, `induction` and more.',
+        body: 'Follow a Lean proof line by line, and write your own with core Lean tactics like `intro`, `obtain`, `constructor`, `rw`, and `induction`.',
       },
       {
         title: 'Prove real mathematics',
-        body: "Prove facts about logic, sets, functions, natural numbers and divisibility, from `0 + n = n` by induction to Cantor's theorem: no function from a set to its subsets reaches every subset.",
+        body: "Prove results in logic, sets, functions, natural numbers, and divisibility—from `0 + n = n` by induction all the way to Cantor's theorem.",
       },
       {
         title: 'Formalize your own theorem',
-        body: 'Take a statement written in English, give its objects types, write the definitions it needs, state it precisely in Lean and prove it.',
+        body: 'Take a claim written in English, choose types for its objects, write any definitions it needs, state it cleanly in Lean, and prove it.',
       },
       {
-        title: 'Know what a proof is',
-        body: 'Explain why, in Lean, a statement is a type and a proof is a program of that type, and what exactly the machine checks.',
+        title: 'Understand what a proof actually is',
+        body: 'Explain why a statement in Lean is a type, why a proof is a program of that type, and what the kernel actually checks.',
       },
     ],
   },
@@ -79,56 +79,56 @@ export const home: HomeCopy = {
   journey: {
     heading: 'Ten worlds, from first steps to your own theorem',
     intro:
-      'Each world teaches one big idea in 9 to 15 short levels, and opens with a primer that tells the story of that idea. After the fifth, the map branches: numbers and induction on one side, sets and functions on the other. Both lead to the Formalization Forge, where you state and prove a theorem of your own. If you already know a world, beat its final level to pass it.',
+      'Each world focuses on one big idea across 9 to 18 short levels, with a chapter explainer and a short primer to set the scene. After the fifth world the path splits into two tracks—numbers and induction on one side, sets and functions on the other—before meeting at the Formalization Forge, where you state and prove a theorem of your own. If you already know a topic, beat its boss level to skip ahead.',
   },
 
   method: {
     heading: 'How it feels to learn here',
     items: [
       {
-        title: 'You predict before you see',
-        body: 'Some levels stop before a step runs and ask what the goal will become. You commit to an answer, then see what really happens, with a note on why.',
+        title: 'Predict before you see',
+        body: "Some levels pause right before a tactic runs and ask what the goal will look like next. Guessing first—even if you're wrong—makes the mechanics stick.",
       },
       {
-        title: 'Explanation beside every level',
-        body: 'Each level has a lesson next to the task, with a worked example of a different problem. Ask for a hint and you get a nudge first, then the name of a tool, then the next line.',
+        title: 'Help that meets you where you are',
+        body: 'Every level has a lesson beside the editor, plus a coach that reads your live goal and asks what it needs before pointing to a tool.',
       },
       {
-        title: 'Mistakes are explained',
-        body: "You see Lean's real error message, so you learn to read it, and underneath it a plain explanation of what it means and what to try.",
+        title: 'Errors you can actually read',
+        body: "You always see Lean's real error message, so you get used to reading it, with a plain-English translation and a few things to try right underneath.",
       },
       {
-        title: 'Ideas come back, nothing punishes you',
-        body: 'Solved levels return for short reviews at growing gaps, so they stay with you. Stars, daily quests and a streak with a weekly rest day mark your progress. The levels have no timers and no lives.',
+        title: 'No timers or penalties in the curriculum',
+        body: 'Solved levels come back in short spaced reviews so the ideas stay fresh. Stars, daily quests, and a streak (with one free rest day a week) track progress without punishing you.',
       },
     ],
   },
 
   audience: {
-    heading: 'Who it is for',
-    body: 'Anyone curious about how a computer can check mathematics, and what else Lean can do: a student meeting proofs for the first time, or someone who knows Lean by name and wants a careful way in. You need school algebra and patience to read closely. No programming is assumed. The Guide explains Lean for newcomers. If you already prove theorems in Lean every day, you will find little new here.',
+    heading: 'Who this is for',
+    body: "Anyone curious about how a computer can check mathematics—whether you're meeting formal proofs for the first time or you've heard of Lean and want a gentle, hands-on way in. High-school algebra and a willingness to read closely are plenty; no programming experience is expected. If you already write Lean proofs every day, you probably won't find much new here.",
   },
 
   closing: {
     heading: 'Start with the first goal',
-    body: 'Level one asks you for a single natural number. It is short, and every proof in the game is built the same way: by giving Lean something of the right type.',
+    body: "Level one asks for a single natural number. It takes ten seconds, and every proof in the game follows the exact same idea: give Lean something of the right type.",
     cta: 'Start level one',
   },
 };
 
 /** "How a level works" as three parts, shown as numbered steps on the About page. */
 export const aboutLevelParts: { name: string; text: string }[] = [
-  { name: 'The task', text: 'States what to prove, in English and in Lean, with a short explanation of the new idea.' },
-  { name: 'The editor', text: 'Holds the proof. The statement is fixed; you write below it, starting from `sorry`, Lean\'s placeholder for "not done yet". Your proof is checked as you type.' },
-  { name: 'The goal view', text: 'Shows where you stand at the cursor. Facts you may use sit above the `⊢`; what you must prove sits after it. When no goals remain, the level is solved. Errors appear here too, with a plain explanation underneath.' },
+  { name: 'The task', text: "Says what you're proving, in English and in Lean, with a short introduction to the new idea." },
+  { name: 'The editor', text: 'Where you write the proof. The statement at the top is fixed; you write below it, replacing `sorry` (Lean\'s "to be filled in" placeholder). Lean checks your code as you type.' },
+  { name: 'The goal view', text: 'Shows where your proof stands at the cursor. Facts you can use sit above the `⊢`; what you still need to prove sits after it. When no goals are left, you\'ve solved the level. Errors show up here too, with a plain explanation underneath.' },
 ];
 
 /** The goal view example for the annotated figure. Display only. */
 export const aboutGoalExample = {
   facts: ['A B : Set Nat', 'x : Nat', 'hx : x ∈ A ∩ B'],
   goal: '⊢ x ∈ B ∩ A',
-  factsNote: 'Facts you may use',
-  goalNote: 'What you must prove',
+  factsNote: 'Facts you can use',
+  goalNote: 'What you need to prove',
 };
 
 /** Rows of the typing table on the About page: what you type, what you get, what it means. */
@@ -146,181 +146,188 @@ export const aboutSymbols: { typed: string; symbol: string; meaning: string }[] 
 ];
 
 /** Shown under the typing table. Markdown. */
-export const aboutSymbolsNote = `If you forget one, the symbol bar above the editor has the common symbols: click one to insert it, or hover to see its abbreviation. Plain-text spellings also work for some, such as \`->\` for \`→\`.
+export const aboutSymbolsNote = `If you forget an abbreviation, the symbol bar above the editor has all the common ones—click a symbol to insert it, or hover to see how to type it. Plain-text fallbacks also work for a few symbols, like \`->\` for \`→\`.
 
-These are the same abbreviations as in the Lean extension for the VS Code editor, so the habit carries over to real Lean.`;
+These are the same shortcuts used by the Lean 4 extension in VS Code, so the muscle memory transfers straight to real Lean.`;
 
 /** Copy for the About page. */
 export const about: AboutCopy = {
   title: 'About Inhabit',
-  lede: 'Inhabit is a free game that teaches you to write mathematical proofs in Lean 4, a language in which a computer checks every step. This page explains what Lean is, what you will do in the game, and how the game is built. No programming background is assumed.',
+  lede: 'Inhabit is a free browser game that teaches you to write mathematical proofs in Lean 4, a language where a computer checks every single step. No installation and no programming background required.',
   sections: [
     {
       id: 'what-is-lean',
       title: 'What Lean is',
-      body: `**Lean** is an open-source programming language and *proof assistant*. A proof assistant is a program that checks proofs. You write a statement and its proof in a precise language, and it checks each step against the rules of logic. It accepts the proof only if every step follows.
+      body: `**Lean** is an open-source programming language and *proof assistant*—a program that checks mathematical proofs. You write a statement and its proof in a precise syntax, and Lean verifies every step against the rules of logic. If even one step has a gap, Lean rejects it and tells you where.
 
-Here is a small Lean theorem:
+Here's a tiny Lean theorem:
 
 \`\`\`lean
 theorem my_add_zero (n : Nat) : n + 0 = n := by
   rfl
 \`\`\`
 
-The first line is the statement: for every natural number \`n\`, \`n + 0 = n\`. Everything after \`by\` is the proof. Here it is one word, \`rfl\`, which says "both sides work out to the same thing", and Lean checks that they do.
+The first line is the claim: for any natural number \`n\`, \`n + 0 = n\`. Everything after \`by\` is the proof. Here it's a single word, \`rfl\`, which tells Lean "both sides simplify to the same thing"—and Lean checks that they really do.
 
-While you write a proof, Lean shows you what is still left to prove, so you are never guessing where you stand.`,
+As you write a proof, Lean updates a live view of what's still left to prove, so you're never guessing where you stand.`,
     },
     {
       id: 'why-formalize',
       title: 'Why check proofs by machine',
-      body: `A proof on paper is checked by people, and people miss things: a case nobody considered, a step called "obvious" that is not. When Lean accepts a proof, every step has been checked, down to the basic rules of logic.
+      body: `Paper proofs are checked by human readers, and humans miss things: a forgotten edge case, or a step brushed off as "obvious" that quietly isn't. When Lean accepts a proof, every step has been verified all the way down to basic logical rules.
 
-That has practical uses. You can build on a result without re-reading its whole proof, which lets many people work on one large body of mathematics, as the community does in **Mathlib**, Lean's shared library. The same methods are used to verify that software does what it is meant to.
+That opens up practical possibilities. You can build on someone else's theorem without having to re-check its proof by hand, which is how thousands of contributors collaborate on **Mathlib**, Lean's shared mathematics library. Software engineers use the same machinery to verify critical code.
 
-It also changes how you think. Lean will not accept "clearly" or "similarly", so you find out exactly which steps you understood.
+It also changes how you think. Lean won't accept "clearly" or "similarly", so you find out quickly which parts of an argument you actually understand.
 
-The honest cost: it takes effort. You must spell out steps a human reader would skip, and a short proof on paper can become a much longer one in Lean.`,
+The trade-off is effort: you have to spell out small steps a human reader would glide past, so a three-line paper proof can easily become fifteen lines in Lean.`,
     },
     {
       id: 'what-you-do',
       title: 'What you do in the game',
-      body: `The game has 10 worlds and 133 levels, arranged on a map. You start with types and functions, then learn that statements are types and proofs are programs. Next come logic, "for all" and "there exists", and equality. Then the map branches: natural numbers, induction and divisibility on one side; sets and functions, ending with Cantor's theorem, on the other. Both meet in a last world where you formalize a theorem of your own.
+      body: `Inhabit has 10 worlds and 133 levels. You start with types and functions, then see how statements are types and proofs are programs. From there you work through logic, quantifiers, and equality. Halfway through, the roadmap splits into two tracks—natural numbers, induction, and divisibility on one side; sets and functions, leading up to Cantor's theorem, on the other—before reuniting at the Formalization Forge, where you state and prove a theorem of your own.
 
-Levels come in five kinds:
+The levels come in five flavors:
 
-- **Write a proof**, as a sequence of steps or as a single expression.
-- **Arrange shuffled lines** of a proof in the right order.
-- **Predict** the goal a step will produce, before you see it.
-- **Concept checks**: short questions with explained answers.
-- **Translate** an English sentence into a Lean statement.
+- **Write a proof**, either step by step with tactics or as a single expression.
+- **Arrange shuffled lines** of a proof into working order.
+- **Predict** what the goal will look like after a tactic runs.
+- **Concept checks**: quick multiple-choice questions with tailored explanations for each wrong answer.
+- **Formalize**: turn a plain-English sentence into a Lean statement.
 
-Each world opens with a primer on its big idea and ends with a harder *boss* level. Each level earns up to three stars, the last for solving it again in Review.`,
+Each world has a chapter explainer, a short primer, and a boss level at the end. You can earn up to three stars per level—the third comes from solving it again later in Review.`,
     },
     {
       id: 'the-name',
       title: 'Why it is called Inhabit',
-      body: `In Lean, every expression has a *type*. \`7\` has type \`Nat\`, the natural numbers. A statement is a type too, and a proof of the statement is something of that type.
+      body: `In Lean, every expression has a *type*. The number \`7\` has type \`Nat\`, the natural numbers. Mathematical statements are types too, and a proof of a statement is simply a value of that type.
 
-For example, a proof of "if P then Q" is a function that turns any proof of P into a proof of Q. Proving a statement therefore means building something that has its type. Type theorists call this *inhabiting* the type.
+For instance, a proof of "if P then Q" is a function that turns any proof of P into a proof of Q. So proving a statement means building something that lives inside its type. Type theorists call that *inhabiting* the type.
 
-The game starts right there. Level one asks for anything of type \`Nat\`, and \`7\` will do. A few worlds later the types are mathematical statements, and the things you build are proofs.`,
+Level one starts right there: it asks for anything of type \`Nat\`, and \`7\` works. A few worlds later the types are mathematical theorems, and the values you build are proofs.`,
     },
     {
       id: 'how-a-level-works',
       title: 'How a level works',
-      body: `The **Inventory** lists what you have unlocked so far: tactics (proof steps), lemmas (facts already proved) and Codex entries. Clicking a name puts it into your proof. Beside the task, a **lesson** explains the idea with an example that is not the level itself. **Hints** come one at a time if you ask, and you can reveal a full solution if you need to.`,
+      body: `The **Inventory** shows everything you've unlocked so far: tactics (proof moves), lemmas (already-proved facts), and Codex entries. Clicking any name inserts it into your proof, and the editor also autocompletes unlocked names as you type. Beside the task sits a collapsible **lesson** explaining the idea on a different example. If you get stuck, you can ask the coach to read your live goal for free, reveal hints one at a time, or look at a full solution whenever you want.`,
     },
     {
       id: 'typing-symbols',
       title: 'Typing the symbols',
-      body: `Lean uses mathematical symbols, and you type them with short abbreviations. Type a backslash, a name, then a space: \`\\to\` followed by a space becomes \`→\`. Some you will use often:`,
+      body: `Lean uses standard math symbols, and you type them with backslash shortcuts. Type a backslash, a short name, and a space: \`\\to\` plus space turns into \`→\`. Here are the ones you'll use most:`,
     },
     {
       id: 'how-it-teaches',
       title: 'How the game teaches, and why',
-      body: `Each level adds exactly one new thing: a tactic, an idea or a piece of notation. Nothing new competes for your attention.
+      body: `Each level introduces one new thing—a tactic, a concept, or a piece of notation—so you're not juggling three unfamiliar ideas at once.
 
-Each new skill comes in a fixed order. First you step through a complete example. Then you predict what a step will do, finish a proof that is mostly written, order shuffled lines, and finally write proofs on your own. By the blank page, you have already seen the skill used.
+New skills follow a gradual ramp: first you see a worked example, then you predict what a step does, finish a partially written proof, sort shuffled lines, and finally write proofs from a blank editor. By the time you face a blank page, the move already feels familiar.
 
-Hints start vague and get more specific, so you do as much of the thinking as you can. Wrong answers get feedback about the particular mistake. Solved levels come back after a few days, then after longer gaps, because recalling something after a gap lasts longer than rereading it.
+Hints start broad and narrow down step by step, and wrong answers explain the specific mix-up behind them. Finished levels come back in spaced review after growing gaps, because retrieving an idea from memory sticks far better than rereading it.
 
-The curriculum has no timers, lives or streak penalties, and using hints never blocks your progress. Timed play exists only in the optional Arena. Stars, daily quests and a streak (one rest day a week is forgiven) record progress; an unfinished quest simply expires.`,
+The main curriculum has no timers, no lives, and no streak punishments. Timed play lives only in the optional Arena. Stars, daily quests, and a forgiving streak (one rest day a week doesn't break it) keep track of your progress without nagging.`,
     },
     {
       id: 'is-this-real-lean',
       title: 'Is this real Lean?',
-      body: `The language is; the checker is not. The game checks your code inside your browser, with an engine written for this game that implements a part of Lean 4.
+      body: `You're writing real Lean 4 syntax, checked inside your browser by a custom TypeScript engine that implements a faithful subset of Lean.
 
-What is left out: *type classes* (the machinery that lets \`+\` work on many kinds of number), automation such as \`simp\` that finds proofs for you, and every kind of number except the natural numbers. Occasionally the game rejects something real Lean would accept.
+A few big parts of full Lean are left out on purpose: *type classes* (the machinery that lets \`+\` work on integers, reals, and matrices alike), automation tactics like \`simp\` and \`omega\`, and number types beyond \`Nat\`. Occasionally this engine will reject valid Lean that the full compiler accepts.
 
-What is kept: the syntax, and names and statements that follow Lean and its library. Every reference solution in the game is also compiled by real Lean 4, so what you learn to type here is real Lean and transfers directly.
+What stays faithful is the syntax, the goal view, and the library naming. Every reference solution in the game is also compiled by real Lean 4, so what you learn transfers directly.
 
-When you are ready for the real thing, the **Graduate** guide explains the differences, and **Open in real Lean** in the Sandbox and Workshop sends your code to the Lean web editor at https://live.lean-lang.org.`,
+When you're ready for the full system, the **Graduate** page walks you through the differences, and **Open in real Lean** in the Sandbox and Workshop opens your code directly at https://live.lean-lang.org.`,
     },
     {
       id: 'the-guide',
       title: 'The Guide',
-      body: `The levels teach by doing, and the **Guide** explains. It has sixteen articles, each a few minutes of reading. They cover what Lean is and what it can do, from proving theorems to running programs, type classes, automation and verified software. They explain the ideas underneath: types, propositions as types, dependent types, inductive types, the two kinds of equality, and the small kernel that makes a proof trustworthy. They give a method for attacking a proof and for turning English into a Lean statement, and they describe Mathlib and some of the things Lean is used for. Every code block in the Guide is checked by Lean, and each world page links to the articles that support it.`,
+      body: `Alongside the levels, the **Guide** offers sixteen short articles (around five minutes each) on Lean itself: what it can do, how the type theory and kernel work, practical proof strategies, and how Mathlib and the Lean community fit together. Every code block in the Guide is checked by Lean, and each world links to the articles that go with it.`,
     },
     {
       id: 'the-arena',
       title: 'The Arena',
-      body: `The **Arena** is optional, and it is the only place with timers. A generator makes puzzles on demand: a **Daily Proof** of three puzzles, the same for everyone each UTC day; **rated puzzles** that follow your rating; **Proof Rush**, against the clock or until three strikes; and **duels**, races on the same puzzles against a named bot or a friend. A friend can join live, or you can send a challenge link and they play whenever they like. Friend games are unrated, and there is no public matchmaking, because that would need a server. Results rest on the honour system. Each generated proof puzzle comes with a reference proof that the game's engine accepts.`,
+      body: `The **Arena** is completely optional—and the only part of the site with timers. A deterministic generator builds fresh puzzles on demand:
+
+- **Daily Proof**: the same three puzzles for everyone each UTC day, with a count-up timer and shareable results.
+- **Rated puzzles**: endless problems tuned to your Elo-style rating.
+- **Proof Rush**: rapid multiple-choice questions on a 3- or 5-minute clock, or Survival (three strikes).
+- **Duels**: race a rated bot, connect live to a friend, or send an async challenge link.
+
+Friend games are unrated, and there's no public matchmaking because the site runs without a server. Everything is on the honor system, and every generated proof puzzle is verified by the engine before you see it.`,
     },
     {
       id: 'where-it-leads',
       title: 'Where it leads',
-      body: `The **Workshop** is where you formalize a theorem of your own in five steps: *say it* in careful English, *type it* by choosing a type for each object, *define it* by writing any definitions it needs, *state it* in Lean, and *prove it*. If you want a starting point, it suggests 17 theorems. Your theorems are saved.
+      body: `The **Workshop** walks you through formalizing a theorem of your own in five steps—say it, type it, define it, state it, prove it—with 17 suggested theorems if you want a spark.
 
-The **Sandbox** is a free editor with every tactic unlocked, for experiments.
+The **Sandbox** gives you an open editor with every tactic and lemma unlocked for quick experiments.
 
-The **Graduate** guide takes you to real Lean and **Mathlib**: how to try it in your browser, how to install it, the automation tactics the game withheld, how to search the library, and a phrasebook from the names you learned here to the names Mathlib uses.
+The **Graduate** guide helps you move to real Lean 4 and **Mathlib**: browser editor, local install, the automation tactics we held back, library search tools, and a name phrasebook.
 
-The **Codex** collects every idea and tactic you meet, as a reference you build while you play. The **Review** screen brings solved levels back, and the **Profile** shows your stars, quests and streak.`,
+Meanwhile, the **Codex** grows into a searchable reference as you unlock ideas, **Review** keeps older skills sharp, and **Profile** tracks your stars, quests, and streak.`,
     },
   ],
   faq: [
     {
       q: 'Do I need to install anything?',
-      a: 'No. The game runs entirely in your browser. There is nothing to download and no account to create.',
+      a: "No. Everything runs right in your browser—nothing to download and no account to make.",
     },
     {
       q: 'Do I need to know how to program?',
-      a: 'No. The game teaches all the Lean you need, starting from the very first symbol. If you have programmed before, some of the early ideas about functions will feel familiar.',
+      a: "No. The game teaches Lean from the very first symbol. If you've programmed before, some of the early ideas about functions will feel familiar, but you don't need that background.",
     },
     {
       q: 'How much mathematics do I need?',
-      a: 'School algebra and a willingness to read carefully. You do not need to have written proofs before; the logic is taught as you go. Sets, functions and induction are each introduced from the start in their own world.',
+      a: "High-school algebra and a willingness to read carefully. You don't need prior proof experience—logic, sets, functions, and induction are all built from the ground up in their own worlds.",
     },
     {
       q: 'Is the Arena multiplayer real?',
-      a: 'Yes, in one form. In a live duel, two browsers connect directly to each other, peer to peer, and race the same puzzles. A public broker only introduces them. You can also play a bot, or send a friend a challenge link and let them play later.',
+      a: 'Yes, for playing with friends. In a live duel, the two browsers connect directly peer to peer and race the same puzzles, using a public broker only to introduce them. You can also race a bot or send a friend a challenge link to play on their own time.',
     },
     {
       q: 'Why is there no public matchmaking?',
-      a: 'Matching strangers needs a server that keeps accounts and ratings, and this game has none. It is a static site, so friend games are unrated and results rest on the honour system.',
+      a: "Matching strangers requires a server with accounts and ratings, and Inhabit is a static site with no server. Friend duels are unrated, and ratings stay on the honor system.",
     },
     {
       q: 'Are the generated puzzles checked?',
-      a: 'Yes. Each generated proof puzzle comes with a reference proof that the game\'s engine accepts, and samples of the generator\'s output are compiled in real Lean. Puzzles are rated by an estimate of difficulty, which can be off.',
+      a: "Yes. Every generated proof puzzle carries a reference proof verified by the browser engine, and samples from every family are compiled by real Lean 4. Difficulty ratings are estimates, so an occasional puzzle may feel easier or harder than its number.",
     },
     {
       q: 'Does anything leave my browser?',
-      a: 'Nothing, except during a live duel, and when you press **Open in real Lean**, which sends that one piece of code to the Lean web editor. There is no account, no analytics and no tracking. In a live duel the two browsers connect directly, so each side\'s IP address is visible to the other and to the signalling service. The game tells you this before connecting.',
+      a: "Almost nothing. There are no accounts, no analytics, and no tracking. Data only leaves your browser during a live friend duel (which connects peer to peer, so your IP address is visible to the other player and the signaling broker—the game warns you first) or when you click **Open in real Lean** to send one snippet to the Lean web editor.",
     },
     {
       q: 'Is my progress saved?',
-      a: 'Yes, in your browser on this device. Nothing is sent to a server. To move your progress to another device or keep a backup, use **Export save** on the Profile page, then **Import save** on the other device. Clearing your browser data erases progress that has not been exported.',
+      a: "Yes, in your browser's local storage on this device. To back it up or move to another device, use **Export save** and **Import save** on the Profile page. Clearing your browser data will wipe progress you haven't exported.",
     },
     {
       q: 'Can I skip ahead?',
-      a: 'Yes. Any world you can reach on the map can be passed by beating its final boss level, which counts the rest of that world as done. After the fifth world you can also choose which branch to take first.',
+      a: "Yes. On any unlocked world, beating its final boss level clears the rest of that world too. After world five, you can also play the numbers track and the sets track in whichever order you prefer.",
     },
     {
-      q: 'What if I am stuck?',
-      a: 'Ask for a hint: each level has a few, from a gentle nudge to almost the answer. Read the goal view and the error explanation, and open the Inventory to see the tools you have. If you still need it, you can reveal a full solution; the level then comes back later for you to solve on your own.',
+      q: "What if I'm stuck?",
+      a: "Open the Stuck panel: **Read the goal** explains your current proof state in plain English for free, **Which tool?** points to an unlocked tactic that fits, and there are step-by-step hints underneath. If you'd rather see how it's done, you can always reveal a full solution—the level stays open as studied and comes back later so you can solve it on your own.",
     },
     {
-      q: 'Why does it reject something that looks right?',
-      a: 'Lean is exact. `x ∈ A ∩ B` is not the same goal as `x ∈ B ∩ A`, and a misspelled name is an unknown name. Compare your line with the goal view and read the message. The game also accepts only tactics you have already unlocked, unless you turn that off in Profile. And because the game checks a part of Lean, it occasionally rejects something real Lean accepts.',
+      q: 'Why does Lean reject something that looks right?',
+      a: "Lean is literal. `x ∈ A ∩ B` isn't the exact same goal as `x ∈ B ∩ A`, and a typo in a name makes it unknown. Check the goal view and read the error explanation underneath. Also, levels restrict tactics to the ones you've unlocked so far (you can lift that lock in Profile), and because the browser engine covers a subset of Lean, it occasionally rejects valid Lean that the full compiler would accept.",
     },
     {
       q: 'Is it free?',
-      a: 'Yes, completely. There are no ads, no payments and no account. The source code is open under the MIT license.',
+      a: 'Completely free—no ads, no paywalls, no accounts. The source code is open under the MIT license.',
     },
     {
       q: 'Can I play on a phone?',
-      a: 'Yes. The pages work on a phone, and the symbol bar helps you type the symbols. A real keyboard is much more comfortable, though, since most levels involve typing.',
+      a: 'Yes. Every screen works on mobile, and the symbol bar makes typing symbols doable without shortcuts. Still, a physical keyboard is much more comfortable once you start writing longer proofs.',
     },
     {
       q: 'Where do I report a problem?',
-      a: 'Open an issue on the GitHub repository: https://github.com/polionus/inhabit/issues. Please include the level and the code you typed.',
+      a: 'Open an issue on GitHub at https://github.com/polionus/inhabit/issues, and include the level name and the code you typed.',
     },
   ],
-  credits: `Inhabit is open source under the MIT license. The source code is at https://github.com/polionus/inhabit.
+  credits: `Inhabit is open source under the MIT license: https://github.com/polionus/inhabit.
 
-It is inspired by the Natural Number Game and the other teaching games of the Lean community. The Unicode abbreviations come from the Lean 4 extension for VS Code. Built with Claude (Anthropic).
+It's inspired by the Natural Number Game and the Lean community's teaching games. The Unicode abbreviation table comes from the Lean 4 VS Code extension. Built with Claude (Anthropic).
 
-Lean is the work of its developers and its community. Inhabit is an independent project and is not affiliated with or endorsed by them.`,
+Lean is created by its developers and community. Inhabit is an independent project and isn't affiliated with or endorsed by them.`,
 };
