@@ -73,7 +73,7 @@ export const world: World = {
       title: 'Using a function',
       english: 'Given a function f from Nat to Nat and a number n, produce a Nat.',
       intro:
-        "You're given a function `f` and a number `n` above the line. Replace `sorry` with a `Nat` built from them.\n\nTo use a function, write it right next to its argument: `f n`. No parentheses, no commas.",
+        "You're given a function `f` and a number `n` above the line. Replace `sorry` with a `Nat` built from them.\n\nThe names in parentheses above the line, like `(f : Nat → Nat)`, are things you are given, each with its type.\n\nTo use a function, write it right next to its argument: `f n`. No parentheses, no commas.",
       outro:
         "The rule \"if `f : A → B` and `a : A`, then `f a : B`\" is the only way to *use* a function. Keep it in mind: Proposition Peaks turns out to be built on this exact rule.",
       unlocks: { codex: ['application'] },
@@ -191,19 +191,39 @@ example : Nat → Nat := area 3`,
       title: 'Types as arguments',
       english: 'Define the polymorphic identity function: it takes a type α, then a value of type α, and returns it.',
       intro:
-        "So far, a function's *output type* has never depended on its input. Here it does: `(α : Type) → α → α` says \"give me a type α, then an element of α, and I'll return an element of α.\" Because the result type mentions the argument `α`, this is a **dependent function type**.\n\nDefine `myId`. It takes two arguments: first the type, then the value.",
+        "So far, a function's *output type* has never depended on its input. Here it does: `(α : Type) → α → α` says \"give me a type α, then an element of α, and I'll return an element of α.\" Because the result type mentions the argument `α`, this is a **dependent function type**.\n\nDefine `myId`. It takes two arguments: first the type, then the value. The `fun` line is started for you; fill in what it returns.",
       outro:
         "`A → B` is just the special case `(x : A) → B` where `B` doesn't mention `x`. Taking a type as an argument is what makes a function polymorphic, and in Quantifier Quay you'll see that `∀` is this exact same construct.",
       unlocks: { codex: ['pi-types'] },
       mode: 'term',
       header: 'def myId : (α : Type) → α → α :=',
-      starter: '  sorry',
+      starter: '  fun α a => sorry',
       after: 'example : myId Nat 3 = 3 := rfl',
       solutions: ['  fun α a => a', '  fun α => fun a => a'],
       hints: [
         { text: 'Count the arrows in the type: two arguments, the type first.' },
-        { text: 'Start `fun α a => …`. What should come back?' },
-        { text: 'The body is just `a`; the full term is `fun α a => a`.' },
+        { text: 'The `fun α a =>` is written for you. What should come back?' },
+        { text: 'Replace `sorry` with `a`: the full term is `fun α a => a`.' },
+      ],
+    },
+    {
+      id: 'types-08b',
+      kind: 'proof',
+      title: 'Ignoring an argument',
+      english: 'Define a function that takes two types and one value of each, and returns the first value.',
+      intro:
+        "Read the type one arrow at a time: give me a type `α`, a type `β`, a value of `α`, a value of `β`, and I return an `α`. Four arrows, four names after `fun`. One of the values is never needed, and that is fine.",
+      outro:
+        'A function may ignore an argument. The type only promises what comes back, here an `α`, and `a` is the only thing that has that type.',
+      mode: 'term',
+      header: 'def myConst : (α β : Type) → α → β → α :=',
+      starter: '  sorry',
+      after: 'example : myConst Nat Nat 3 4 = 3 := rfl',
+      solutions: ['  fun α β a b => a', '  fun _ _ a _ => a'],
+      hints: [
+        { text: 'Count the arrows: two types, then two values. That is four names.' },
+        { text: 'Start `fun α β a b => …`. Which of these names has the result type `α`?' },
+        { text: 'The body is `a`.' },
       ],
     },
     {

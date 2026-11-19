@@ -53,12 +53,12 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       unlocks: { codex: ['and-proj'] },
       mode: 'term',
       header: 'theorem rotate (P Q R : Prop) (h : (P ∧ Q) ∧ R) : R ∧ P :=',
-      starter: '  sorry',
+      starter: '  ⟨h.2, sorry⟩',
       solutions: ['  ⟨h.2, h.1.1⟩', '  ⟨h.right, h.left.left⟩'],
       hints: [
         { text: 'The goal is a conjunction, so the term is a pair. What are its two halves?' },
-        { text: 'Start with `⟨_, _⟩`. The first slot needs an `R`: where is `R` inside `h`?' },
-        { text: '`h.2` is the `R`. For `P`, go through `h.1` first.' },
+        { text: 'The first slot of the pair is filled: `h.2` is the `R`. What goes in the second slot, a `P`?' },
+        { text: 'For the `P`, go through `h.1` first.' },
         { text: '`⟨h.2, h.1.1⟩`' },
       ],
     },
@@ -266,7 +266,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       unlocks: { codex: ['iff', 'iff-proj'] },
       mode: 'tactic',
       header: "theorem iff_symm' (P Q : Prop) (h : P ↔ Q) : Q ↔ P := by",
-      starter: '  sorry',
+      starter: '  constructor\n  · sorry\n  · sorry',
       solutions: [
         `  constructor
   · intro hq
@@ -280,7 +280,7 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       ],
       hints: [
         { text: 'The goal is an `↔`, which is built from two implications.' },
-        { text: '`constructor` gives two goals: `Q → P` first, then `P → Q`. Which direction of `h` serves each?' },
+        { text: '`constructor` is written for you and gives two goals: `Q → P` first, then `P → Q`. Which direction of `h` serves each?' },
         { text: '`h.mpr : Q → P` for the first goal, `h.mp : P → Q` for the second.' },
       ],
     },
@@ -336,18 +336,18 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
         tactics: ['by_cases'],
         codex: ['by_cases', 'classical-vs-constructive', 'excluded-middle'],
       },
+      mustUse: ['by_cases'],
       mode: 'tactic',
       header: 'theorem cases_demo (P Q : Prop) (h1 : P → Q) (h2 : ¬P → Q) : Q := by',
-      starter: '  sorry',
+      starter: '  by_cases hp : P\n  · sorry\n  · sorry',
       solutions: [
         `  by_cases hp : P
   · exact h1 hp
   · exact h2 hp`,
-        '  exact (Classical.em P).elim h1 h2',
       ],
       hints: [
         { text: "You can't tell whether `P` holds, but you can consider both possibilities." },
-        { text: 'Use `by_cases hp : P`. You get two goals, one for each answer.' },
+        { text: '`by_cases hp : P` is written for you. It gives two goals, one for each answer.' },
         { text: 'In the first goal `hp : P`, so `h1` applies. In the second, `hp : ¬P` fits `h2`.' },
       ],
     },
@@ -363,15 +363,15 @@ theorem left_demo (P Q : Prop) (h : P ∧ Q) : P := h.1
       unlocks: { tactics: ['by_contra'], codex: ['by_contra'] },
       mode: 'tactic',
       header: 'theorem dne (P : Prop) : ¬¬P → P := by',
-      starter: '  sorry',
+      starter: '  intro h\n  by_contra hn\n  sorry',
       solutions: [
         `  intro h
   by_contra hn
   exact h hn`,
       ],
       hints: [
-        { text: 'The goal is an implication. Start there.' },
-        { text: 'After `intro h`, assume the opposite of the goal with `by_contra hn`. What is the goal now?' },
+        { text: 'The `intro` and `by_contra` lines are written for you. What is the goal now?' },
+        { text: '`by_contra hn` assumed the opposite of the goal, so the goal is `False`.' },
         { text: '`h : ¬¬P` is a function from `¬P` to `False`, and `hn : ¬P`.' },
         { text: '`exact h hn`' },
       ],

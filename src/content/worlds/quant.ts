@@ -196,12 +196,12 @@ Arrange the lines. Two of them don't belong.`,
 Remember that \`¬A\` is \`A → False\`. In one direction you'll *build* an \`∃\`; in the other, you'll *take one apart*.`,
       english: 'There is no x with P x if and only if every x fails P.',
       header: 'theorem not_exists_iff (α : Type) (P : α → Prop) : (¬∃ x, P x) ↔ ∀ x, ¬P x := by',
-      starter: '  sorry',
+      starter: '  constructor\n  · sorry\n  · sorry',
       solutions: [
         '  constructor\n  · intro h x hx\n    exact h ⟨x, hx⟩\n  · intro h hex\n    obtain ⟨x, hx⟩ := hex\n    exact h x hx',
       ],
       hints: [
-        { text: "It's an `↔`: split it first, then `intro` as much as each direction allows." },
+        { text: "The `↔` is already split. In each bullet, `intro` as much as that direction allows." },
         { text: 'Forward direction: after `intro h x hx` you need `False`, and `h` refutes an `∃`. Which pair can you build?' },
         { text: 'Backward direction: `intro h hex`, then unpack `hex` with `obtain`.' },
         { text: '`exact h ⟨x, hx⟩` for the first; `obtain ⟨x, hx⟩ := hex` then `exact h x hx` for the second.' },
@@ -249,10 +249,39 @@ Same symbols, different order. In the first, \`m\` can depend on \`n\`. In the s
       unlocks: { codex: ['quantifier-order'] },
     },
     {
+      id: 'quant-09b',
+      kind: 'formalize',
+      title: 'Say it: two facts about zero',
+      intro: `Here you type a statement, not a proof. Write a Lean proposition that means the English sentence. If \`P\` is a property of numbers, \`P 3\` says "3 satisfies P". To say two things hold, join them with \`∧\`.`,
+      english: 'Both P and Q hold of 0.',
+      binders: '(P Q : Nat → Prop)',
+      accept: ['P 0 ∧ Q 0'],
+      mistakes: [
+        {
+          statement: 'P 0 ∨ Q 0',
+          feedback: 'This says at least one of them holds. "Both" needs `∧`.',
+        },
+        {
+          statement: 'P 0 → Q 0',
+          feedback: 'This says that if `P` holds of 0, then `Q` does too. The English claims both facts outright.',
+        },
+        {
+          statement: '∀ n, P n ∧ Q n',
+          feedback: 'This is about every number. The English only talks about 0.',
+        },
+      ],
+      hints: [
+        { text: 'Apply `P` to the number the sentence is about, like a function.' },
+        { text: 'Write one fact for `P` and one for `Q`, and join them with `∧`.' },
+        { text: '`P 0 ∧ Q 0`' },
+      ],
+      outro: `A statement is a type, and \`∧\` is the pair type. Next you will add a quantifier.`,
+    },
+    {
       id: 'quant-10',
       kind: 'formalize',
       title: 'Say it: all P are Q',
-      intro: `Translate English into a Lean proposition. Spot every "every", "some", and "if … then" first.
+      intro: `Now add a quantifier. Spot every "every", "some", and "if … then" first.
 
 Watch out for the classic trap: "every P is a Q" is **not** \`∀ n, P n ∧ Q n\` (which claims every number satisfies both), and **not** \`∃ n, P n → Q n\`.`,
       english: 'Every natural number that satisfies P also satisfies Q.',

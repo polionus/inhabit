@@ -151,7 +151,7 @@ export const world: World = {
       intro:
         "`refine ⟨b, ?_⟩` gives the witness and leaves the evidence as a new goal marked `?_`. It's the more general version of `use`, letting you write down exactly what you know and leave holes for the rest. Pick the witness, then close `b * a = a * b`.",
       header: 'theorem dvd_mul_left (a b : Nat) : a ∣ b * a := by',
-      starter: '  sorry',
+      starter: '  refine ⟨sorry, ?_⟩\n  sorry',
       mode: 'tactic',
       solutions: [
         `  refine ⟨b, ?_⟩

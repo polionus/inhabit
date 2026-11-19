@@ -256,6 +256,40 @@ export const world: World = {
     },
     // 09
     {
+      id: 'fun-08b',
+      kind: 'choice',
+      title: 'Which set is which?',
+      intro:
+        "Two symbols take a function and a set: `f '' A` (image) and `f ⁻¹' B` (preimage). The two examples below are proved for you. Read them, hover over the pieces, and decide what each symbol collects.",
+      question: 'Which description is right?',
+      code: `example (f : Nat → Nat) (A : Set Nat) (a : Nat) (ha : a ∈ A) : f a ∈ f '' A :=
+  ⟨a, ha, rfl⟩
+
+example (f : Nat → Nat) (B : Set Nat) (x : Nat) (h : f x ∈ B) : x ∈ f ⁻¹' B :=
+  h`,
+      options: [
+        {
+          text: "`f '' A` holds outputs `f a` for `a ∈ A`. `f ⁻¹' B` holds the inputs `x` whose output `f x` lies in `B`.",
+          correct: true,
+          feedback: 'Yes. The image lives on the output side, the preimage on the input side. Membership in a preimage is just `f x ∈ B`.',
+        },
+        {
+          text: "Both collect outputs; the preimage just starts from `B`.",
+          feedback: 'A preimage collects *inputs*: its elements `x` are tested by asking whether `f x` is in `B`. That is why the second proof is just `h : f x ∈ B`.',
+        },
+        {
+          text: "`f ⁻¹' B` is the image of `B` under an inverse function.",
+          feedback: 'No inverse is involved, and `f` need not have one. `⁻¹` is part of the notation. The preimage only asks whether `f x ∈ B`.',
+        },
+        {
+          text: "`y ∈ f '' A` means `f y ∈ A`.",
+          feedback: 'That mixes up the two. `y ∈ f \'\' A` means some `x ∈ A` has `f x = y`. The condition `f y ∈ A` is closer to a preimage.',
+        },
+      ],
+      outro:
+        'Image: start from inputs in `A`, collect their outputs. Preimage: start from outputs in `B`, collect the inputs that land there. Next you will prove that every `x ∈ A` lands in the preimage of its own image.',
+    },
+    {
       id: 'fun-09',
       kind: 'proof',
       mode: 'term',
@@ -266,7 +300,7 @@ export const world: World = {
         "The image `f '' A` is `{y | ∃ x, x ∈ A ∧ f x = y}`, and the preimage `f ⁻¹' B` is `{x | f x ∈ B}`. So `x ∈ f ⁻¹' (f '' A)` unfolds to `∃ a, a ∈ A ∧ f a = f x`, where `x` itself is a witness. Write the proof as a term: `fun x hx => ⟨_, _, _⟩`.",
       header:
         "theorem subset_preimage_image {α β : Type} (f : α → β) (A : Set α) : A ⊆ f ⁻¹' (f '' A) :=",
-      starter: '  sorry',
+      starter: '  fun x hx => ⟨sorry, sorry, sorry⟩',
       solutions: ['  fun x hx => ⟨x, hx, rfl⟩'],
       hints: [
         { text: 'Start with the function for `⊆`. Then unfold the membership in the goal—preimage first, then image—until you see an `∃`.' },

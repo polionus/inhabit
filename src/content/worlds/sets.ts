@@ -126,11 +126,11 @@ example (α : Type) (A : Set α) (a : α) (h : A a) : a ∈ A := h`,
       intro:
         "No tactics this time: a proof of `A ∩ B ⊆ A` is a function `fun x hx => …`. What's `hx : x ∈ A ∩ B`? By definition `A ∩ B` is `{x | x ∈ A ∧ x ∈ B}`, so membership in `A ∩ B` *is* a conjunction, and `hx.1` gives its first half. `Set.mem_inter_iff` states this equivalence, and it holds by `Iff.rfl`.",
       header: 'theorem inter_subset_left {α : Type} {A B : Set α} : A ∩ B ⊆ A :=',
-      starter: '  sorry',
+      starter: '  fun x hx => sorry',
       solutions: ['  fun x hx => hx.1', '  fun _ hx => hx.left'],
       hints: [
         { text: 'The goal is a subset statement. In term mode, what kind of term proves a `∀ … → …`?' },
-        { text: 'Write `fun x hx => …`. Then check what `hx` really is by unfolding `∩` once.' },
+        { text: '`fun x hx =>` is written for you. Then check what `hx` really is by unfolding `∩` once.' },
         { text: 'A proof of `P ∧ Q` has two halves, accessed with `.1` and `.2`.' },
       ],
       outro:

@@ -67,15 +67,35 @@ export const world: World = {
       ],
     },
     {
+      id: 'props-02b',
+      kind: 'proof',
+      title: 'A one-word proof',
+      english: 'From a proof of P, prove P.',
+      intro:
+        "Write `by` and Lean waits for instructions. Your first instruction is `exact`: it closes the goal with a term of exactly the goal's type. The goal `P` is below `⊢`, and your hypotheses are above it. Which hypothesis already has the type `P`?",
+      outro:
+        'A tactic block is a script that builds a term. Here the script has one line, and the term is just `hp`. Next you will build a slightly bigger term to hand to `exact`.',
+      unlocks: { tactics: ['exact'], codex: ['by', 'tactics-concept', 'exact', 'turnstile'] },
+      mode: 'tactic',
+      showTerm: true,
+      header: 'theorem same_thing (P : Prop) (hp : P) : P := by',
+      starter: '  sorry',
+      solutions: ['  exact hp'],
+      hints: [
+        { text: 'Look at the goal after `⊢`, then at the hypotheses. Which one has that same type?' },
+        { text: '`hp : P` has exactly the type of the goal.' },
+        { text: '`exact hp`' },
+      ],
+    },
+    {
       id: 'props-03',
       kind: 'proof',
-      title: 'Your first tactic: exact',
+      title: 'Using exact on a function',
       english: 'From a proof of Q and a proof of Q → R, prove R.',
       intro:
-        "Replace `sorry` with `exact` and a term of the goal's type. The goal `R` appears after `⊢`, with your hypotheses listed above the line.\n\n`by` switches from writing a term directly to giving *instructions* for building one. `exact e` tells Lean that the term `e` has the exact type of the goal.",
+        "Same tactic, one step bigger. The goal is `R`, and no hypothesis has that type. But `hqr` is a function that ends in `R`. What does it need? Build that term and give it to `exact`.",
       outro:
         "A tactic block is just a script that builds a term, and `exact` hands over a finished one. Open the proof term below: Lean checked *that* against the goal.",
-      unlocks: { tactics: ['exact'], codex: ['by', 'tactics-concept', 'exact', 'turnstile'] },
       mode: 'tactic',
       showTerm: true,
       header: 'theorem use_it (P Q R : Prop) (hq : Q) (hqr : Q → R) : R := by',

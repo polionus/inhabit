@@ -5,7 +5,7 @@ export const home: HomeCopy = {
   hero: {
     eyebrow: 'A free browser game for learning Lean 4',
     headline: 'Learn to write proofs a computer can check',
-    lede: '**Lean** is a theorem prover: you write a proof, and it checks every step. Across 133 short levels—each with a lesson right beside it—you learn to read Lean, write proofs of your own, and formalize a theorem from scratch. There is also a long-form Guide and an optional Arena when you want more practice.',
+    lede: '**Lean** is a theorem prover: you write a proof, and it checks every step. Across 137 short levels—each with a lesson right beside it—you learn to read Lean, write proofs of your own, and formalize a theorem from scratch. There is also a long-form Guide and an optional Arena when you want more practice.',
     startLabel: 'Start level one',
     continueLabel: 'Continue',
     aboutLabel: 'New to Lean? Read the introduction',
@@ -185,7 +185,7 @@ The trade-off is effort: you have to spell out small steps a human reader would 
     {
       id: 'what-you-do',
       title: 'What you do in the game',
-      body: `Inhabit has 10 worlds and 133 levels. You start with types and functions, then see how statements are types and proofs are programs. From there you work through logic, quantifiers, and equality. Halfway through, the roadmap splits into two tracks—natural numbers, induction, and divisibility on one side; sets and functions, leading up to Cantor's theorem, on the other—before reuniting at the Formalization Forge, where you state and prove a theorem of your own.
+      body: `Inhabit has 10 worlds and 137 levels. You start with types and functions, then see how statements are types and proofs are programs. From there you work through logic, quantifiers, and equality. Halfway through, the roadmap splits into two tracks—natural numbers, induction, and divisibility on one side; sets and functions, leading up to Cantor's theorem, on the other—before reuniting at the Formalization Forge, where you state and prove a theorem of your own.
 
 The levels come in five flavors:
 

@@ -82,6 +82,9 @@ function checkLevel(world: World, level: Level): Outcome {
       level.solutions.forEach((sol, i) => {
         checks++;
         const { result, assembled } = timed(() => checkBody(session, sol));
+        for (const t of level.mustUse ?? []) {
+          if (!result.decls.some((d) => d.usedTactics.includes(t))) fail(o, `solution ${i + 1} does not use required tactic \`${t}\``);
+        }
         if (!result.complete) {
           fail(
             o,
