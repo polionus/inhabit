@@ -531,5 +531,21 @@ behind "n more". A proof that still contains `sorry` is never shown a green tick
   the capstone skill beyond the nine authored formalize levels.
 
 ### 12.5 Deferred
-Reminders for tactics going stale; generator families for `rw`, induction, `calc`, `funext`;
+Generator families for `calc` and `funext`; user-defined `inductive` types and induction beyond `Nat`;
 bots that explain their proofs; ghost replays; any gate on a boss; analytics.
+
+## 13. Reading and reuse (v4)
+
+- **Chapter explainers.** Each world has a blog-style article (`ChapterExplainer`, src/content/chapters/<world>.ts,
+  900–1500 words, 4–7 sections, checked Lean blocks with the end-of-world inventory). It goes deeper than the primer
+  (which stays the short story on the world page) and never lists the levels; the page adds the contents itself.
+  Route `#/chapter/<world>`.
+- **Roadmap.** `#/map` opens on a list of chapters (big idea, progress, explainer, expandable contents with the
+  tactics each level introduces). Locked chapters stay readable: seeing what is ahead is the point. The node map remains.
+- **Taught once, used again.** Every unlocked tactic should be needed by at least one later level. v4 added nine
+  revisit levels (quant, sets, fun, forge) for classical reasoning, `funext`, `specialize`, `exfalso`/`contradiction`,
+  `change`/`show`, `rwa`, `refine`, `all_goals`/`try`/`repeat`, `exists`. A level may only rely on lemmas or skills
+  introduced by required levels (nat-11 became required for this reason).
+- **Translate grading** accepts logically equivalent statements it can recognize (bundled hypotheses, `¬∃`/`∀¬`,
+  flipped `↔`, commuted `∧`/`∨`) with a note on the convention; otherwise it shows both statements side by side and
+  lets the learner judge, which is recorded as reviewed, not solved.
