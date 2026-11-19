@@ -16,10 +16,12 @@ By the end, you can take a mathematical statement of your own, formalize it in L
 - **Five kinds of exercise:** writing a proof, arranging shuffled proof lines, predicting the goal after a tactic, concept checks, and translating English into a Lean statement.
 - **A live goal view** like Lean's infoview, with Lean's real error messages and a plain-language explanation underneath. Unicode input uses the Lean VS Code extension's abbreviations, so `\to` produces `→`.
 - **Lessons and reading:** a lesson beside every level (124 of them), a chapter-length primer and a recap for each world, and a Guide of 16 long-form articles about Lean. All Lean code in this prose is compiled by both engines.
-- **Progress:** up to three stars per level. The third star is earned by solving the level again in Review. Also a player level, three daily quests, a streak that forgives one rest day a week, and 37 achievements.
+- **Progress that reflects your own work:** a level solved unaided earns stars (one with hints, two without, three once re-solved in Review); a level whose solution you looked at stays open but earns nothing until you solve it yourself. Also a player level, three daily quests that fit where you are, a streak that forgives one rest day a week, and 41 achievements.
+- **Help that reads your goal:** when you are stuck, the game describes your current goal in plain words and asks what it needs, then (as a hint) names a tactic you have unlocked that fits. Errors are shown one at a time, calmly, with Lean's real message.
+- **Practice:** after a level, a short set of generated problems on the same tactic, limited to what you have unlocked; a smaller version when you are stuck; and Translate, which drills turning English sentences into Lean statements.
 - **The Arena:** generated puzzles in five families (propositional proofs, writing terms, quantifiers, sets, and quick multiple-choice questions), each with a reference proof that the engine accepts. A Daily Proof is the same three puzzles for everyone on each UTC day. Rated puzzles carry an Elo-style rating. Proof Rush is a timed or survival run through quick questions. Duels are against rated bots, against a friend live, or by challenge link.
 - **Proof cards:** a link that carries a theorem and its proof. The recipient's browser re-checks the proof before showing the verdict.
-- **Supporting material:** a Codex that fills in as you play, spaced review, a Sandbox, and a Workshop with 17 suggested theorems.
+- **Supporting material:** a Codex that fills in as you play, a short daily review (at most five levels), a Sandbox, and a Workshop with 17 suggested theorems.
 
 ## How it works
 
