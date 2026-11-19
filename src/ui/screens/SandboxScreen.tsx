@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { data, engine } from '../data.ts';
 import { game, useGame } from '../game.ts';
 import { useCheck } from '../hooks.tsx';
+import { dataForEverything, hypItems } from '../lean/complete.ts';
 import { Editor, toEditorDiags, type EditorHandle } from '../lean/Editor.tsx';
 import { mapDiagnostics } from '../lean/offsets.ts';
 import { OpenInLean } from '../components/OpenInLean.tsx';
@@ -24,6 +25,8 @@ export function SandboxScreen() {
     const id = setTimeout(() => game().setSandbox(text), 400);
     return () => clearTimeout(id);
   }, [text]);
+  const completion = useMemo(() => dataForEverything(), []);
+  const hyps = useMemo(() => hypItems(info.goals?.[0]?.hyps ?? []), [info.goals]);
   const outputs = (result?.diagnostics ?? []).filter((d) => d.code === 'command-output');
   const diags = info.diags.filter((d) => d.code !== 'command-output');
   return (
@@ -43,7 +46,7 @@ export function SandboxScreen() {
       <div className="sandbox-grid">
         <div className="editor-panel">
           <SymbolBar onInsert={(s) => editor.current?.insert(s)} />
-          <div className="sandbox-editor"><Editor ref={editor} value={text} onChange={setText} onCursor={setCursor} diagnostics={toEditorDiags(mapDiagnostics(result?.diagnostics ?? [], 0, text.length))} fontSize={fontSize} ariaLabel="Sandbox editor" cursor={0} /></div>
+          <div className="sandbox-editor"><Editor ref={editor} value={text} onChange={setText} onCursor={setCursor} diagnostics={toEditorDiags(mapDiagnostics(result?.diagnostics ?? [], 0, text.length))} fontSize={fontSize} ariaLabel="Sandbox editor" completion={completion} hyps={hyps} cursor={0} /></div>
         </div>
         <div className="sandbox-side">
           <CommandOutputs outputs={outputs} label="Output" />

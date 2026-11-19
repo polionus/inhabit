@@ -1,0 +1,38 @@
+/* Editor name completion menu (tactics, lemmas, hypotheses). Tokens flip with the theme. */
+.cm-editor .cm-tooltip.cm-tooltip-autocomplete {
+  background: var(--surface-1);
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  box-shadow: var(--shadow-2);
+  overflow: hidden;
+}
+.cm-editor .cm-tooltip-autocomplete > ul {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  max-height: 14em;
+  max-width: min(34rem, 90vw);
+}
+.cm-editor .cm-tooltip-autocomplete > ul > li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75em;
+  padding: 3px 10px;
+  color: var(--ink);
+}
+.cm-editor .cm-tooltip-autocomplete > ul > li[aria-selected] {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+.cm-editor .cm-tooltip-autocomplete .cm-completionLabel { flex: none; font-weight: 600; }
+.cm-editor .cm-tooltip-autocomplete .cm-completionDetail {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-style: normal;
+  font-family: var(--font, inherit);
+  color: var(--muted);
+}
+.cm-editor .cm-tooltip-autocomplete .cm-completionMatchedText { text-decoration: none; color: var(--accent); }

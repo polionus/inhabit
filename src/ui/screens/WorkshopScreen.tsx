@@ -3,6 +3,7 @@ import type { TheoremIdea } from '../../content/types.ts';
 import { data, engine } from '../data.ts';
 import { game, useGame } from '../game.ts';
 import { useCheck, useDebounced } from '../hooks.tsx';
+import { dataForEverything, hypItems } from '../lean/complete.ts';
 import { Editor, toEditorDiags, type EditorHandle } from '../lean/Editor.tsx';
 import { mapDiagnostics } from '../lean/offsets.ts';
 import { OpenInLean } from '../components/OpenInLean.tsx';
@@ -60,6 +61,8 @@ function Wizard() {
   const { result: proofRes, pending } = useCheck(proofSource + '|' + (defsRes ? 1 : 0), () => engine.check(env2, proofSource));
   const [cursor, setCursor] = useState(w.proof.length);
   const info = useInfo(proofRes, header.length + 1, w.proof.length, cursor);
+  const completion = useMemo(() => dataForEverything(), []);
+  const hyps = useMemo(() => hypItems(info.goals?.[0]?.hyps ?? []), [info.goals]);
   const unsupported = UNSUPPORTED.test(w.binders + w.defs + w.statement + w.english);
 
   const q = quantifierCounts(w.english);
@@ -145,7 +148,7 @@ function Wizard() {
           <label className="inline-field">Name <input value={w.name} onChange={(e) => set({ name: e.target.value })} placeholder="my_theorem" spellCheck={false} /></label>
           <SymbolBar onInsert={(s) => editor.current?.insert(s)} />
           <div className="header-ro"><Lean code={header} /></div>
-          <Editor ref={editor} value={w.proof} onChange={(v) => set({ proof: v })} onCursor={setCursor} fontSize={fontSize} ariaLabel="Proof editor" diagnostics={toEditorDiags(info.diags)} className="proof-editor" />
+          <Editor ref={editor} value={w.proof} onChange={(v) => set({ proof: v })} onCursor={setCursor} fontSize={fontSize} ariaLabel="Proof editor" completion={completion} hyps={hyps} diagnostics={toEditorDiags(info.diags)} className="proof-editor" />
           <Infoview goals={info.goals} fallbackGoals={info.fallback} diagnostics={info.diags} complete={complete} pending={pending} onInsert={(n) => editor.current?.insert(n)} />
           <div className="actions">
             <button className="btn primary" onClick={save}>{complete ? 'Save to My theorems' : 'Save work in progress'}</button>

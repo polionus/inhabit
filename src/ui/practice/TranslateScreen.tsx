@@ -20,7 +20,7 @@ const SLIP: Record<string, string> = {
   'and-for-implies': 'This looks like “and” where “implies” was meant. “Every x with p x has q x” is a statement about the x that have p x, not about all x.',
 };
 
-type Mark = 'right' | 'shown' | 'skipped';
+type Mark = 'right' | 'reviewed' | 'shown' | 'skipped';
 
 export function TranslateScreen() {
   const [round, setRound] = useState(0);
@@ -66,7 +66,7 @@ export function TranslateScreen() {
       <p className="muted">Read the sentence, then write the Lean statement it says. You are stating, not proving.</p>
       <p className="muted small">
         The English here is a careful literal reading of the Lean, so word order matters: <code className="inline">P ∧ Q</code> and <code className="inline">Q ∧ P</code> are different statements.
-        Any way of writing the same statement is accepted.
+        Equivalent ways of writing it are accepted too, such as <code className="inline">(P ∧ Q) → R</code> for <code className="inline">P → Q → R</code>.
       </p>
     </header>
   );
@@ -87,6 +87,7 @@ export function TranslateScreen() {
         {head}
         <Card tone={right === items.length ? 'ok' : 'default'} className="practice-end">
           <h2 data-testid="practice-result">You wrote {right} of {items.length} correctly</h2>
+          {marks.includes('reviewed') && <p className="muted small">Statements you judged equivalent without the checker confirming them are not counted as solved.</p>}
           <p>{right === items.length ? 'Reading a sentence as a statement is most of formalising.' : 'The ones you looked up are worth another read: compare the shape of the sentence with the shape of the statement.'}</p>
           <div className="practice-actions">
             <button className="btn primary" onClick={() => setRound(round + 1)}>Another set</button>
@@ -117,7 +118,10 @@ function Statement({ item, last, onFinish }: { item: TranslateItem; last: boolea
   const [verdict, setVerdict] = useState<Verdict | null>(null);
   const [shown, setShown] = useState(false);
   const editor = useRef<EditorHandle>(null);
-  const done = verdict?.kind === 'right' || shown;
+  const [resolved, setResolved] = useState<'same' | 'different' | null>(null);
+  const accepted = verdict?.kind === 'right' || verdict?.kind === 'equivalent';
+  const done = accepted || shown || resolved !== null;
+  const unsure = verdict?.kind === 'different' && !verdict.slip && resolved === null && !shown;
 
   const dText = useDebounced(text, 150);
   const live = useMemo(() => {
@@ -138,7 +142,7 @@ function Statement({ item, last, onFinish }: { item: TranslateItem; last: boolea
       v = { kind: 'error', message: String(e) };
     }
     setVerdict(v);
-    if (v.kind === 'right') {
+    if (v.kind === 'right' || v.kind === 'equivalent') {
       celebrate('tick');
       sfx.play('correct');
     } else sfx.play('wrong');
@@ -164,7 +168,7 @@ function Statement({ item, last, onFinish }: { item: TranslateItem; last: boolea
           value={text}
           onChange={(v) => {
             setText(v);
-            if (verdict && verdict.kind !== 'right') setVerdict(null);
+            if (verdict && !accepted) setVerdict(null);
           }}
           diagnostics={toEditorDiags(liveDiags)}
           fontSize={fontSize}
@@ -182,6 +186,7 @@ function Statement({ item, last, onFinish }: { item: TranslateItem; last: boolea
         {live?.ok && !verdict && <p className="muted small">Lean reads this as <LeanInline code={live.pretty ?? text} /></p>}
         {live && !live.ok && !verdict && <ul className="diags">{liveDiags.map((d, i) => <DiagnosticItem key={i} d={d} />)}</ul>}
         {verdict?.kind === 'right' && <div className="feedback right"><strong>Yes.</strong> That says the same thing as the reference statement.</div>}
+        {verdict?.kind === 'equivalent' && <div className="feedback right"><strong>Yes.</strong> {verdict.note}</div>}
         {verdict?.kind === 'error' && <div className="feedback wrong">Lean could not read that as a proposition yet. {verdict.message}</div>}
         {verdict?.kind === 'not-prop' && <div className="feedback wrong">That is a well-formed term, but its type is <LeanInline code={verdict.type} />, not <code className="inline">Prop</code>. A statement must be a proposition.</div>}
         {verdict?.kind === 'different' && (
@@ -189,6 +194,27 @@ function Statement({ item, last, onFinish }: { item: TranslateItem; last: boolea
             <strong>Not quite.</strong> That is a different statement from the one in the sentence.
             {verdict.slip && <> {SLIP[verdict.slip]}</>}
             <span className="muted small"> Reread the sentence and try again, or look at a correct statement.</span>
+          </div>
+        )}
+        {unsure && (
+          <div className="feedback neutral">
+            <p><strong>Well-typed, but I cannot confirm it means the same.</strong> I only compare against the statement and a set of known rewrites, so yours might still be right. Compare the two:</p>
+            <div className="formalize-compare">
+              <div><div className="label small muted">Yours</div><Lean code={text.trim()} /></div>
+              <div><div className="label small muted">Reference</div><Lean code={task.reference} /></div>
+            </div>
+            <p className="small">Be honest with yourself: do they say the same thing?</p>
+            <div className="practice-actions">
+              <button className="btn" onClick={() => setResolved('same')}>Mine says the same thing</button>
+              <button className="btn" onClick={() => setResolved('different')}>I see the difference</button>
+            </div>
+          </div>
+        )}
+        {resolved === 'same' && <div className="feedback"><strong>Noted.</strong> The checker could not confirm that yours is equivalent, so this one does not count as solved. If it is, you read the sentence well.</div>}
+        {resolved === 'different' && (
+          <div className="feedback">
+            <strong>A correct statement</strong>
+            <Lean code={task.reference} />
           </div>
         )}
         {shown && (
@@ -201,7 +227,7 @@ function Statement({ item, last, onFinish }: { item: TranslateItem; last: boolea
 
       {done && (
         <div className="practice-actions">
-          <button className="btn primary" autoFocus onClick={() => onFinish(verdict?.kind === 'right' ? 'right' : 'shown')}>{last ? 'See how you did' : 'Next sentence'}</button>
+          <button className="btn primary" autoFocus onClick={() => onFinish(accepted ? 'right' : resolved === 'same' ? 'reviewed' : 'shown')}>{last ? 'See how you did' : 'Next sentence'}</button>
         </div>
       )}
       {!done && (

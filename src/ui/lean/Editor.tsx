@@ -1,3 +1,4 @@
+import '../styles/complete.css';
 import { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { EditorState, StateEffect, StateField, Compartment, type Extension } from '@codemirror/state';
 import {
@@ -15,9 +16,10 @@ import {
 } from '@codemirror/view';
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands';
 import { HighlightStyle, syntaxHighlighting, indentUnit } from '@codemirror/language';
-import { autocompletion, type CompletionContext } from '@codemirror/autocomplete';
+import { acceptCompletion, autocompletion, completionStatus, type CompletionContext } from '@codemirror/autocomplete';
 import { tags as t } from '@lezer/highlight';
 import { abbreviations } from '../../content/abbreviations.ts';
+import { matchItems, wordBefore, type CompletionData, type CompletionItem } from './complete.ts';
 import { completionsFor, findPending, onType, resolve } from './abbrev.ts';
 import { leanLanguage } from './highlight.ts';
 import type { BodyDiagnostic } from './offsets.ts';
@@ -150,6 +152,24 @@ function abbrevCompletion(ctx: CompletionContext) {
   };
 }
 
+/** Names: unlocked tactics, inventory lemmas, hypotheses in scope. Never fires inside a `\\abbrev`. */
+function nameCompletion(get: () => { data?: CompletionData; hyps?: CompletionItem[] }) {
+  return (ctx: CompletionContext) => {
+    if (ctx.matchBefore(/\\[^\s\\]*/)) return null;
+    const line = ctx.state.doc.lineAt(ctx.pos);
+    const w = wordBefore(line.text.slice(0, ctx.pos - line.from));
+    if (!w) return null;
+    const { data, hyps } = get();
+    const opts = matchItems(w.text, data ?? {}, hyps ?? []);
+    if (!opts.length) return null;
+    return {
+      from: line.from + w.from,
+      filter: false,
+      options: opts.map((o) => ({ label: o.name, detail: o.detail, type: o.kind === 'hyp' ? 'variable' : o.kind === 'tactic' ? 'keyword' : 'function' })),
+    };
+  };
+}
+
 const highlight = HighlightStyle.define([
   { tag: t.keyword, class: 'hl-kw' },
   { tag: t.operatorKeyword, class: 'hl-tac' },
@@ -174,7 +194,6 @@ const theme = EditorView.theme({
   '.cm-cursor': { borderLeftColor: 'var(--accent)', borderLeftWidth: '2px' },
   '.cm-selectionBackground, &.cm-focused .cm-selectionBackground': { backgroundColor: 'var(--selection) !important' },
   '.cm-tooltip': { backgroundColor: 'var(--surface)', border: '1px solid var(--line)', color: 'var(--ink)' },
-  '.cm-tooltip-autocomplete ul': { fontFamily: 'var(--mono)' },
 });
 
 interface Props {
@@ -195,6 +214,10 @@ interface Props {
    * focused, so that typing replaces the placeholder. Does nothing if the text was edited first.
    */
   selectPlaceholder?: boolean;
+  /** Tactics and lemmas offered by name completion (only what the player has unlocked). */
+  completion?: CompletionData;
+  /** Hypotheses in scope at the cursor. */
+  hyps?: CompletionItem[];
 }
 
 export const Editor = forwardRef<EditorHandle, Props>(function Editor(props, ref) {
@@ -235,6 +258,7 @@ export const Editor = forwardRef<EditorHandle, Props>(function Editor(props, ref
         v.dispatch({ changes: { from: r.from, to: r.to, insert: r.insert }, selection: { anchor: r.cursor } });
         return true;
       }
+      if (completionStatus(v.state) === 'active') return acceptCompletion(v);
       v.dispatch({ changes: { from: sel.from, to: sel.to, insert: '  ' }, selection: { anchor: sel.from + 2 } });
       return true;
     };
@@ -277,7 +301,7 @@ export const Editor = forwardRef<EditorHandle, Props>(function Editor(props, ref
       pendingPlugin,
       diagTooltip,
       abbrevInput,
-      autocompletion({ override: [abbrevCompletion], activateOnTyping: true, icons: false }),
+      autocompletion({ override: [abbrevCompletion, nameCompletion(() => ({ data: cb.current.completion, hyps: cb.current.hyps }))], activateOnTyping: true, icons: false }),
       keymap.of([{ key: 'Tab', run: tabKey, shift: () => true }, ...defaultKeymap, ...historyKeymap]),
       EditorView.contentAttributes.of({ 'aria-label': cb.current.ariaLabel, spellcheck: 'false', autocapitalize: 'off', autocorrect: 'off' }),
       fontComp.current.of(EditorView.theme({ '&': { fontSize: `${cb.current.fontSize ?? 15}px` } })),

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ProofLevel } from '../../content/types.ts';
 import type { CheckResult } from '../../engine/types.ts';
 import { data, engine } from '../data.ts';
+import { dataForContext, hypItems } from '../lean/complete.ts';
 import { Editor, placeholderRange, toEditorDiags, type EditorHandle } from '../lean/Editor.tsx';
 import { mapDiagnostics } from '../lean/offsets.ts';
 import { useCheck } from '../hooks.tsx';
@@ -58,6 +59,9 @@ export function ProofLevelView({ run, level }: { run: Run; level: ProofLevel }) 
   const result = checked?.result ?? null;
   const bodyOffset = checked?.assembled.bodyOffset ?? 0;
   const info = useInfo(result, bodyOffset, body.length, cursor);
+
+  const completion = useMemo(() => dataForContext(run.session.ctx), [run.session.ctx]);
+  const hyps = useMemo(() => hypItems(info.goals?.[0]?.hyps ?? []), [info.goals]);
 
   const prevErr = useRef(false);
   useEffect(() => {
@@ -123,6 +127,8 @@ export function ProofLevelView({ run, level }: { run: Run; level: ProofLevel }) 
           fontSize={run.fontSize}
           ariaLabel="Proof editor"
           selectPlaceholder
+          completion={completion}
+          hyps={hyps}
           cursor={placeholderRange(run.initialBody)?.from ?? 'end'}
         />
         {level.after && <div className="header-ro after"><Lean code={level.after} /></div>}

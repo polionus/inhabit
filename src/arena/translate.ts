@@ -115,6 +115,8 @@ export type Verdict =
   | { kind: 'error'; message: string }
   | { kind: 'not-prop'; type: string }
   | { kind: 'right' }
+  /** Logically the same statement written another way; `note` names the difference. */
+  | { kind: 'equivalent'; note: string }
   | { kind: 'different'; slip?: Slip };
 
 /** Statements a learner might write by mistake, built from the reference. Only the two cheap slips. */
@@ -134,12 +136,130 @@ export function slipVariants(reference: string): { slip: Slip; text: string }[] 
   return out;
 }
 
+export interface Equivalent {
+  text: string;
+  note: string;
+}
+
+const NOTE_BUNDLE = "You bundled the hypotheses with ∧; Lean's convention is to chain them with →, but both say the same thing.";
+const NOTE_ORDER = 'You listed the hypotheses in a different order. That says the same thing, since each → just takes the next fact in turn.';
+const NOTE_NOT_EX = 'You used ¬∃ where the sentence reads as ∀ … ¬ (or the other way round). “No x has it” and “every x lacks it” say the same thing.';
+const NOTE_IFF = 'You swapped the two sides of ↔. An “if and only if” reads the same in both directions.';
+const NOTE_COMM = 'You swapped the two sides of ∧ (or ∨). Order does not change what “and” and “or” say.';
+
+const BINARY = [' → ', ' ↔ ', ' ∧ ', ' ∨ '];
+const hasTopBinary = (s: string) => BINARY.some((b) => topLevel(s, b).length > 0);
+
+/** Equivalent rewrites of one component (a hypothesis or the conclusion), original excluded. */
+function componentRewrites(s: string): Equivalent[] {
+  if (!/^[∀∃]/.test(s) && topLevel(s, ' → ').length > 0) {
+    const at = topLevel(s, ' → ');
+    const segs: string[] = [];
+    let from = 0;
+    for (const i of at) {
+      segs.push(s.slice(from, i));
+      from = i + 3;
+    }
+    segs.push(s.slice(from));
+    return segs.flatMap((seg, k) => componentRewrites(seg).map((r) => ({ text: segs.map((x, j) => (j === k ? r.text : x)).join(' → '), note: r.note })));
+  }
+  const out: Equivalent[] = [];
+  const quant = /^(∀|∃)\s*/.exec(s);
+  const notEx = /^¬\s*∃\s*/.exec(s);
+  if (notEx) {
+    const rest = s.slice(notEx[0].length);
+    const c = topLevel(rest, ',')[0];
+    if (c !== undefined) out.push({ text: `∀ ${rest.slice(0, c).trim()}, ¬${paren(rest.slice(c + 1).trim())}`, note: NOTE_NOT_EX });
+  }
+  if (quant && quant[1] === '∀') {
+    const rest = s.slice(quant[0].length);
+    const c = topLevel(rest, ',')[0];
+    if (c !== undefined) {
+      const body = rest.slice(c + 1).trim();
+      if (body.startsWith('¬')) {
+        const inner = body.slice(1).trim();
+        if (!hasTopBinary(inner)) out.push({ text: `¬∃ ${rest.slice(0, c).trim()}, ${inner}`, note: NOTE_NOT_EX });
+      }
+    }
+  }
+  if (!/^[∀∃]/.test(s)) {
+    const iff = topLevel(s, ' ↔ ');
+    if (iff.length === 1) out.push({ text: `${s.slice(iff[0] + 3)} ↔ ${s.slice(0, iff[0])}`, note: NOTE_IFF });
+    else if (iff.length === 0 && topLevel(s, ' → ').length === 0) {
+      const sep = topLevel(s, ' ∨ ').length > 0 ? ' ∨ ' : ' ∧ ';
+      const at = topLevel(s, sep);
+      if (at.length > 0) {
+        const parts: string[] = [];
+        let from = 0;
+        for (const i of at) {
+          parts.push(s.slice(from, i));
+          from = i + 3;
+        }
+        parts.push(s.slice(from));
+        out.push({ text: parts.reverse().join(sep), note: NOTE_COMM });
+      }
+    }
+  }
+  return out;
+}
+
+const permutations = <T,>(xs: T[]): T[][] =>
+  xs.length <= 1 ? [xs] : xs.flatMap((x, i) => permutations([...xs.slice(0, i), ...xs.slice(i + 1)]).map((r) => [x, ...r]));
+
+/** Statements logically equivalent to the reference that a careful learner may write instead, with a note each. Fewest changes first. */
+export function equivalentVariants(task: TranslateTask, cap = 400): Equivalent[] {
+  const comps = [...task.hypotheses, task.conclusion];
+  const options = comps.map((c) => [{ text: c, note: '' }, ...componentRewrites(c)]);
+  const out: Equivalent[] = [];
+  const n = task.hypotheses.length;
+  const orders = n >= 2 && n <= 3 ? permutations([...Array(n).keys()]) : [[...Array(n).keys()]];
+  const picks: Equivalent[][] = [[]];
+  for (const o of options) {
+    const next: Equivalent[][] = [];
+    for (const p of picks) for (const x of o) next.push([...p, x]);
+    picks.splice(0, picks.length, ...next.slice(0, 64));
+  }
+  for (const pick of picks) {
+    const notes = [...new Set(pick.map((x) => x.note).filter(Boolean))];
+    const texts = pick.map((x) => x.text);
+    const concl = texts[n];
+    for (const order of orders) {
+      const hs = order.map((i) => texts[i]);
+      const orderNote = order.some((v, i) => v !== i) ? [NOTE_ORDER] : [];
+      for (let mask = 0; mask < 1 << Math.max(0, n - 1); mask++) {
+        const groups: string[][] = n === 0 ? [] : [[]];
+        hs.forEach((h, i) => {
+          groups[groups.length - 1].push(h);
+          if (i < n - 1 && !(mask & (1 << i))) groups.push([]);
+        });
+        const bundled = groups.some((g) => g.length > 1);
+        const nests: boolean[] = bundled && groups.some((g) => g.length === 3) ? [false, true] : [false];
+        for (const left of nests) {
+          const gs = groups.map((g) => {
+            if (g.length === 1) return paren(g[0]);
+            const ps = g.map(paren);
+            return '(' + (left ? `(${ps[0]} ∧ ${ps[1]}) ∧ ${ps[2]}` : ps.join(' ∧ ')) + ')';
+          });
+          const all = [...notes, ...orderNote, ...(bundled ? [NOTE_BUNDLE] : [])];
+          if (all.length === 0) continue;
+          out.push({ text: [...gs, concl].join(' → '), note: all.join(' ') });
+        }
+      }
+    }
+  }
+  out.sort((a, b) => a.note.length - b.note.length);
+  return out.slice(0, cap);
+}
+
 export function checkTranslation(env: Env, task: TranslateTask, answer: string): Verdict {
   const binders = task.binders || undefined;
   const el = engine.elab(env, answer, binders);
   if (!el.ok) return { kind: 'error', message: el.diagnostics.find((d) => d.severity === 'error')?.message ?? 'Lean could not read that.' };
   if (el.type && el.type.trim() !== 'Prop') return { kind: 'not-prop', type: el.type };
   if (engine.defEq(env, answer, task.reference, binders)) return { kind: 'right' };
+  for (const q of equivalentVariants(task)) {
+    if (engine.defEq(env, answer, q.text, binders)) return { kind: 'equivalent', note: q.note };
+  }
   for (const v of slipVariants(task.reference)) {
     if (engine.defEq(env, answer, v.text, binders) && !engine.defEq(env, v.text, task.reference, binders)) return { kind: 'different', slip: v.slip };
   }

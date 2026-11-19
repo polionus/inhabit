@@ -44,6 +44,19 @@ function phrase(f: F, o: EnglishOpts, nested: boolean): string {
   }
 }
 
+/** `if A then B`, with brackets round anything that would blur where A or B ends. */
+function ifThen(f: F, o: EnglishOpts): string {
+  if (f.t !== 'imp') return phrase(f, o, false);
+  const side = (g: F) => (isLit(g) || g.t === 'and' || g.t === 'or' ? phrase(g, o, true) : '(' + phrase(g, o, false) + ')');
+  return 'if ' + side(f.a) + ' then ' + ifThen(f.b, o);
+}
+
+/** "x has B" for a simple B, otherwise "x satisfies: …" so that no bare "has A implies B" is produced. */
+function has(x: string, b: F, o: EnglishOpts): string {
+  if (b.t === 'atom' || b.t === 'and' || b.t === 'or') return `${x} has ${phrase(b, o, false)}`;
+  return `${x} satisfies: ${b.t === 'imp' ? ifThen(b, o) : phrase(b, o, false)}`;
+}
+
 /** A clause that stands on its own as a hypothesis or conclusion. */
 export function clause(f: F, o: EnglishOpts = {}): string {
   const lit = (g: F) => isLit(g);
@@ -63,15 +76,18 @@ export function clause(f: F, o: EnglishOpts = {}): string {
       if (a.t === 'imp' && lit(a.a) && lit(a.b)) return phrase(a.a, o, true) + ' does not imply ' + phrase(a.b, o, true);
       if (a.t === 'iff') return phrase(a.a, o, true) + ' and ' + phrase(a.b, o, true) + ' are not equivalent';
       if (a.t === 'ex') return 'there is no ' + a.x + ' such that ' + phrase(a.a, o, false);
-      if (a.t === 'all') return 'not every ' + a.x + ' has ' + phrase(a.a, o, false);
+      if (a.t === 'all') return 'not ' + has('every ' + a.x, a.a, o);
       return 'it is not the case that ' + phrase(a, o, true);
     }
     case 'imp':
       if (lit(f.a) && lit(f.b)) return phrase(f.a, o, true) + ' implies ' + phrase(f.b, o, true);
       return phrase(f, o, false);
     case 'all':
-      if (f.a.t === 'imp') return 'every ' + f.x + ' with ' + phrase(f.a.a, o, false) + ' has ' + phrase(f.a.b, o, false);
-      if (f.a.t === 'not' && f.a.a.t !== 'all' && f.a.a.t !== 'ex') return 'no ' + f.x + ' has ' + phrase(f.a.a, o, false);
+      if (f.a.t === 'imp') {
+        const c = isLit(f.a.a) || f.a.a.t === 'and' || f.a.a.t === 'or' ? phrase(f.a.a, o, true) : '(' + phrase(f.a.a, o, false) + ')';
+        return has('every ' + f.x + ' with ' + c, f.a.b, o);
+      }
+      if (f.a.t === 'not' && f.a.a.t !== 'all' && f.a.a.t !== 'ex') return has('no ' + f.x, f.a.a, o);
       return phrase(f, o, false);
     case 'ex':
       if (f.a.t === 'atom' || f.a.t === 'and' || (f.a.t === 'not' && f.a.a.t === 'atom')) return 'some ' + f.x + ' has ' + phrase(f.a, o, false);
@@ -86,8 +102,8 @@ export function sentence(hyps: F[], goal: F, o: EnglishOpts = {}): string {
   const g = goal.t === 'bot' ? 'we reach a contradiction' : clause(goal, o);
   if (hyps.length === 0) return cap(g) + '.';
   const hs = hyps.map((h) => clause(h, o));
-  if (hs.length === 1) return `If ${hs[0]}, then ${g}.`;
-  const tricky = hs.some((h) => / and | or /.test(h));
+  if (hs.length === 1) return /,|:|for every|there is/.test(hs[0]) ? `Suppose that ${hs[0]}. Then ${g}.` : `If ${hs[0]}, then ${g}.`;
+  const tricky = hs.some((h) => / and | or |,|:|implies|for every|there is/.test(h));
   if (!tricky) return `If ${hs.slice(0, -1).join(', ')} and ${hs[hs.length - 1]}, then ${g}.`;
   return `Suppose that ${hs.slice(0, -1).join('; that ')}; and that ${hs[hs.length - 1]}. Then ${g}.`;
 }
