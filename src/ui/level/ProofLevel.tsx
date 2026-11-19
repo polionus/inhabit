@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ProofLevel } from '../../content/types.ts';
 import type { CheckResult } from '../../engine/types.ts';
 import { data, engine } from '../data.ts';
-import { Editor, toEditorDiags, type EditorHandle } from '../lean/Editor.tsx';
+import { Editor, placeholderRange, toEditorDiags, type EditorHandle } from '../lean/Editor.tsx';
 import { mapDiagnostics } from '../lean/offsets.ts';
 import { useCheck } from '../hooks.tsx';
 import { Infoview } from '../components/Infoview.tsx';
@@ -40,7 +40,9 @@ export function useInfo(result: CheckResult | null, bodyOffset: number, bodyLen:
 
 export function ProofLevelView({ run, level }: { run: Run; level: ProofLevel }) {
   const [body, setBody] = useState(run.initialBody);
-  const [cursor, setCursor] = useState(body.length);
+  // Start with the cursor on the placeholder, so the goal view shows what is left to prove
+  // before the learner has clicked anywhere.
+  const [cursor, setCursor] = useState(() => placeholderRange(body)?.from ?? body.length);
   const editor = useRef<EditorHandle>(null);
   const runRef = useRef(run);
   runRef.current = run;
@@ -121,6 +123,7 @@ export function ProofLevelView({ run, level }: { run: Run; level: ProofLevel }) 
           fontSize={run.fontSize}
           ariaLabel="Proof editor"
           selectPlaceholder
+          cursor={placeholderRange(run.initialBody)?.from ?? 'end'}
         />
         {level.after && <div className="header-ro after"><Lean code={level.after} /></div>}
       </div>

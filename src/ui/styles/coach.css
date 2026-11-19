@@ -51,3 +51,10 @@
 @media (max-width: 900px) {
   .stuck { margin: .6rem 0; }
 }
+
+/* The head is a button: one line when the panel is collapsed. */
+button.stuck-head { width: 100%; background: none; border: 0; padding: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+button.stuck-head:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; border-radius: var(--r-sm); }
+.stuck-chev { margin-left: auto; color: var(--muted); transition: transform .15s; }
+.stuck-chev.up { transform: rotate(180deg); }
+.stuck-body { display: grid; gap: .55rem; }

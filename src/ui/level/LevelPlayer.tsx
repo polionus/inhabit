@@ -209,7 +209,6 @@ export function LevelPlayer(props: LevelPlayerProps) {
         {englishOf(level) && level.kind !== 'choice' && <Markdown className="english" text={englishOf(level)!} />}
         <Markdown text={level.intro} className="task-intro" />
         {level.kind === 'choice' && <Markdown className="english" text={level.question} />}
-        <LessonPanel lesson={lesson} defaultOpen={lessonDefaultOpen({ ctx: session.ctx, mode, passed, settings: lessonSettings, narrow })} remember={mode === 'play'} nudge={failedChecks >= 2 && !outcome && !passed} />
         <div className="toolbar">
           <button className="btn" onClick={() => setInventory(true)}><Icon name="bag" size={18} /> Inventory</button>
         </div>
@@ -231,6 +230,7 @@ export function LevelPlayer(props: LevelPlayerProps) {
             mode={mode}
           />
         )}
+        <LessonPanel lesson={lesson} defaultOpen={lessonDefaultOpen({ ctx: session.ctx, mode, passed, settings: lessonSettings, narrow })} remember={mode === 'play'} nudge={failedChecks >= 2 && !outcome && !passed} />
         {showSolution && sol && (
           <div className="solution">
             <div className="label">A solution</div>

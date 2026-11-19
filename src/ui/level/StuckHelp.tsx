@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { goalFromHeader, readGoal, type Reading } from '../../coach/index.ts';
 import type { Hint, Level } from '../../content/types.ts';
 import type { LevelContext } from '../../content/index.ts';
@@ -7,6 +7,7 @@ import { Markdown } from '../components/Markdown.tsx';
 import { Icon, Pill } from '../components/kit.tsx';
 import { PracticeOffer } from '../practice/PracticeOffer.tsx';
 import type { LiveState } from './run.ts';
+import { useMedia } from '../hooks.tsx';
 
 export interface StuckHelpProps {
   level: Level;
@@ -93,6 +94,15 @@ export function StuckHelp(p: StuckHelpProps) {
   const [readOpen, setReadOpen] = useState(false);
   const [readUsed, setReadUsed] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
+  // On a phone the panel starts as one line, so the editor stays in view; it opens itself the
+  // first time a check fails, which is when help is wanted.
+  const narrow = useMedia('(max-width: 900px)');
+  const [expanded, setExpanded] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (p.failedChecks >= 1) setExpanded((e) => (e === null ? true : e));
+  }, [p.failedChecks]);
+  const open = expanded ?? !narrow;
+  const bodyId = useId();
 
   const initial = useMemo(() => (level.kind === 'proof' ? goalFromHeader(level.header) : null), [level]);
   const goals = isProof ? (p.live?.goals ?? (initial ? [initial] : null)) : null;
@@ -119,11 +129,13 @@ export function StuckHelp(p: StuckHelpProps) {
 
   return (
     <section className="stuck" aria-label="Help">
-      <div className="stuck-head">
+      <button type="button" className="stuck-head" aria-expanded={open} aria-controls={bodyId} onClick={() => setExpanded(!open)}>
         <span className="stuck-badge" aria-hidden="true"><Icon name="bulb" size={16} /></span>
         <h2>{isProof ? 'Stuck?' : 'Hints'}</h2>
-        {isProof && <span className="stuck-sub">Start by reading the goal. It costs nothing.</span>}
-      </div>
+        {isProof && <span className="stuck-sub">{open ? 'Start by reading the goal. It costs nothing.' : 'Help that reads your goal'}</span>}
+        <Icon name="chevron-down" size={18} className={`stuck-chev ${open ? 'up' : ''}`} />
+      </button>
+      {open && <div className="stuck-body" id={bodyId}>
       {isProof && (
         <div className="stuck-steps">
           <button type="button" className={`btn small stuck-step ${readOpen ? 'on' : ''}`} aria-expanded={readOpen} onClick={toggleRead}>
@@ -146,6 +158,7 @@ export function StuckHelp(p: StuckHelpProps) {
           <span className="stuck-solution-note">Always here. It marks the level as studied.</span>
         </div>
       )}
+      </div>}
     </section>
   );
 }
