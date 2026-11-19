@@ -212,7 +212,7 @@ example : Nat → Nat := area 3`,
       title: 'Ignoring an argument',
       english: 'Define a function that takes two types and one value of each, and returns the first value.',
       intro:
-        "Read the type one arrow at a time: give me a type `α`, a type `β`, a value of `α`, a value of `β`, and I return an `α`. Four arrows, four names after `fun`. One of the values is never needed, and that is fine.",
+        "Read the type one arrow at a time: give me a type `α`, a type `β`, a value of `α`, a value of `β`, and I return an `α`. Four arrows, four names after `fun`. One of the values is never needed, and that's fine.",
       outro:
         'A function may ignore an argument. The type only promises what comes back, here an `α`, and `a` is the only thing that has that type.',
       mode: 'term',
@@ -221,7 +221,7 @@ example : Nat → Nat := area 3`,
       after: 'example : myConst Nat Nat 3 4 = 3 := rfl',
       solutions: ['  fun α β a b => a', '  fun _ _ a _ => a'],
       hints: [
-        { text: 'Count the arrows: two types, then two values. That is four names.' },
+        { text: 'Count the arrows: two types, then two values. That\'s four names.' },
         { text: 'Start `fun α β a b => …`. Which of these names has the result type `α`?' },
         { text: 'The body is `a`.' },
       ],

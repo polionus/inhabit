@@ -207,7 +207,7 @@ Each line justifies one step, and \`_\` repeats the previous right side. Lean gl
       ],
       hints: [
         { text: 'The chain is started for you: `x = y + 2` is `h1`. Each `sorry` is one step to justify.' },
-        { text: 'After `y + 2` you want `3 + 2`: that step replaces `y` using `h2`.' },
+        { text: 'After `y + 2` you want `3 + 2`: that step replaces `y` using `h2`. After `:=` a calc step wants a proof term, so write `by` first to use a tactic there.' },
         { text: 'The last step, `3 + 2 = 5`, is a computation.' },
       ],
       mustUse: ['calc'],

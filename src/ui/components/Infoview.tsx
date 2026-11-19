@@ -193,7 +193,9 @@ export function Infoview({ goals, fallbackGoals, diagnostics, complete, pending,
       ? `${errors.length} ${errors.length === 1 ? 'error' : 'errors'}`
       : shown
         ? `${shown.length} ${shown.length === 1 ? 'goal' : 'goals'}`
-        : 'No goal at the cursor';
+        : note
+          ? 'Almost'
+          : 'No goal at the cursor';
   return (
     <section className="infoview" aria-label="Infoview" aria-busy={pending}>
       <div className="info-head">
@@ -207,7 +209,7 @@ export function Infoview({ goals, fallbackGoals, diagnostics, complete, pending,
           <div className="done-state"><span className="check" aria-hidden="true"><Icon name="check" size={16} strokeWidth={3.5} /></span> {completeText}</div>
         ) : shown ? (
           <Goals goals={shown} onInsert={onInsert} />
-        ) : goals && goals.length === 0 ? (
+        ) : note ? null : goals && goals.length === 0 ? (
           <p className="info-note">{hasSorry ? 'A sorry closes the goal for now. Put the cursor on an earlier line to see what is left.' : 'No goals are open at this line.'}</p>
         ) : fb ? (
           <Goals goals={fb} label="Still to prove" />

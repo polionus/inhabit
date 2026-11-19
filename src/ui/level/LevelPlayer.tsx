@@ -90,7 +90,8 @@ export function LevelPlayer(props: LevelPlayerProps) {
 
   const initialBody = useMemo(() => {
     if (level.kind === 'proof') {
-      if (mode === 'review') return level.starter;
+      // Review tests recall: start blank, unless the starter is the task itself (code to fix, or a commented workflow).
+      if (mode === 'review') return keepStarterInReview(level.starter) ? level.starter : '  sorry';
       return draft ?? (progress?.status === 'solved' || progress?.status === 'studied' ? (progress.best ?? level.starter) : level.starter);
     }
     return '';
@@ -335,4 +336,9 @@ function WorldDone({ worldId, onNext }: { worldId: string; onNext: () => void })
       )}
     </div>
   );
+}
+
+/** A starter with no `sorry` is code to fix; one that opens with a comment is a written workflow. Both are the task. */
+export function keepStarterInReview(starter: string): boolean {
+  return !starter.includes('sorry') || starter.trimStart().startsWith('--');
 }

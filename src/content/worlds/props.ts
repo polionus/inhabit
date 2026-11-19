@@ -74,7 +74,7 @@ export const world: World = {
       intro:
         "Write `by` and Lean waits for instructions. Your first instruction is `exact`: it closes the goal with a term of exactly the goal's type. The goal `P` is below `⊢`, and your hypotheses are above it. Which hypothesis already has the type `P`?",
       outro:
-        'A tactic block is a script that builds a term. Here the script has one line, and the term is just `hp`. Next you will build a slightly bigger term to hand to `exact`.',
+        'A tactic block is a script that builds a term. Here the script has one line, and the term is just `hp`. Next you\'ll build a slightly bigger term to hand to `exact`.',
       unlocks: { tactics: ['exact'], codex: ['by', 'tactics-concept', 'exact', 'turnstile'] },
       mode: 'tactic',
       showTerm: true,

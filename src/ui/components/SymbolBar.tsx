@@ -25,8 +25,10 @@ export function splitSymbols(unlocked: string[]): { shown: typeof symbolBar; mor
 
 const refText = (l: Level): string => (l.kind === 'proof' ? (l.solutions[0] ?? '') : l.kind === 'formalize' ? (l.accept[0] ?? '') : '');
 
+const count = (text: string, sym: string): number => text.split(sym).length - 1;
+
 let firstUse: Map<string, Set<string>> | null = null;
-/** For each level id, the bar symbols its reference solution uses that no earlier level's solution used. Computed once. */
+/** For each level id, the bar symbols the player first has to type there (in the solution beyond what the starter shows). Computed once. */
 export function newSymbolsOf(levelId: string | undefined): Set<string> {
   if (!firstUse) {
     firstUse = new Map();
@@ -34,8 +36,10 @@ export function newSymbolsOf(levelId: string | undefined): Set<string> {
     for (const w of worlds) {
       for (const l of w.levels) {
         const text = refText(l);
+        const given = l.kind === 'proof' ? l.starter : '';
         const fresh = new Set<string>();
-        for (const s of symbolBar) if (text.includes(s.symbol) && !met.has(s.symbol)) fresh.add(s.symbol);
+        // Only symbols the player has to type: more uses in the solution than the starter already shows.
+        for (const s of symbolBar) if (count(text, s.symbol) > count(given, s.symbol) && !met.has(s.symbol)) fresh.add(s.symbol);
         for (const s of fresh) met.add(s);
         firstUse.set(l.id, fresh);
       }

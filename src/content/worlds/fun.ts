@@ -275,7 +275,7 @@ example (f : Nat → Nat) (B : Set Nat) (x : Nat) (h : f x ∈ B) : x ∈ f ⁻�
         },
         {
           text: "Both collect outputs; the preimage just starts from `B`.",
-          feedback: 'A preimage collects *inputs*: its elements `x` are tested by asking whether `f x` is in `B`. That is why the second proof is just `h : f x ∈ B`.',
+          feedback: 'A preimage collects *inputs*: its elements `x` are tested by asking whether `f x` is in `B`. That\'s why the second proof is just `h : f x ∈ B`.',
         },
         {
           text: "`f ⁻¹' B` is the image of `B` under an inverse function.",
@@ -287,7 +287,7 @@ example (f : Nat → Nat) (B : Set Nat) (x : Nat) (h : f x ∈ B) : x ∈ f ⁻�
         },
       ],
       outro:
-        'Image: start from inputs in `A`, collect their outputs. Preimage: start from outputs in `B`, collect the inputs that land there. Next you will prove that every `x ∈ A` lands in the preimage of its own image.',
+        'Image: start from inputs in `A`, collect their outputs. Preimage: start from outputs in `B`, collect the inputs that land there. Next you\'ll prove that every `x ∈ A` lands in the preimage of its own image.',
     },
     {
       id: 'fun-09',
