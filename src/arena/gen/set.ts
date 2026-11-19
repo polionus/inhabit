@@ -334,13 +334,13 @@ export function buildSet(c0: SetCand, o: { hypStyle: boolean; contraOk?: boolean
   const sf = statementFeatures([statementF, ...hypF]);
   const rating = rate({ lines: lines.length, stats: st, ...sf, family: 'set', mode: 'tactic' }) + (c0.eq ? 60 : 0);
 
-  const goalEn = c0.eq
-    ? `${capital(nounSE(lhs))} equals ${nounSE(rhs)}`
-    : `${capital(nounSE(lhs))} is contained in ${nounSE(rhs)}`;
+  // Lower-case form for the "then …" clause; capitalize only at the start of a sentence (set names like A keep their case).
+  const goalTail = c0.eq ? `${nounSE(lhs)} equals ${nounSE(rhs)}` : `${nounSE(lhs)} is contained in ${nounSE(rhs)}`;
+  const goalEn = capital(goalTail);
   const english =
     hyps.length === 0
       ? goalEn + '.'
-      : `If ${hyps.map(([a, b]) => `${nounSE(a)} is contained in ${nounSE(b)}`).join(' and ')}, then ${goalEn.charAt(0).toLowerCase() + goalEn.slice(1)}.`;
+      : `If ${hyps.map(([a, b]) => `${nounSE(a)} is contained in ${nounSE(b)}`).join(' and ')}, then ${goalTail}.`;
   const shape = c0.eq
     ? 'Two sets are equal when they have the same elements: start with `ext x`, then prove both directions of the `↔`.'
     : 'To prove `S ⊆ T`, take an element: `intro x hx` gives `hx : x ∈ S`; show `x ∈ T`.';

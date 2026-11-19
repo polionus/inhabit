@@ -313,8 +313,7 @@ Which variable should you induct on? Remember what \`+\` looks at.`,
       id: 'nat-11',
       kind: 'proof',
       mode: 'tactic',
-      optional: true,
-      title: 'Side-quest: swap in the middle',
+      title: 'Swap in the middle',
       intro: `Sometimes \`rw\` needs a hint about *which* instance of a lemma to use. Give the arguments explicitly: \`rw [Nat.add_comm a b]\` rewrites only \`a + b\`.
 
 Prove that \`a + (b + c) = b + (a + c)\` using \`add_assoc\` and \`add_comm\`.`,
