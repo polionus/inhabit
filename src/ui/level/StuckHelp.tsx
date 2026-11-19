@@ -7,7 +7,6 @@ import { Markdown } from '../components/Markdown.tsx';
 import { Icon, Pill } from '../components/kit.tsx';
 import { PracticeOffer } from '../practice/PracticeOffer.tsx';
 import type { LiveState } from './run.ts';
-import { useMedia } from '../hooks.tsx';
 
 export interface StuckHelpProps {
   level: Level;
@@ -26,7 +25,10 @@ export interface StuckHelpProps {
   failedChecks: number;
   canShowSolution: boolean;
   onShowSolution: () => void;
-  mode: 'play' | 'review';
+  /** The level is solved: the help goes away, only `leading` stays. */
+  finished?: boolean;
+  /** Utility-row items placed before the Stuck? toggle (the Inventory button). */
+  leading?: React.ReactNode;
 }
 
 const WHERE: Record<string, string> = {
@@ -94,14 +96,13 @@ export function StuckHelp(p: StuckHelpProps) {
   const [readOpen, setReadOpen] = useState(false);
   const [readUsed, setReadUsed] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
-  // On a phone the panel starts as one line, so the editor stays in view; it opens itself the
-  // first time a check fails, which is when help is wanted.
-  const narrow = useMedia('(max-width: 900px)');
+  // The panel starts closed, so the reading column stays short; it opens itself the first time
+  // a check fails, which is when help is wanted.
   const [expanded, setExpanded] = useState<boolean | null>(null);
   useEffect(() => {
     if (p.failedChecks >= 1) setExpanded((e) => (e === null ? true : e));
   }, [p.failedChecks]);
-  const open = expanded ?? !narrow;
+  const open = expanded ?? false;
   const bodyId = useId();
 
   const initial = useMemo(() => (level.kind === 'proof' ? goalFromHeader(level.header) : null), [level]);
@@ -115,7 +116,7 @@ export function StuckHelp(p: StuckHelpProps) {
   const steps = (readUsed ? 1 : 0) + (p.toolUsed ? 1 : 0) + p.revealed;
   const showPractice = steps >= 2 && p.failedChecks >= 1;
   const hasHints = p.hints.length > 0;
-  if (!isProof && !hasHints && !p.canShowSolution) return null;
+  const hasPanel = (isProof || hasHints) && !p.finished;
 
   const toggleRead = () => {
     setReadOpen(!readOpen);
@@ -128,37 +129,40 @@ export function StuckHelp(p: StuckHelpProps) {
   const toolsVisible = p.toolUsed && toolsOpen;
 
   return (
-    <section className="stuck" aria-label="Help">
-      <button type="button" className="stuck-head" aria-expanded={open} aria-controls={bodyId} onClick={() => setExpanded(!open)}>
-        <span className="stuck-badge" aria-hidden="true"><Icon name="bulb" size={16} /></span>
-        <h2>{isProof ? 'Stuck?' : 'Hints'}</h2>
-        {isProof && <span className="stuck-sub">{open ? 'Start by reading the goal. It costs nothing.' : 'Help that reads your goal'}</span>}
-        <Icon name="chevron-down" size={18} className={`stuck-chev ${open ? 'up' : ''}`} />
-      </button>
-      {open && <div className="stuck-body" id={bodyId}>
-      {isProof && (
-        <div className="stuck-steps">
-          <button type="button" className={`btn small stuck-step ${readOpen ? 'on' : ''}`} aria-expanded={readOpen} onClick={toggleRead}>
-            <Icon name="eye" size={16} /> Read the goal <Pill tone="ok" className="stuck-tag">free</Pill>
+    <>
+      <div className="utility">
+        {p.leading}
+        {hasPanel && (
+          <button type="button" className={`btn small stuck-toggle ${open ? 'on' : ''}`} aria-expanded={open} aria-controls={bodyId} onClick={() => setExpanded(!open)}>
+            <Icon name="bulb" size={16} /> {isProof ? 'Stuck?' : 'Hints'}
+            <Icon name="chevron-down" size={14} className={`stuck-chev ${open ? 'up' : ''}`} />
           </button>
-          <button type="button" className={`btn small stuck-step ${toolsVisible ? 'on' : ''}`} aria-expanded={toolsVisible} onClick={toggleTools} title={p.toolUsed ? undefined : 'Counts as a hint'}>
-            <Icon name="target" size={16} /> Which tool? {!p.toolUsed && <Pill tone="gold" className="stuck-tag">1 hint</Pill>}
-          </button>
-        </div>
+        )}
+        {p.canShowSolution && !p.finished && (
+          <button type="button" className="linkish quiet show-solution" onClick={p.onShowSolution} title="Always here. It marks the level as studied.">Show solution</button>
+        )}
+      </div>
+      {hasPanel && open && (
+        <section className="stuck" aria-label="Help" id={bodyId}>
+          <div className="stuck-body">
+            {isProof && <p className="stuck-sub">Start by reading the goal. It costs nothing.</p>}
+            {isProof && (
+              <div className="stuck-steps">
+                <button type="button" className={`btn small stuck-step ${readOpen ? 'on' : ''}`} aria-expanded={readOpen} onClick={toggleRead}>
+                  <Icon name="eye" size={16} /> Read the goal <Pill tone="ok" className="stuck-tag">free</Pill>
+                </button>
+                <button type="button" className={`btn small stuck-step ${toolsVisible ? 'on' : ''}`} aria-expanded={toolsVisible} onClick={toggleTools} title={p.toolUsed ? undefined : 'Counts as a hint'}>
+                  <Icon name="target" size={16} /> Which tool? {!p.toolUsed && <Pill tone="gold" className="stuck-tag">1 hint</Pill>}
+                </button>
+              </div>
+            )}
+            {isProof && readOpen && <ReadingCard reading={reading} where={where} empty={emptyGoals} />}
+            {isProof && toolsVisible && <ToolsCard reading={reading} term={mode === 'term'} />}
+            {hasHints && <HintLadder hints={p.hints} revealed={p.revealed} onReveal={p.onRevealHint} lastGivesAway={false} />}
+            {showPractice && <PracticeOffer levelId={p.levelId} when="stuck" />}
+          </div>
+        </section>
       )}
-      {isProof && readOpen && <ReadingCard reading={reading} where={where} empty={emptyGoals} />}
-      {isProof && toolsVisible && <ToolsCard reading={reading} term={mode === 'term'} />}
-      {hasHints && <HintLadder hints={p.hints} revealed={p.revealed} onReveal={p.onRevealHint} lastGivesAway={false} />}
-      {showPractice && <PracticeOffer levelId={p.levelId} when="stuck" />}
-      {p.canShowSolution && (
-        <div className="stuck-solution">
-          <button type="button" className="btn ghost small" onClick={p.onShowSolution} title="Marks the level as studied">
-            <Icon name="eye" size={16} /> Show the solution
-          </button>
-          <span className="stuck-solution-note">Always here. It marks the level as studied.</span>
-        </div>
-      )}
-      </div>}
-    </section>
+    </>
   );
 }

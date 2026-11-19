@@ -13,6 +13,7 @@ import { Lean, Markdown } from '../components/Markdown.tsx';
 import { missingTactics, mustUseNote } from './mustUse.ts';
 import { SymbolBar } from '../components/SymbolBar.tsx';
 import type { Run } from './run.ts';
+import { WhatToProve } from './WhatToProve.tsx';
 
 /** Derive infoview inputs from a check result and a cursor in body coordinates. */
 export function useInfo(result: CheckResult | null, bodyOffset: number, bodyLen: number, cursor: number) {
@@ -120,11 +121,13 @@ export function ProofLevelView({ run, level }: { run: Run; level: ProofLevel }) 
   return (
     <>
       <div className="editor-panel">
-        {level.mode === 'tactic' && <FirstTimeTip tip="tactic" solved={run.solved} />}
+        <WhatToProve english={level.english}>
+          <div className="header-ro" aria-label="Statement (read-only)">
+            <Lean code={level.header} />
+          </div>
+        </WhatToProve>
         <SymbolBar levelId={level.id} onInsert={(s) => editor.current?.insert(s)} unlocked={run.session.ctx.codex} />
-        <div className="header-ro" aria-label="Statement (read-only)">
-          <Lean code={level.header} />
-        </div>
+        {level.mode === 'tactic' && <FirstTimeTip tip="tactic" solved={run.solved} />}
         <Editor
           ref={editor}
           value={body}

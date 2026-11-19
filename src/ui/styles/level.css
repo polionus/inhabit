@@ -6,8 +6,10 @@
 .task-crumb a { color: var(--muted); text-decoration: none; display: inline-flex; align-items: center; gap: .5rem; min-width: 0; }
 .task-crumb a:hover { color: var(--ink); }
 .task-crumb .crumb-world { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.task-crumb .crumb-pos { margin-left: auto; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.task-head { margin-bottom: .9rem; }
+.task-crumb .crumb-pos, .task-crumb .crumb-kind { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.task-crumb .crumb-sep { opacity: .6; }
+.task-crumb .crumb-kind { font-weight: 800; color: var(--primary-text); }
+.task-head { margin-bottom: .7rem; }
 .task-head .task-tags { display: flex; gap: .4rem; flex-wrap: wrap; align-items: center; margin-bottom: .55rem; }
 .task-head h1 { font-size: clamp(1.45rem, 2vw, 1.85rem); margin: 0; }
 .task-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: .8rem; }
@@ -20,7 +22,17 @@
 }
 .task-intro { font-size: 1rem; line-height: 1.6; color: var(--ink); }
 .task-intro p { margin: 0 0 .75rem; }
-.toolbar { display: flex; gap: .5rem; margin: 1rem 0; flex-wrap: wrap; }
+.utility { display: flex; gap: .5rem .6rem; margin: .9rem 0; flex-wrap: wrap; align-items: center; }
+.utility .linkish { font-size: .85rem; margin-left: .2rem; }
+.stuck-toggle.on { box-shadow: inset 0 0 0 2px var(--primary); }
+/* what to prove: the statement above its Lean form, one card */
+.wtp { border-radius: var(--r-md); background: var(--surface-1); box-shadow: inset 0 0 0 1px var(--line), var(--shadow-1); overflow: hidden; }
+.wtp-goal { padding: .6rem .95rem .65rem; }
+.wtp-label { display: block; font: 800 .7rem/1 var(--font-ui); letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin-bottom: .3rem; }
+.wtp-text { font-family: var(--font-read); font-size: 1.05rem; line-height: 1.5; color: var(--ink); }
+.wtp-text p { margin: 0; }
+.wtp .header-ro { border-radius: 0; box-shadow: inset 0 1px 0 var(--line); }
+.wtp .header-ro .label { margin: .2rem 0; }
 
 /* lesson (reading section in the task panel) */
 .lesson { margin: 1.1rem 0; border-radius: var(--r-lg); background: var(--surface-1); box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
@@ -258,7 +270,7 @@ pre.raw { font-size: .84rem; white-space: pre-wrap; margin: .3rem 0; overflow-wr
   .task-head .task-tags { margin-bottom: .35rem; }
   .task-intro { line-height: 1.5; }
   .task-intro p { margin-bottom: .55rem; }
-  .toolbar { margin: .6rem 0; }
+  .utility { margin: .6rem 0; }
   .lesson.nudge .lesson-teaser { display: none; }
   .lesson.nudge .lesson-meta { margin-left: auto; }
 }

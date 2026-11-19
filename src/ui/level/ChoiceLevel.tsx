@@ -1,3 +1,4 @@
+import { WhatToProve } from './WhatToProve.tsx';
 import { FirstTimeTip } from '../components/FirstTime.tsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChoiceLevel, PredictLevel } from '../../content/types.ts';
@@ -97,6 +98,7 @@ export function ChoiceLevelView({ run, level }: { run: Run; level: ChoiceLevel }
   return (
     <>
       <div className="editor-panel choice">
+        <WhatToProve english={level.question} label="Question" />
         {level.code?.includes('#check') && <FirstTimeTip tip="check-click" solved={run.solved} />}
         {level.code && (
           <Editor value={level.code} readOnly fontSize={run.fontSize} onCursor={setCursor} diagnostics={toEditorDiags(mapDiagnostics(snippet?.result?.diagnostics ?? [], snippet?.offset ?? 0, level.code.length))} ariaLabel="Code (read-only). Move the cursor to inspect goals." cursor={0} />
@@ -166,9 +168,9 @@ export function PredictLevelView({ run, level }: { run: Run; level: PredictLevel
   return (
     <>
       <div className="editor-panel predict">
+        <WhatToProve english={level.question ?? 'What will the goal be after this line runs?'} label="Question" />
         <FirstTimeTip tip="predict" solved={run.solved} />
         <Editor value={level.code} readOnly markLine={level.line} fontSize={run.fontSize} cursor={lo.indent} ariaLabel="Code (read-only). The marked line is the one to predict." />
-        <Markdown className="question" text={level.question ?? 'What will the goal be after this line runs?'} />
         <OptionList options={level.options} order={order} picked={picked} selected={sel} locked={done} onPick={(i) => !done && setSel(i)} />
         {!done && (
           <div className="actions">

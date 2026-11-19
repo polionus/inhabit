@@ -1,11 +1,11 @@
 /* Help that reads the learner's goal (StuckHelp) and calm diagnostics (Infoview). */
 
 /* ── the stuck panel ─────────────────────────────────────────────── */
-.stuck { margin: .9rem 0; padding: .7rem .9rem .8rem; background: var(--surface-1); border-radius: var(--r-md); box-shadow: inset 0 0 0 1px var(--line); display: grid; gap: .55rem; }
+.stuck { margin: 0 0 .9rem; padding: .7rem .9rem .8rem; background: var(--surface-1); border-radius: var(--r-md); box-shadow: inset 0 0 0 1px var(--line); display: grid; gap: .55rem; }
 .stuck-head { display: flex; align-items: center; flex-wrap: wrap; gap: .15rem .55rem; }
 .stuck-head h2 { margin: 0; font: 800 1rem/1.2 var(--font-ui); }
 .stuck-badge { display: grid; place-items: center; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--gold-soft); color: var(--gold-text); flex: none; }
-.stuck-sub { color: var(--muted); font-size: .85rem; }
+.stuck-sub { color: var(--muted); font-size: .85rem; margin: 0; }
 .stuck-steps { display: flex; flex-wrap: wrap; gap: .45rem; }
 .stuck-step { gap: .4rem; }
 .stuck-step.on { box-shadow: inset 0 0 0 2px var(--primary); }
@@ -52,9 +52,7 @@
   .stuck { margin: .6rem 0; }
 }
 
-/* The head is a button: one line when the panel is collapsed. */
-button.stuck-head { width: 100%; background: none; border: 0; padding: 0; color: inherit; font: inherit; text-align: left; cursor: pointer; }
-button.stuck-head:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; border-radius: var(--r-sm); }
-.stuck-chev { margin-left: auto; color: var(--muted); transition: transform .15s; }
+/* The Stuck? toggle sits in the utility row. */
+.stuck-chev { margin-left: .1rem; color: var(--muted); transition: transform .15s; }
 .stuck-chev.up { transform: rotate(180deg); }
 .stuck-body { display: grid; gap: .55rem; }

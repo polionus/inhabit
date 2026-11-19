@@ -12,7 +12,6 @@ import { Success, type Reward } from '../components/Success.tsx';
 import { ShareButton } from '../arena/ShareButton.tsx';
 import { Icon, Modal, Pill, Stars } from '../components/kit.tsx';
 import { WorldToken, worldStatus } from '../components/world.tsx';
-import { KIND_ICON } from '../screens/WorldScreen.tsx';
 import { starsFor } from '../../state/meta.ts';
 import { worldComplete } from '../../state/progress.ts';
 import { chapterFor } from '../../content/chapters/index.ts';
@@ -202,51 +201,51 @@ export function LevelPlayer(props: LevelPlayerProps) {
   return (
     <div className={`level kind-${level.kind}`}>
       <section className="task" aria-label="Task">
-        {world && mode === 'play' && (
-          <nav className="task-crumb" aria-label="Breadcrumb">
-            <a href={href.world(world.id)}>
-              <WorldToken world={world} size={28} state={wStatus?.state} progress={wStatus?.frac ?? 0} badge={false} />
-              <span className="crumb-world">{world.title}</span>
-            </a>
-            <span className="crumb-pos">Level {session.ctx.index + 1} of {world.levels.length}</span>
-          </nav>
-        )}
+        <nav className="task-crumb" aria-label="Breadcrumb">
+          {world && mode === 'play' && (
+            <>
+              <a href={href.world(world.id)}>
+                <WorldToken world={world} size={28} state={wStatus?.state} progress={wStatus?.frac ?? 0} badge={false} />
+                <span className="crumb-world">{world.title}</span>
+              </a>
+              <span className="crumb-sep" aria-hidden="true">·</span>
+              <span className="crumb-pos">Level {session.ctx.index + 1} of {world.levels.length}</span>
+              <span className="crumb-sep" aria-hidden="true">·</span>
+            </>
+          )}
+          <span className="crumb-kind">{KIND_LABEL[level.kind]}</span>
+        </nav>
         <div className="task-head">
-          <div className="task-tags">
-            <Pill tone="primary" icon={KIND_ICON[level.kind]}>{KIND_LABEL[level.kind]}</Pill>
-            {level.boss && <Pill tone="gold" icon="crown-fill">Boss</Pill>}
-            {level.optional && <Pill>Side quest</Pill>}
-            {level.kind === 'proof' && level.mode === 'term' && <Pill>Term mode</Pill>}
-          </div>
+          {(level.boss || level.optional || (level.kind === 'proof' && level.mode === 'term')) && (
+            <div className="task-tags">
+              {level.boss && <Pill tone="gold" icon="crown-fill">Boss</Pill>}
+              {level.optional && <Pill>Side quest</Pill>}
+              {level.kind === 'proof' && level.mode === 'term' && <Pill>Term mode</Pill>}
+            </div>
+          )}
           <div className="task-title-row">
             <h1>{level.title}</h1>
             {mode === 'play' && !outcome && <Stars value={currentStars} size="md" />}
           </div>
         </div>
-        {englishOf(level) && level.kind !== 'choice' && <Markdown className="english" text={englishOf(level)!} />}
         <Markdown text={level.intro} className="task-intro" />
-        {level.kind === 'choice' && <Markdown className="english" text={level.question} />}
-        <div className="toolbar">
-          <button className="btn" onClick={() => setInventory(true)}><Icon name="bag" size={18} /> Inventory</button>
-        </div>
-        {!outcome && (
-          <StuckHelp
-            level={level}
-            levelId={levelId}
-            ctx={session.ctx}
-            strict={strict}
-            hints={hints}
-            live={live}
-            revealed={revealed}
-            onRevealHint={revealHint}
-            toolUsed={toolUsed}
-            onUseTool={useTool}
-            failedChecks={failedChecks}
-            canShowSolution={!!sol && !showSolution}
-            onShowSolution={reveal}
-            mode={mode}
-          />
-        )}
+        <StuckHelp
+          level={level}
+          levelId={levelId}
+          ctx={session.ctx}
+          strict={strict}
+          hints={hints}
+          live={live}
+          revealed={revealed}
+          onRevealHint={revealHint}
+          toolUsed={toolUsed}
+          onUseTool={useTool}
+          failedChecks={failedChecks}
+          canShowSolution={!!sol && !showSolution}
+          onShowSolution={reveal}
+          finished={!!outcome}
+          leading={<button className="btn small" onClick={() => setInventory(true)}><Icon name="bag" size={16} /> Inventory</button>}
+        />
         <LessonPanel lesson={lesson} defaultOpen={lessonDefaultOpen({ ctx: session.ctx, mode, passed, settings: lessonSettings, narrow })} remember={mode === 'play'} nudge={failedChecks >= 2 && !outcome && !passed} />
         {showSolution && sol && (
           <div className="solution">

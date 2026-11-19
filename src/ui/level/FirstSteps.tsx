@@ -13,7 +13,7 @@ const SEEN_KEY = 'first-steps';
 
 /** `target` is outlined; the card sits under `anchor` (default: the target) so it hides no text. */
 const STEPS: { target: string; anchor?: string; title: string; text: React.ReactNode }[] = [
-  { target: '.task-title-row', anchor: '.task-intro', title: '1 of 3', text: <>This is the task.</> },
+  { target: '.wtp', title: '1 of 3', text: <>This is the task: the sentence, and the Lean line that says it.</> },
   { target: '.editor-panel .editor', title: '2 of 3', text: <>The gray line <code>example : Nat :=</code> means &ldquo;give me something of type <code>Nat</code>.&rdquo; Type your answer here, in place of <code>sorry</code>.</> },
   { target: '.infoview', title: '3 of 3', text: <>Lean checks as you type, so there's no Submit button. This panel shows what's still needed and turns to &ldquo;solved&rdquo; when you're right.</> },
 ];

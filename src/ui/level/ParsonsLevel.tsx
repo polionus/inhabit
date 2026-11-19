@@ -1,3 +1,4 @@
+import { WhatToProve } from './WhatToProve.tsx';
 import { FirstTimeTip } from '../components/FirstTime.tsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ParsonsLevel } from '../../content/types.ts';
@@ -115,8 +116,10 @@ export function ParsonsLevelView({ run, level }: { run: Run; level: ParsonsLevel
   return (
     <>
       <div className="editor-panel parsons">
+        <WhatToProve english={level.english}>
+          <div className="header-ro"><LeanInline code={level.header} /></div>
+        </WhatToProve>
         <FirstTimeTip tip="parsons" solved={run.solved} />
-        <div className="header-ro"><LeanInline code={level.header} /></div>
         <div className="parsons-cols">
           <div
             className="plist solution-list"
