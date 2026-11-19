@@ -116,6 +116,40 @@ export const home: HomeCopy = {
   },
 };
 
+/** "How a level works" as three parts, shown as numbered steps on the About page. */
+export const aboutLevelParts: { name: string; text: string }[] = [
+  { name: 'The task', text: 'States what to prove, in English and in Lean, with a short explanation of the new idea.' },
+  { name: 'The editor', text: 'Holds the proof. The statement is fixed; you write below it, starting from `sorry`, Lean\'s placeholder for "not done yet". Your proof is checked as you type.' },
+  { name: 'The goal view', text: 'Shows where you stand at the cursor. Facts you may use sit above the `⊢`; what you must prove sits after it. When no goals remain, the level is solved. Errors appear here too, with a plain explanation underneath.' },
+];
+
+/** The goal view example for the annotated figure. Display only. */
+export const aboutGoalExample = {
+  facts: ['A B : Set Nat', 'x : Nat', 'hx : x ∈ A ∩ B'],
+  goal: '⊢ x ∈ B ∩ A',
+  factsNote: 'Facts you may use',
+  goalNote: 'What you must prove',
+};
+
+/** Rows of the typing table on the About page: what you type, what you get, what it means. */
+export const aboutSymbols: { typed: string; symbol: string; meaning: string }[] = [
+  { typed: '\\to', symbol: '→', meaning: 'implies, function arrow' },
+  { typed: '\\and', symbol: '∧', meaning: 'and' },
+  { typed: '\\or', symbol: '∨', meaning: 'or' },
+  { typed: '\\not', symbol: '¬', meaning: 'not' },
+  { typed: '\\forall', symbol: '∀', meaning: 'for all' },
+  { typed: '\\ex', symbol: '∃', meaning: 'there exists' },
+  { typed: '\\in', symbol: '∈', meaning: 'is an element of' },
+  { typed: '\\sub', symbol: '⊆', meaning: 'is a subset of' },
+  { typed: '\\inter', symbol: '∩', meaning: 'intersection' },
+  { typed: '\\<  \\>', symbol: '⟨ ⟩', meaning: 'angle brackets' },
+];
+
+/** Shown under the typing table. Markdown. */
+export const aboutSymbolsNote = `If you forget one, the symbol bar above the editor has the common symbols: click one to insert it, or hover to see its abbreviation. Plain-text spellings also work for some, such as \`->\` for \`→\`.
+
+These are the same abbreviations as in the Lean extension for the VS Code editor, so the habit carries over to real Lean.`;
+
 /** Copy for the About page. */
 export const about: AboutCopy = {
   title: 'About Inhabit',
@@ -175,38 +209,12 @@ The game starts right there. Level one asks for anything of type \`Nat\`, and \`
     {
       id: 'how-a-level-works',
       title: 'How a level works',
-      body: `A level screen has three parts.
-
-**The task** states what to prove, in English and in Lean, with a short explanation of the new idea.
-
-**The editor** holds the proof. The statement is fixed; you write below it, starting from \`sorry\`, Lean's placeholder for "not done yet". Your proof is checked as you type.
-
-**The goal view** shows where you stand at the cursor. Facts you may use sit above the \`⊢\`; what you must prove sits after it:
-
-\`\`\`lean
-A B : Set Nat
-x : Nat
-hx : x ∈ A ∩ B
-⊢ x ∈ B ∩ A
-\`\`\`
-
-When no goals remain, the level is solved. Errors appear here too, with a plain explanation underneath.
-
-The **Inventory** lists what you have unlocked so far: tactics (proof steps), lemmas (facts already proved) and Codex entries. Clicking a name puts it into your proof. Beside the task, a **lesson** explains the idea with an example that is not the level itself. **Hints** come one at a time if you ask, and you can reveal a full solution if you need to.`,
+      body: `The **Inventory** lists what you have unlocked so far: tactics (proof steps), lemmas (facts already proved) and Codex entries. Clicking a name puts it into your proof. Beside the task, a **lesson** explains the idea with an example that is not the level itself. **Hints** come one at a time if you ask, and you can reveal a full solution if you need to.`,
     },
     {
       id: 'typing-symbols',
       title: 'Typing the symbols',
-      body: `Lean uses mathematical symbols, and you type them with short abbreviations. Type a backslash, a name, then a space: \`\\to\` followed by a space becomes \`→\`. Some you will use often:
-
-- \`\\to\` gives \`→\`, \`\\and\` gives \`∧\`, \`\\or\` gives \`∨\`, \`\\not\` gives \`¬\`
-- \`\\forall\` gives \`∀\`, \`\\ex\` gives \`∃\`
-- \`\\in\` gives \`∈\`, \`\\sub\` gives \`⊆\`, \`\\inter\` gives \`∩\`
-- \`\\<\` and \`\\>\` give the angle brackets \`⟨\` and \`⟩\`
-
-If you forget one, the symbol bar above the editor has the common symbols: click one to insert it, or hover to see its abbreviation. Plain-text spellings also work for some, such as \`->\` for \`→\`.
-
-These are the same abbreviations as in the Lean extension for the VS Code editor, so the habit carries over to real Lean.`,
+      body: `Lean uses mathematical symbols, and you type them with short abbreviations. Type a backslash, a name, then a space: \`\\to\` followed by a space becomes \`→\`. Some you will use often:`,
     },
     {
       id: 'how-it-teaches',

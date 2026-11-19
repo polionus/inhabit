@@ -21,6 +21,8 @@ import { GuideScreen } from './screens/GuideScreen.tsx';
 import { ArenaScreen } from './arena/ArenaScreen.tsx';
 import { ShareScreen } from './arena/ShareScreen.tsx';
 import { PracticeScreen } from './practice/PracticeScreen.tsx';
+import { ChapterScreen } from './screens/ChapterScreen.tsx';
+import { chapterFor } from '../content/chapters/index.ts';
 
 const SITE = 'Inhabit';
 const HOME_TITLE = 'Inhabit — learn Lean 4, the theorem prover, by playing';
@@ -33,6 +35,7 @@ function titleFor(route: Route): string {
     case 'home': return HOME_TITLE;
     case 'level': return `${data.findLevel(route.id)?.level.title ?? 'Level'} · ${SITE}`;
     case 'world': return `${data.worlds.find((w) => w.id === route.id)?.title ?? 'Region'} · ${SITE}`;
+    case 'chapter': return `${chapterFor(route.id)?.title ?? data.worlds.find((w) => w.id === route.id)?.title ?? 'Chapter'} · ${SITE}`;
     case 'codex': return `${route.id ? (getCodex(route.id)?.name ?? 'Codex') : 'Codex'} · ${SITE}`;
     case 'notfound': return `Not found · ${SITE}`;
     default: return `${PAGE_TITLES[route.name]} · ${SITE}`;
@@ -73,6 +76,7 @@ export function App() {
       case 'map': screen = <MapScreen />; break;
       case 'world': screen = <WorldScreen id={route.id} />; break;
       case 'level': screen = <LevelScreen id={route.id} />; break;
+      case 'chapter': screen = <ChapterScreen id={route.id} />; break;
       case 'review': screen = <ReviewScreen />; break;
       case 'codex': screen = <CodexScreen focus={route.id} />; break;
       case 'sandbox': screen = <SandboxScreen />; break;

@@ -8,6 +8,7 @@ import { Markdown } from '../components/Markdown.tsx';
 import { Card, EmptyState, Icon, Pill, ProgressBar, Stars, type IconName } from '../components/kit.tsx';
 import { WorldToken, worldStatus } from '../components/world.tsx';
 import { href } from '../router.ts';
+import { chapterFor } from '../../content/chapters/index.ts';
 
 export const KIND_LABEL: Record<Level['kind'], string> = { proof: 'Proof', parsons: 'Arrange', choice: 'Check', predict: 'Predict', formalize: 'Formalize' };
 export const KIND_ICON: Record<Level['kind'], IconName> = { proof: 'turnstile', parsons: 'list', choice: 'check-circle', predict: 'eye', formalize: 'translate' };
@@ -185,6 +186,10 @@ export function WorldScreen({ id }: { id: string }) {
           </div>
           <Markdown text={prose.recap} className="prose compact" />
         </Card>
+      )}
+
+      {chapterFor(w.id) && (
+        <p className="world-explainer"><Icon name="book" size={16} /> <a href={href.chapter(w.id)}>Read the chapter explainer</a> <span className="muted">a longer article on this world's big idea</span></p>
       )}
 
       {prose?.primer && <Primer worldId={w.id} primer={prose.primer} />}

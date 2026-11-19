@@ -1,11 +1,15 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import type { World } from '../../content/types.ts';
+import { chapterFor } from '../../content/chapters/index.ts';
+import { LevelRows, readMinutes } from '../components/ChapterLevels.tsx';
+import { worldMastery } from '../../state/meta.ts';
 import { data } from '../data.ts';
 import { useGame } from '../game.ts';
 import { canTestOut, continueLevel, layoutWorlds, worldComplete } from '../../state/progress.ts';
 import { href } from '../router.ts';
 import { usePlayer } from '../usePlayer.ts';
 import { useMedia } from '../hooks.tsx';
-import { Card, Icon, Pill, ProgressRing, ScreenHeader, Stars } from '../components/kit.tsx';
+import { Card, Icon, Pill, ProgressBar, ProgressRing, ScreenHeader, Stars } from '../components/kit.tsx';
 import { WorldToken, worldStatus } from '../components/world.tsx';
 
 const ROW = 176;
@@ -18,7 +22,118 @@ function xFor(layer: number, slot: number, slots: number): number {
   return ((slot + 0.5) / slots) * 100;
 }
 
+const VIEW_KEY = 'inhabit.mapView';
+type View = 'roadmap' | 'map';
+function readView(): View {
+  try {
+    return localStorage.getItem(VIEW_KEY) === 'map' ? 'map' : 'roadmap';
+  } catch {
+    return 'roadmap';
+  }
+}
+
+const TRACKS: Record<string, string> = { nat: 'Track A: numbers', sets: 'Track B: sets and functions' };
+
+/** Track label for worlds on a parallel branch: follow `requires` back to the world that forks. */
+function trackOf(w: World, worlds: World[]): string | undefined {
+  let cur: World | undefined = w;
+  while (cur && cur.requires.length === 1) {
+    const parent: string = cur.requires[0];
+    if (worlds.filter((x) => x.requires.includes(parent)).length > 1) return TRACKS[cur.id];
+    cur = worlds.find((x) => x.id === parent);
+  }
+  return undefined;
+}
+
+function Roadmap({ currentId }: { currentId?: string }) {
+  const save = useGame((s) => s.save);
+  const worlds = data.worlds;
+  const [openIds, setOpenIds] = useState<Record<string, boolean>>({});
+  return (
+    <ol className="roadmap">
+      {worlds.map((w, i) => {
+        const st = worldStatus(w, save);
+        const m = worldMastery(w, save);
+        const ch = chapterFor(w.id);
+        const track = trackOf(w, worlds);
+        const forkAfter = worlds.filter((x) => x.requires.includes(w.id)).length > 1;
+        const locked = st.state === 'locked';
+        const current = currentId === w.id;
+        const open = openIds[w.id] ?? current;
+        const started = st.done > 0;
+        const label = st.state === 'locked' ? 'Locked' : st.state === 'complete' ? 'Done' : st.state === 'empty' ? 'Coming soon' : started ? 'In progress' : 'Open';
+        const cid = `rm-c-${w.id}`;
+        return (
+          <li key={w.id} className={`rm-item ${st.state} ${current ? 'current' : ''} ${track ? 'branch' : ''}`}>
+            <Card as="article" className="rm-card" aria-labelledby={`rm-h-${w.id}`}>
+              <div className="rm-top">
+                <WorldToken world={w} size={64} state={st.state} progress={st.frac} />
+                <div className="rm-head">
+                  <span className="rm-kicker">
+                    <span className="eyebrow">Chapter {i + 1}</span>
+                    {track && <span className="rm-track">{track}</span>}
+                    {current && <span className="rm-here">You are here</span>}
+                  </span>
+                  <h2 id={`rm-h-${w.id}`}>{w.title}</h2>
+                  <p className="rm-tag">{w.tagline}</p>
+                </div>
+                <span className={`rm-state ${st.state}`}>
+                  {st.state === 'locked' && <Icon name="lock" size={13} />}
+                  {st.state === 'complete' && <Icon name="check" size={13} />}
+                  {label}
+                </span>
+              </div>
+              {w.bigIdea && <p className="rm-idea">{w.bigIdea}</p>}
+              {st.total > 0 && (
+                <div className="rm-prog">
+                  <ProgressBar value={m.total ? m.unaided / m.total : 0} tone="ok" size="sm" label={`${m.unaided} of ${m.total} solved on your own`} />
+                  <span className="tnum">{m.unaided} of {m.total} solved on your own</span>
+                  <span className="tnum muted">{st.done}/{st.total} passed</span>
+                </div>
+              )}
+              <div className="rm-actions">
+                {ch ? (
+                  <a className="btn outline" href={href.chapter(w.id)}><Icon name="book" size={16} /> Read the explainer <span className="muted tnum">{readMinutes(ch.body)} min</span></a>
+                ) : (
+                  <span className="rm-soon"><Icon name="book" size={16} /> Explainer coming soon</span>
+                )}
+                {st.state !== 'empty' && (
+                  locked ? (
+                    <button type="button" className="btn primary" disabled><Icon name="lock" size={16} /> Play (locked)</button>
+                  ) : (
+                    <a className="btn primary" href={href.world(w.id)}><Icon name="play" size={16} /> {started ? 'Continue' : 'Play'}</a>
+                  )
+                )}
+                {w.levels.length > 0 && (
+                  <button type="button" className="btn ghost rm-toggle" aria-expanded={open} aria-controls={cid} onClick={() => setOpenIds({ ...openIds, [w.id]: !open })}>
+                    Contents ({w.levels.length}) <Icon name="chevron-down" size={16} style={{ transform: open ? 'rotate(180deg)' : undefined }} />
+                  </button>
+                )}
+              </div>
+              {open && w.levels.length > 0 && (
+                <div id={cid} className="rm-contents">
+                  <LevelRows world={w} save={save} locked={locked} />
+                </div>
+              )}
+            </Card>
+            {forkAfter && <p className="rm-fork" role="note">The path splits here into two tracks, A and B. Both lead to the Formalization Forge.</p>}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 export function MapScreen() {
+  const [view, setViewState] = useState<View>(readView);
+  const setView = (v: View) => {
+    setViewState(v);
+    try {
+      localStorage.setItem(VIEW_KEY, v);
+    } catch {
+      /* ignore */
+    }
+  };
   const save = useGame((s) => s.save);
   const levels = save.levels;
   const worlds = data.worlds;
@@ -35,9 +150,14 @@ export function MapScreen() {
 
   return (
     <div className="page wide map-page">
-      <ScreenHeader id="map" title="The map" icon="map" />
-      <div className="map-layout">
-        <div className="board" style={{ height: H }}>
+      <ScreenHeader id="map" title={view === 'roadmap' ? 'The roadmap' : 'The map'} icon="map" />
+      <div className="seg rm-seg" role="group" aria-label="View">
+        {(['roadmap', 'map'] as const).map((v) => (
+          <button key={v} type="button" aria-pressed={view === v} className={view === v ? 'on' : ''} onClick={() => setView(v)}>{v === 'roadmap' ? 'Roadmap' : 'Map'}</button>
+        ))}
+      </div>
+      <div className={`map-layout ${view === 'roadmap' ? 'is-roadmap' : ''}`}>
+        {view === 'roadmap' ? <Roadmap currentId={contWorld?.id} /> : <div className="board" style={{ height: H }}>
           <svg className="board-roads" viewBox={`0 0 100 ${H}`} preserveAspectRatio="none" aria-hidden="true">
             {worlds.flatMap((w) =>
               w.requires.map((r) => {
@@ -88,7 +208,7 @@ export function MapScreen() {
               );
             })}
           </ol>
-        </div>
+        </div>}
 
         <aside className="map-side" aria-label="Your progress">
           <Card className="map-summary">

@@ -5,6 +5,7 @@ export type Route =
   | { name: 'about' }
   | { name: 'map' }
   | { name: 'world'; id: string }
+  | { name: 'chapter'; id: string }
   | { name: 'level'; id: string }
   | { name: 'review' }
   | { name: 'codex'; id?: string }
@@ -30,6 +31,8 @@ export function parseHash(hash: string): Route {
       return { name: a };
     case 'world':
       return b ? { name: 'world', id: b } : { name: 'map' };
+    case 'chapter':
+      return b ? { name: 'chapter', id: b } : { name: 'map' };
     case 'level':
       return b ? { name: 'level', id: b } : { name: 'map' };
     case 'review':
@@ -58,6 +61,7 @@ export const href = {
   map: () => '#/map',
   about: () => '#/about',
   world: (id: string) => `#/world/${encodeURIComponent(id)}`,
+  chapter: (id: string) => `#/chapter/${encodeURIComponent(id)}`,
   level: (id: string) => `#/level/${encodeURIComponent(id)}`,
   codex: (id?: string) => (id ? `#/codex/${encodeURIComponent(id)}` : '#/codex'),
   guide: (id?: string) => (id ? `#/guide/${encodeURIComponent(id)}` : '#/guide'),

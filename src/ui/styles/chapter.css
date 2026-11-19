@@ -1,0 +1,41 @@
+/* Chapter explainer: a blog-style article with a side table of contents on wide screens. */
+.page.chapter-page { max-width: 1040px; }
+.ch-layout { display: block; }
+.ch-layout.has-toc { display: grid; grid-template-columns: 210px minmax(0, 68ch); gap: 3rem; align-items: start; }
+.ch-toc { position: sticky; top: 1.5rem; font-size: .9rem; max-height: calc(100vh - 3rem); overflow: auto; }
+.ch-toc ol { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .1rem; border-left: 2px solid var(--line); }
+.ch-toc a { display: block; padding: .3rem .8rem; color: var(--ink-2); }
+.ch-toc a:hover { color: var(--primary-text); text-decoration: none; background: var(--surface-2); }
+.ch-article { min-width: 0; max-width: 68ch; margin-inline: auto; }
+.ch-kicker { margin: 0 0 .5rem; font: 800 .85rem var(--font-ui); letter-spacing: .06em; text-transform: uppercase; color: var(--primary-text); }
+.ch-head h1 { margin: 0; font-size: clamp(2rem, 4.6vw, 2.9rem); line-height: 1.1; letter-spacing: -.03em; text-wrap: balance; }
+.ch-dek { margin: 1rem 0 0; font-family: var(--font-read); font-size: 1.3rem; line-height: 1.45; color: var(--ink-2); }
+.ch-meta { display: flex; flex-wrap: wrap; gap: .7rem 1rem; align-items: center; margin: 1.1rem 0 0; padding-bottom: 1.4rem; border-bottom: 1px solid var(--line); }
+.ch-body { margin-top: 1.6rem; font-family: var(--font-read); font-size: 1.12rem; line-height: 1.75; }
+.ch-body p, .ch-body ul, .ch-body ol { margin: 0 0 1.2rem; }
+.ch-body h2 { margin: 2.6rem 0 .8rem; font-family: var(--font-ui); font-size: 1.55rem; line-height: 1.2; letter-spacing: -.02em; scroll-margin-top: 1rem; }
+.ch-body h3 { margin: 1.8rem 0 .6rem; font-family: var(--font-ui); font-size: 1.2rem; }
+.ch-body pre.code { margin: 1.2rem 0 1.5rem; font-size: .92rem; max-width: 100%; overflow-x: auto; }
+.ch-body blockquote { margin: 1.4rem 0; padding: .2rem 1.1rem; border-left: 3px solid var(--primary); color: var(--ink-2); }
+.ch-play { margin: 2.4rem 0 0; padding: 1.4rem 0 0; border-top: 1px solid var(--line); }
+.ch-levels, .ch-readnext { max-width: 68ch; margin: 3rem auto 0; }
+.ch-readnext ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; }
+.ch-rn { display: grid; gap: .15rem; padding: .8rem 1rem; border-radius: var(--r-md); background: var(--surface-1); box-shadow: inset 0 0 0 1px var(--line); color: var(--ink); }
+.ch-rn:hover { text-decoration: none; box-shadow: inset 0 0 0 1px var(--primary); }
+.ch-rn .muted { font-size: .92rem; }
+.page.chapter-page .article-nav { max-width: 68ch; margin-inline: auto; }
+@media (max-width: 900px) {
+  .ch-layout.has-toc { display: block; }
+  .ch-toc { display: none; }
+}
+@media (max-width: 520px) {
+  .ch-body { font-size: 1.05rem; }
+  .ch-dek { font-size: 1.15rem; }
+}
+.world-explainer { display: flex; flex-wrap: wrap; gap: .4rem .7rem; align-items: center; margin: 1rem 0; font-weight: 700; }
+
+.lrow-title a, .ch-rn, .ch-rn:hover, .ch-rn * { text-decoration: none; }
+.page.chapter-page.with-toc .ch-article { margin-inline: 0; }
+@media (min-width: 901px) {
+  .page.chapter-page.with-toc .ch-levels, .page.chapter-page.with-toc .ch-readnext, .page.chapter-page.with-toc .article-nav { margin-left: calc(210px + 3rem); margin-right: 0; }
+}
