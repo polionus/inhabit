@@ -276,3 +276,15 @@ pre.raw { font-size: .84rem; white-space: pre-wrap; margin: .3rem 0; overflow-wr
 .wd-recap { text-align: left; margin: 0 auto; }
 .wd .actions { justify-content: center; }
 .world-done .modal-head h2 { text-align: center; margin-right: 0; color: var(--gold-text); text-transform: uppercase; letter-spacing: .12em; font-size: .85rem; }
+
+/* First-time tips, level captions, new-symbol cue */
+.first-tip { display: flex; align-items: flex-start; gap: .75rem; padding: .55rem .8rem; border-radius: var(--r-md); background: var(--surface-2); box-shadow: inset 3px 0 0 var(--primary, currentColor), inset 0 0 0 1px var(--line); font-size: .92rem; min-width: 0; }
+.first-tip p { margin: 0; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.first-tip .btn { flex: none; }
+.after-caption { margin: .5rem 0 0; font-size: .8rem; color: var(--muted, inherit); }
+.editor-panel.choice .cm-editor .cm-line { cursor: pointer; }
+.editor-panel.choice .cm-editor .cm-line:hover { background: color-mix(in srgb, var(--primary, currentColor) 10%, transparent); }
+.sym.sym-new { box-shadow: 0 0 0 2px var(--primary, currentColor); animation: sym-pulse 2.4s ease-in-out 3; }
+@keyframes sym-pulse { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--primary, currentColor) 25%, transparent); } }
+@media (prefers-reduced-motion: reduce) { .sym.sym-new { animation: none; } }
+.wd-next { display: flex; flex-direction: column; gap: .5rem; align-items: flex-start; }

@@ -14,6 +14,7 @@ import { WorldToken, worldStatus } from '../components/world.tsx';
 import { KIND_ICON } from '../screens/WorldScreen.tsx';
 import { starsFor } from '../../state/meta.ts';
 import { worldComplete } from '../../state/progress.ts';
+import { chapterFor } from '../../content/chapters/index.ts';
 import { href } from '../router.ts';
 import { LessonPanel } from './Lesson.tsx';
 import { ProofLevelView } from './ProofLevel.tsx';
@@ -300,6 +301,10 @@ function WorldDone({ worldId, onNext }: { worldId: string; onNext: () => void })
   }, []);
   if (!w) return null;
   const st = worldStatus(w, save);
+  // Worlds this one leads to, once all their other prerequisites are also finished.
+  const nextWorlds = data.worlds.filter(
+    (x) => x.requires.includes(w.id) && x.requires.every((r) => { const rw = data.worlds.find((y) => y.id === r); return !!rw && worldComplete(rw, save.levels); }),
+  );
   const recap = data.worldLessons(w.id)?.recap;
   return (
     <div className="wd">
@@ -309,10 +314,25 @@ function WorldDone({ worldId, onNext }: { worldId: string; onNext: () => void })
         <span className="wd-stars"><Icon name="star" size={18} className="goldc" /> <span className="tnum">{st.stars.earned} of {st.stars.total} stars</span></span>
       </div>
       {recap && <Markdown text={recap} className="prose compact wd-recap" />}
-      <div className="actions">
-        <a className="btn primary big" href={href.map()}><Icon name="map" size={18} /> Back to the map</a>
-        <button type="button" className="btn ghost" onClick={onNext}>See the world page</button>
-      </div>
+      {nextWorlds.length > 0 ? (
+        <>
+          {nextWorlds.map((n) => (
+            <div key={n.id} className="wd-next">
+              <a className="btn primary big" href={href.world(n.id)}>{nextWorlds.length > 1 ? 'Next track' : 'Next chapter'}: {n.title} <Icon name="arrow-right" size={18} /></a>
+              {chapterFor(n.id) && <a className="linkish" href={href.chapter(n.id)}>Read the chapter explainer</a>}
+            </div>
+          ))}
+          <div className="actions">
+            <a className="linkish" href={href.map()}>Back to the map</a>
+            <button type="button" className="linkish" onClick={onNext}>See the world page</button>
+          </div>
+        </>
+      ) : (
+        <div className="actions">
+          <a className="btn primary big" href={href.map()}><Icon name="map" size={18} /> Back to the map</a>
+          <button type="button" className="btn ghost" onClick={onNext}>See the world page</button>
+        </div>
+      )}
     </div>
   );
 }

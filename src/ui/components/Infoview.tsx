@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import type { Diagnostic, Goal } from '../../engine/types.ts';
 import type { BodyDiagnostic } from '../lean/offsets.ts';
 import { explain } from '../lean/explain.ts';
@@ -166,11 +166,13 @@ export interface InfoviewProps {
   outputs?: { message: string }[];
   /** Render the `sorry` warning as a calm "to do" note (level play). */
   friendlySorry?: boolean;
+  /** A calm note shown above the goals (e.g. the proof works but misses the tactic the level teaches). */
+  note?: ReactNode;
 }
 
 const sameGoals = (a: Goal[] | null | undefined, b: Goal[] | null | undefined) => !!a && !!b && JSON.stringify(a) === JSON.stringify(b);
 
-export function Infoview({ goals, fallbackGoals, diagnostics, complete, pending, onInsert, onReplace, errorGoals, sorryLeft = false, completeText = 'No goals. The proof is complete.', emptyHint = 'Put the cursor on a line to see the goal there.', outputs = [], friendlySorry = false }: InfoviewProps) {
+export function Infoview({ goals, fallbackGoals, diagnostics, complete, pending, onInsert, onReplace, errorGoals, sorryLeft = false, completeText = 'No goals. The proof is complete.', emptyHint = 'Put the cursor on a line to see the goal there.', outputs = [], friendlySorry = false, note }: InfoviewProps) {
   const [moreOpen, setMoreOpen] = useState(false);
   const errors = diagnostics.filter((d) => d.severity === 'error').sort((a, b) => a.from - b.from);
   const others = diagnostics.filter((d) => d.severity !== 'error');
@@ -200,6 +202,7 @@ export function Infoview({ goals, fallbackGoals, diagnostics, complete, pending,
       </div>
       <div className="sr-only" role="status" aria-live="polite">{summary}</div>
       <div className="info-body">
+        {note && <div className="info-note must-use-note" role="status">{note}</div>}
         {isComplete ? (
           <div className="done-state"><span className="check" aria-hidden="true"><Icon name="check" size={16} strokeWidth={3.5} /></span> {completeText}</div>
         ) : shown ? (

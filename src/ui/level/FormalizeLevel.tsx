@@ -1,3 +1,4 @@
+import { FirstTimeTip } from '../components/FirstTime.tsx';
 import { useMemo, useRef, useState } from 'react';
 import type { FormalizeLevel } from '../../content/types.ts';
 import type { Diagnostic } from '../../engine/types.ts';
@@ -73,7 +74,8 @@ export function FormalizeLevelView({ run, level }: { run: Run; level: FormalizeL
   return (
     <>
       <div className="editor-panel formalize">
-        <SymbolBar onInsert={(s) => editor.current?.insert(s)} />
+        <FirstTimeTip tip="formalize" solved={run.solved} />
+        <SymbolBar levelId={level.id} onInsert={(s) => editor.current?.insert(s)} />
         {level.binders && (
           <div className="header-ro">
             <div className="label">In scope</div>

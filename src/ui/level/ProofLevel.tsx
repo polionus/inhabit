@@ -1,3 +1,4 @@
+import { FirstTimeTip } from '../components/FirstTime.tsx';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ProofLevel } from '../../content/types.ts';
 import type { CheckResult } from '../../engine/types.ts';
@@ -8,7 +9,8 @@ import { mapDiagnostics } from '../lean/offsets.ts';
 import { useCheck } from '../hooks.tsx';
 import { Infoview } from '../components/Infoview.tsx';
 import type { Goal } from '../../engine/types.ts';
-import { Lean } from '../components/Markdown.tsx';
+import { Lean, Markdown } from '../components/Markdown.tsx';
+import { missingTactics, mustUseNote } from './mustUse.ts';
 import { SymbolBar } from '../components/SymbolBar.tsx';
 import type { Run } from './run.ts';
 
@@ -58,6 +60,10 @@ export function ProofLevelView({ run, level }: { run: Run; level: ProofLevel }) 
   const { result: checked, pending } = useCheck(body, () => data.checkBody(run.session, body));
   const result = checked?.result ?? null;
   const bodyOffset = checked?.assembled.bodyOffset ?? 0;
+  const missing = useMemo(
+    () => (result?.complete ? missingTactics(level.mustUse, result.decls.flatMap((d) => d.usedTactics)) : []),
+    [result, level.mustUse],
+  );
   const info = useInfo(result, bodyOffset, body.length, cursor);
 
   const completion = useMemo(() => dataForContext(run.session.ctx), [run.session.ctx]);
@@ -69,7 +75,7 @@ export function ProofLevelView({ run, level }: { run: Run; level: ProofLevel }) 
     const hasErr = !result.ok;
     if (hasErr && !prevErr.current && body.trim() && body !== level.starter) runRef.current.attempt();
     prevErr.current = hasErr;
-    if (result.complete && !pending && body.trim() !== '') {
+    if (result.complete && !pending && body.trim() !== '' && missing.length === 0) {
       const decl = result.decls.find((d) => d.term && d.isTacticProof) ?? result.decls.find((d) => d.term);
       runRef.current.complete({ body, term: level.mode === 'tactic' ? decl?.term : undefined });
     }
@@ -114,7 +120,8 @@ export function ProofLevelView({ run, level }: { run: Run; level: ProofLevel }) 
   return (
     <>
       <div className="editor-panel">
-        <SymbolBar onInsert={(s) => editor.current?.insert(s)} unlocked={run.session.ctx.codex} />
+        {level.mode === 'tactic' && <FirstTimeTip tip="tactic" solved={run.solved} />}
+        <SymbolBar levelId={level.id} onInsert={(s) => editor.current?.insert(s)} unlocked={run.session.ctx.codex} />
         <div className="header-ro" aria-label="Statement (read-only)">
           <Lean code={level.header} />
         </div>
@@ -131,13 +138,14 @@ export function ProofLevelView({ run, level }: { run: Run; level: ProofLevel }) 
           hyps={hyps}
           cursor={placeholderRange(run.initialBody)?.from ?? 'end'}
         />
-        {level.after && <div className="header-ro after"><Lean code={level.after} /></div>}
+        {level.after && <><div className="after-caption">Lean also checks this:</div><div className="header-ro after"><Lean code={level.after} /></div></>}
       </div>
       <Infoview
         goals={info.goals}
         fallbackGoals={info.fallback}
         diagnostics={info.diags}
-        complete={!!result?.complete && !pending}
+        complete={!!result?.complete && !pending && missing.length === 0}
+        note={missing.length ? <Markdown text={mustUseNote(missing)} /> : undefined}
         pending={pending}
         friendlySorry
         onInsert={(n) => editor.current?.insert(n)}
