@@ -43,7 +43,7 @@ export { QuestList } from './components/Quests.tsx';
 export { SiteFooter } from './components/SiteFooter.tsx';
 export { StartLink, useStartTarget } from './components/Start.tsx';
 export { Success, type Reward } from './components/Success.tsx';
-export { Seg, Toggle } from './screens/ProfileScreen.tsx';
+export { Seg, Toggle } from './components/controls.tsx';
 export { WhatToProve } from './levels/WhatToProve.tsx';
 export { shuffledOrder, shuffleItems, useShuffledOrder } from './levels/shuffle.ts';
 export { builtInLevelKinds } from './levels/builtins.ts';

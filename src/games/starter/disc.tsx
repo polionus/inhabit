@@ -25,7 +25,7 @@ import { PatternLevelView, evaluatePattern, type PatternLevel } from './PatternL
 
 function PatternLogo() {
   return (
-    <svg viewBox="0 0 28 28" width="26" height="26" aria-hidden="true" style={{ flex: 'none' }}>
+    <svg viewBox="0 0 28 28" width="32" height="32" focusable="false">
       <rect width="28" height="28" rx="8" fill="var(--primary)" />
       <path
         d="M8.5 9.5L13 6.5M8.5 9.5L19.5 9.5M8.5 9.5L11.5 21M16.5 21.5L20 12.5"
@@ -132,7 +132,7 @@ export const starterDisc: GameDisc = {
     name: meta.name,
     homeTitle: meta.homeTitle,
     description: meta.description,
-    logo: PatternLogo,
+    mark: <PatternLogo />,
     storageKey: meta.storageKey,
     mapViewKey: 'patterncraft.mapView',
     saveAppId: 'patterncraft',

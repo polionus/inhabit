@@ -156,6 +156,10 @@ export function applyTheme(
   }
   const css = themeCss(resolved);
   if (styleEl.textContent !== css) styleEl.textContent = css;
+  // The pre-paint script in index.html colors <html> inline from the cached splash; once the real theme CSS
+  // is in, drop those inline colors, or a later light/dark switch would leave the old one showing on <html>.
+  document.documentElement.style.removeProperty('background');
+  document.documentElement.style.removeProperty('color');
 
   const metaLight = document.querySelector('meta[name="theme-color"][media*="light"]');
   const metaDark = document.querySelector('meta[name="theme-color"][media*="dark"]');

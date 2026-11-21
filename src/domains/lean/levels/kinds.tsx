@@ -1,12 +1,16 @@
-import { useMemo } from 'react';
+import { lazy, Suspense, useMemo } from 'react';
 import { CodeBlock as Lean } from '../../../template/components/Markdown.tsx';
 import type { LevelKindDef, LevelRenderProps } from '../../../template/types.ts';
 import { getLeanRuntime } from '../context.ts';
 import type { LeanChoiceLevel, FormalizeLevel, LeanLevel, ParsonsLevel, PredictLevel, ProofLevel } from '../types.ts';
-import { ChoiceLevelView, PredictLevelView } from './ChoiceLevel.tsx';
-import { FormalizeLevelView } from './FormalizeLevel.tsx';
-import { ParsonsLevelView } from './ParsonsLevel.tsx';
-import { ProofLevelView } from './ProofLevel.tsx';
+
+// The views (and CodeMirror behind ProofLevel) load with the first level, not with the app shell.
+const ProofLevelView = lazy(() => import('./ProofLevel.tsx').then((m) => ({ default: m.ProofLevelView })));
+const ParsonsLevelView = lazy(() => import('./ParsonsLevel.tsx').then((m) => ({ default: m.ParsonsLevelView })));
+const ChoiceLevelView = lazy(() => import('./ChoiceLevel.tsx').then((m) => ({ default: m.ChoiceLevelView })));
+const PredictLevelView = lazy(() => import('./ChoiceLevel.tsx').then((m) => ({ default: m.PredictLevelView })));
+const FormalizeLevelView = lazy(() => import('./FormalizeLevel.tsx').then((m) => ({ default: m.FormalizeLevelView })));
+const loading = <div className="level-loading" aria-busy="true" />;
 import type { LiveState, Run } from './run.ts';
 
 function useLeanRun(props: LevelRenderProps): Run {
@@ -36,27 +40,27 @@ function useLeanRun(props: LevelRenderProps): Run {
 
 function ProofKind(props: LevelRenderProps) {
   const run = useLeanRun(props);
-  return <ProofLevelView run={run} level={props.level as ProofLevel} />;
+  return <Suspense fallback={loading}><ProofLevelView run={run} level={props.level as ProofLevel} /></Suspense>;
 }
 
 function ParsonsKind(props: LevelRenderProps) {
   const run = useLeanRun(props);
-  return <ParsonsLevelView run={run} level={props.level as ParsonsLevel} />;
+  return <Suspense fallback={loading}><ParsonsLevelView run={run} level={props.level as ParsonsLevel} /></Suspense>;
 }
 
 function ChoiceKind(props: LevelRenderProps) {
   const run = useLeanRun(props);
-  return <ChoiceLevelView run={run} level={props.level as LeanChoiceLevel} />;
+  return <Suspense fallback={loading}><ChoiceLevelView run={run} level={props.level as LeanChoiceLevel} /></Suspense>;
 }
 
 function PredictKind(props: LevelRenderProps) {
   const run = useLeanRun(props);
-  return <PredictLevelView run={run} level={props.level as PredictLevel} />;
+  return <Suspense fallback={loading}><PredictLevelView run={run} level={props.level as PredictLevel} /></Suspense>;
 }
 
 function FormalizeKind(props: LevelRenderProps) {
   const run = useLeanRun(props);
-  return <FormalizeLevelView run={run} level={props.level as FormalizeLevel} />;
+  return <Suspense fallback={loading}><FormalizeLevelView run={run} level={props.level as FormalizeLevel} /></Suspense>;
 }
 
 export function createLeanLevelKinds(): Record<string, LevelKindDef> {

@@ -64,6 +64,11 @@ export function buildNav(disc: GameDisc): {
   const items: NavItem[] = [];
   const groupDefs = disc.navGroups ?? DEFAULT_GROUPS;
   const all = [...core.filter((i) => i.group !== 'reference'), ...extras, ...core.filter((i) => i.group === 'reference')];
+  const order = disc.navOrder;
+  if (order) {
+    const rank = (n: string) => { const i = order.indexOf(n); return i < 0 ? order.length : i; };
+    all.sort((a, b) => rank(a.name) - rank(b.name)); // stable: unlisted items keep their default order
+  }
   const seen = new Set<string>();
   for (const it of all) {
     if (!seen.has(it.name)) {
@@ -124,7 +129,7 @@ function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <a className={`brand ${compact ? 'compact' : ''}`} href={href.home()} aria-label={`${brand.name}, home`}>
       <span className="brand-mark" aria-hidden="true">
-        <DefaultBrandMark name={brand.name} />
+        {brand.mark ?? <DefaultBrandMark name={brand.name} />}
       </span>
       {!compact && <span className="brand-word">{brand.name}</span>}
     </a>

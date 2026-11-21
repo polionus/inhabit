@@ -1,15 +1,13 @@
+import { lazy, Suspense, type ComponentType, type ReactElement } from 'react';
 import '../../domains/lean/styles/coach.css';
 import { registerLeanRuntime } from '../../domains/lean/context.ts';
 import { highlightHtml } from '../../domains/lean/editor/highlightCore.ts';
 import { hintRevealsSolution } from '../../domains/lean/editor/hints.ts';
 import { createLeanLevelKinds } from '../../domains/lean/levels/kinds.tsx';
-import { StuckHelp } from '../../domains/lean/levels/StuckHelp.tsx';
 import type { LiveState } from '../../domains/lean/levels/run.ts';
 import type { LeanLevel } from '../../domains/lean/types.ts';
 import { FirstTimeTip } from '../../domains/lean/components/FirstTime.tsx';
-import { Inventory } from '../../domains/lean/components/Inventory.tsx';
 import { LiveDemo } from '../../domains/lean/components/LiveDemo.tsx';
-import { OpenInLean } from '../../domains/lean/components/OpenInLean.tsx';
 import {
   Card,
   Icon,
@@ -25,9 +23,8 @@ import {
   type TemplateWorld,
 } from '../../template/index.ts';
 import { INHABIT_BADGE_GROUPS, INHABIT_BADGES, INHABIT_QUEST_OPTIONS, INHABIT_RANKS } from './badges.ts';
-import { hasPractice } from './arena/practice.ts';
+import { practiceLevels } from './arena/practiceLevels.ts';
 import { useArenaSummary } from './arena/state/summary.ts';
-import { ShareButton } from './arena-ui/ShareButton.tsx';
 import { chapterMeta } from './content/chapters/meta.ts';
 import { guideMeta, guideSections } from './content/guideMeta.ts';
 import {
@@ -43,10 +40,25 @@ import { data, engine, getCodex, loadLessons } from './data.ts';
 import { exhibits, exhibitGroups, type ExhibitId } from './gallery/registry.ts';
 import { exhibitLoaders } from './gallery-ui/loaders.ts';
 import { thumbs } from './gallery-ui/thumbs.tsx';
-import { PracticeOffer } from './practice-ui/PracticeOffer.tsx';
 import { AfterHint } from './AfterHint.tsx';
 import { meta } from './meta.ts';
 import { href as inhabitHref } from './routes.ts';
+
+/**
+ * Level-screen pieces load with the level screen, not with the app shell (they pull in the stuck coach,
+ * the practice generator and the share codec). `fallback={null}`: each is a secondary control.
+ */
+function lazyPart<P extends object>(load: () => Promise<ComponentType<P>>): (props: P) => ReactElement {
+  const L = lazy(() => load().then((c) => ({ default: c }))) as unknown as ComponentType<P>;
+  return function LazyPart(props: P) {
+    return <Suspense fallback={null}><L {...props} /></Suspense>;
+  };
+}
+const StuckHelp = lazyPart(() => import('../../domains/lean/levels/StuckHelp.tsx').then((m) => m.StuckHelp));
+const Inventory = lazyPart(() => import('../../domains/lean/components/Inventory.tsx').then((m) => m.Inventory));
+const OpenInLean = lazyPart(() => import('../../domains/lean/components/OpenInLean.tsx').then((m) => m.OpenInLean));
+const ShareButton = lazyPart(() => import('./arena-ui/ShareButton.tsx').then((m) => m.ShareButton));
+const PracticeOffer = lazyPart(() => import('./practice-ui/PracticeOffer.tsx').then((m) => m.PracticeOffer));
 
 const DEFAULT_INHABIT_SANDBOX = `#check Nat.add_comm
 #eval 2 + 3
@@ -242,7 +254,16 @@ export const inhabitDisc: GameDisc = {
     saveAppId: 'inhabit',
     footerLinks: [{ label: 'Open source (MIT)', href: 'https://github.com/polionus/inhabit', external: true }],
     footerNote: 'Independent project, not affiliated with the Lean developers.',
+    // The turnstile-like mark Inhabit has always used.
+    mark: (
+      <svg viewBox="0 0 32 32" width="32" height="32" focusable="false">
+        <rect width="32" height="32" rx="9" fill="var(--primary)" />
+        <path d="M10.5 7.5v17M10.5 16h12" stroke="#fff" strokeWidth="3.6" strokeLinecap="round" fill="none" />
+        <circle cx="23.2" cy="16" r="2.3" fill="var(--gold)" />
+      </svg>
+    ),
   },
+  navOrder: ['home', 'map', 'gallery', 'review', 'arena', 'workshop', 'sandbox', 'guide', 'codex', 'graduate', 'about'],
   theme: {
     preset: 'indigo',
     defaultMode: 'dark',
@@ -508,7 +529,8 @@ export const inhabitDisc: GameDisc = {
       const player = usePlayer();
       return {
         dailyDone: player.starsMax > 0 ? arena.dailyDone : null,
-        practiceable: hasPractice,
+        // The precomputed list, not hasPractice(): that runs the puzzle generator, on every dashboard render.
+        practiceable: (id) => practiceLevels.has(id),
         practiceLink: (id) => inhabitHref.practice(id),
         dailyLink: inhabitHref.arena('daily'),
         workshopLink: inhabitHref.workshop(),

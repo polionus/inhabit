@@ -9,6 +9,9 @@ import { PlayerCard } from '../shell/PlayerCard.tsx';
 import { Card, Icon, ProgressBar, ScreenHeader, StatTile, type IconName } from '../components/kit.tsx';
 import { WorldToken, worldStatus } from '../components/world.tsx';
 import { href } from '../router.ts';
+import { Seg, Toggle } from '../components/controls.tsx';
+
+export { Seg, Toggle };
 
 const DEFAULT_GROUPS: { id: string; title: string; icon: IconName }[] = [
   { id: 'path', title: 'The path', icon: 'map' },
@@ -18,50 +21,6 @@ const DEFAULT_GROUPS: { id: string; title: string; icon: IconName }[] = [
   { id: 'reading', title: 'Reading', icon: 'guide' },
   { id: 'arena', title: 'Arena', icon: 'arena' },
 ];
-
-export function Seg<T extends string>({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string;
-  value: T;
-  options: [T, string][];
-  onChange: (v: T) => void;
-}) {
-  return (
-    <div className="seg-field" role="radiogroup" aria-label={label}>
-      <span className="seg-label">{label}</span>
-      <div className="seg">
-        {options.map(([v, l]) => (
-          <button key={v} type="button" role="radio" aria-checked={value === v} className={value === v ? 'on' : ''} onClick={() => onChange(v)}>
-            {l}
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-export function Toggle({
-  label,
-  desc,
-  checked,
-  onChange,
-}: {
-  label: string;
-  desc?: string;
-  checked: boolean;
-  onChange: (v: boolean) => void;
-}) {
-  return (
-    <label className="toggle-row">
-      <span className="tr-text"><span className="tr-label">{label}</span>{desc && <span className="tr-desc">{desc}</span>}</span>
-      <input type="checkbox" role="switch" className="switch" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-    </label>
-  );
-}
 
 export function ProfileScreen() {
   const disc = useDisc();

@@ -36,12 +36,13 @@ npm run build:starter # builds Patterncraft (no Lean engine or CodeMirror in bun
 
 2. **Author content & implement `GameDisc` in `src/games/<your-id>/disc.tsx`**:
    Import types and helpers from `../../template/index.ts`. Key fields of `GameDisc`:
-   - `brand`: App identity, optional custom `<logo />`, storage key, footer links.
+   - `brand`: App identity, optional `mark` (just the 32×32 icon beside the name) or a full custom `<logo />`, storage key, footer links.
    - `theme`: Built-in palette preset + optional light/dark/typography/radius/layout overrides + `worldVisuals` + optional player palette picker toggle.
    - `worlds`, `allCodex`, `codexKinds`, `findLevel`: Curriculum DAG and reference codex.
    - `lessons`, `chapters`, `guide`, `gallery`: Optional learning prose and interactive exhibits.
    - `levelKinds`: Custom `LevelKindDef` renderers merged on top of the template’s built-in level kinds.
-   - `extraScreens`: Optional domain-specific routes mounted at `#/<name>` and optionally surfaced in navigation.
+   - `extraScreens`: Optional domain-specific routes mounted at `#/<name>` and optionally surfaced in navigation. `navOrder` (a list of nav item names) sets the sidebar order when the default (core items, then extras) isn't what you want.
+   - Keep the disc file light: it loads with the app shell. Import screen-only components lazily (see `lazyPart` in `src/games/inhabit/disc.tsx`), and make heavy level views `lazy` inside your level kinds, as `src/domains/lean/levels/kinds.tsx` does.
    - `progression`: Custom rank ladders, achievement badges/groups, daily quest configuration, lesson auto-open heuristics.
    - `hooks`: Optional slots for domain banners, dashboard widgets, PlayerCard/Profile stats, custom settings toggles, hint filters, inventory drawers, and custom stuck-help panels.
 

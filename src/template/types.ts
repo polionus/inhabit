@@ -330,6 +330,8 @@ export interface GameBrand {
   homeTitle: string;
   description: string;
   logo?: ComponentType<{ compact?: boolean }>;
+  /** Just the 32×32 mark beside the name (the default is the name's first letter). Ignored when `logo` is set. */
+  mark?: ReactNode;
   footerLinks?: { label: string; href: string; external?: boolean }[];
   footerNote?: string;
   storageKey?: string;
@@ -378,6 +380,8 @@ export interface GameDisc {
   /** Extra screens mounted at `#/<name>` and optionally added to navigation. */
   extraScreens?: ExtraScreenDef[];
   navGroups?: { id: string; label: string }[];
+  /** Nav item names in display order; unlisted items keep their default order after the listed ones. */
+  navOrder?: string[];
 
   code?: {
     highlightHtml?: (code: string, lang?: string) => string;

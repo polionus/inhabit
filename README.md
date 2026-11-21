@@ -28,13 +28,13 @@ By the end, you can take a mathematical statement of your own, formalize it in L
 
 ## How it works
 
-Lean code is checked in the browser by a purpose-built "mini-Lean" engine in TypeScript (`src/engine`): a parser for a subset of Lean 4 syntax, a small dependent-type-theory kernel, an elaborator, and about 40 tactics. Tactics build real proof terms, which the kernel re-checks, and the game can show you the term they built.
+Lean code is checked in the browser by a purpose-built "mini-Lean" engine in TypeScript (`src/domains/lean/engine`): a parser for a subset of Lean 4 syntax, a small dependent-type-theory kernel, an elaborator, and about 40 tactics. Tactics build real proof terms, which the kernel re-checks, and the game can show you the term they built.
 
 The engine is a faithful subset, not real Lean. It has no type classes and no automation such as `simp` or `omega`, and it handles natural numbers only. Names and statements mirror Lean core and Mathlib so that what you learn transfers.
 
 Fidelity is tested against the real thing. Every reference solution is compiled by Lean 4 (v4.25.1) in CI, using `lean-verify/`, a small Lean project that mirrors the game's library. A differential corpus checks that the engine and real Lean agree on which snippets are accepted, and a soundness suite of adversarial inputs guards the kernel.
 
-The Arena's puzzles come from a generator in `src/arena/gen`. It is seeded and deterministic: the same seed and family give the same puzzle in every browser. An intuitionistic propositional prover produces the reference proofs. Every generated puzzle is checked by the engine when it is made, so a puzzle that the engine cannot solve is never offered. `npm run verify:arena` compiles a sample of each family in real Lean, and CI runs it too.
+The Arena's puzzles come from a generator in `src/games/inhabit/arena/gen`. It is seeded and deterministic: the same seed and family give the same puzzle in every browser. An intuitionistic propositional prover produces the reference proofs. Every generated puzzle is checked by the engine when it is made, so a puzzle that the engine cannot solve is never offered. `npm run verify:arena` compiles a sample of each family in real Lean, and CI runs it too.
 
 ## How the teaching is designed
 

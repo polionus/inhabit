@@ -24,22 +24,22 @@ toolchain `v4.25.1`, project in `lean-verify/`): every reference solution in the
 both the mini-engine and real Lean.
 
 ```
-src/engine/      mini-Lean: lexer, parser, kernel, elaborator, tactics, printer   (ENGINE agent)
+src/domains/lean/engine/      mini-Lean: lexer, parser, kernel, elaborator, tactics, printer   (ENGINE agent)
   types.ts         public contract (frozen; ask the orchestrator before changing)
   index.ts         exports `engine: Engine`
-src/content/     pure data
+src/games/inhabit/content/     pure data
   types.ts         content schema (frozen)
   index.ts         registry + levelContext() (orchestrator-owned)
   worlds/<id>.ts   one file per world: levels, codex entries, lemma bank  (CONTENT agents)
   ideas.ts, graduate.ts   capstone material                               (forge author)
   lessons/<id>.ts  long-form prose per world: primer, recap, one lesson per level (§9)
   guide.ts, screens.ts   Guide articles and per-screen explanatory copy (§9)
-src/arena/       generated puzzles and competitive play (§10)
+src/games/inhabit/arena/       generated puzzles and competitive play (§10)
   types.ts         generator contract (frozen)
   gen/             the puzzle generator: pure, deterministic, Node-safe
   state/, net/     ratings, modes, bots, share codes, peer-to-peer transport
-src/ui/arena/    Arena screens
-src/ui/, src/state/, src/main.tsx   the React app                         (UI agent)
+src/games/inhabit/arena-ui/    Arena screens
+src/template/, src/template/state/, src/main.tsx   the React app                         (UI agent)
 scripts/verify-lean.ts   compiles all content in real Lean
 lean-verify/Game/Core.lean   real-Lean mirror of the engine's base library (reference; frozen)
 docs/            this spec
@@ -53,7 +53,7 @@ docs/            this spec
 - **Do not run `git commit`/`git add`** — the orchestrator commits. Do not spawn subagents.
 - TypeScript: strict; `erasableSyntaxOnly` (no `enum`, no parameter properties, no namespaces);
   **relative imports must carry the `.ts`/`.tsx` extension**; use `import type` for types.
-  Everything under `src/engine` and `src/content` must also run under plain Node 24
+  Everything under `src/domains/lean/engine` and `src/games/inhabit/content` must also run under plain Node 24
   (`node file.ts`, type-stripping) — no DOM, no Vite-only features there.
 - New npm dependencies: only if clearly needed; install with `npm install <pkg>` (never hand-edit
   `package.json`).
@@ -66,7 +66,7 @@ docs/            this spec
 
 ## 3. The mini-Lean engine
 
-Implements `src/engine/types.ts`. Guiding rule: **when in doubt, do exactly what Lean 4 does**
+Implements `src/domains/lean/engine/types.ts`. Guiding rule: **when in doubt, do exactly what Lean 4 does**
 (syntax, semantics, goal display, error wording). It is a teaching tool: error messages and goal
 display matter as much as acceptance.
 
@@ -168,7 +168,7 @@ diagnostic codes. `sorry` is always allowed (warning, `complete = false`).
 - Speed: `check` on a typical level in a few ms; `baseEnv()` cached; `Env` persistent/immutable.
 
 ### 3.6 Tests
-Vitest suite in `src/engine/**/*.test.ts` covering every tactic and syntax form above, error
+Vitest suite in `src/domains/lean/engine/**/*.test.ts` covering every tactic and syntax form above, error
 cases, and a **differential corpus**: a list of Lean snippets (accept *and* reject cases) kept in
 one data file, each checked by the mini-engine in vitest and — via a small script — by real Lean
 (`import Game.Core`), asserting both agree on accept/reject. `lean-verify/Game/Smoke.lean` is a
@@ -178,7 +178,7 @@ starting corpus; all of it must pass.
 
 ## 4. Curriculum
 
-Ten worlds. Dependency graph (also in `src/content/worlds/*.ts` stubs — keep ids/titles/requires):
+Ten worlds. Dependency graph (also in `src/games/inhabit/content/worlds/*.ts` stubs — keep ids/titles/requires):
 
 ```
 types → props → logic → quant → eq ─┬→ nat ──→ num ─┐
@@ -294,7 +294,7 @@ automation tactics), with a phrasebook from game names to Mathlib names.
 
 ## 6. Content pipeline
 
-- A world file exports `world: World` (schema in `src/content/types.ts`; follow the field docs
+- A world file exports `world: World` (schema in `src/games/inhabit/content/types.ts`; follow the field docs
   there to the letter). Lean code goes in template strings; escape backslashes/backticks.
 - Environment for a level = engine base library + lemma-bank entries selected by
   `levelContext(levelId)` (earlier `unlocks.lemmas`, plus `grants`). Base-library names
@@ -324,7 +324,7 @@ card `#/share/:code` (§10.5).
   read-only header + CodeMirror editor for the body; **live infoview** (goals at cursor via
   `engine.goalsAt`, diagnostics); inventory drawer (unlocked tactics / lemmas / codex with
   one-click docs); hint ladder; on success: outro, optional proof-term reveal, self-rating, next.
-  Each level kind in `src/content/types.ts` has its own interaction (see field docs).
+  Each level kind in `src/games/inhabit/content/types.ts` has its own interaction (see field docs).
 - **Editor**: Lean syntax highlighting; Unicode abbreviations (`\to` → `→`, etc., replaced on
   space/tab/non-identifier char) and a clickable symbol bar; debounced checking; error squiggles;
   clicking a hypothesis or inventory item inserts its name.
@@ -335,7 +335,7 @@ card `#/share/:code` (§10.5).
 - **Review**: spaced-repetition session per §5.4. **Codex**: collection of unlocked entries,
   searchable. **Sandbox**: free editor with everything unlocked, `#check/#eval`, and "Open in
   real Lean" (live.lean-lang.org with the code). **Workshop**: the §5.5 wizard; saves the
-  learner's theorems. **Graduate**: the real-Lean guide from `src/content/graduate.ts`.
+  learner's theorems. **Graduate**: the real-Lean guide from `src/games/inhabit/content/graduate.ts`.
 - Persistence: `localStorage`, versioned key, export/import save as JSON, reset.
 - Quality bar: keyboard accessible, responsive down to phone width (symbol bar matters there),
   light + dark themes, reduced-motion respected, no layout shift on check, fast.
@@ -356,7 +356,7 @@ card `#/share/:code` (§10.5).
 ## 9. Prose layers (v2)
 
 The game explains itself in four layers, from shortest to longest. Schema and the fence
-convention for code blocks are in `src/content/types.ts` ("Prose layers").
+convention for code blocks are in `src/games/inhabit/content/types.ts` ("Prose layers").
 
 | Layer | Where | Length | Job |
 |---|---|---|---|
@@ -365,7 +365,7 @@ convention for code blocks are in `src/content/types.ts` ("Prose layers").
 | **Primer** / recap (`WorldLessons`) | world page | 400–700 / 80–160 words | the chapter: the question this world answers, its notions in order |
 | **Guide** (`GuideArticle`) | `#/guide` | 500–1000 words each | Lean itself: what it is, what it can do, how it works, its ecosystem |
 
-Plus `ScreenIntro` copy (`src/content/screens.ts`): every screen says what it is for and how to
+Plus `ScreenIntro` copy (`src/games/inhabit/content/screens.ts`): every screen says what it is for and how to
 use it.
 
 Rules for all prose:
@@ -385,14 +385,14 @@ Rules for all prose:
 The curriculum is finite; the Arena is not. It gives a reason to come back every day and
 something to send to a friend. Everything runs on static hosting.
 
-### 10.1 Generator (`src/arena/gen`, contract `src/arena/types.ts`)
+### 10.1 Generator (`src/games/inhabit/arena/gen`, contract `src/games/inhabit/arena/types.ts`)
 Pure and deterministic: the same `(seed, family, target)` yields the same puzzle in every
 browser, so a seed in a URL *is* a shared puzzle. No `Math.random`, no `Date`. Every generated
 proof puzzle carries a reference solution that the mini-engine accepts under the puzzle's
 `allowedTactics`; `scripts/verify-arena.ts` samples the generator and compiles the samples in
 real Lean. Families: `prop`, `inhabit`, `quant`, `set`, `quick` (see the contract). Puzzles are
 rated from about 400 to 1900 (the range depends on the family) by an estimate of proof
-difficulty. `src/arena/plan.ts` (frozen) turns seeds
+difficulty. `src/games/inhabit/arena/plan.ts` (frozen) turns seeds
 and dates into the sets each mode plays: `dailySet`, `rushSlot`, `duelSet`, `sequence`, `nth`.
 
 ### 10.2 Modes
@@ -416,7 +416,7 @@ and dates into the sets each mode plays: `dailySet`, `rushSlot`, `duelSet`, `seq
 ### 10.3 State
 Arena state (rating, history, bests, daily results, display name) lives in its own store under
 its own `localStorage` key and is included in the save export. The Arena reports to the main
-game store through `game().recordEvent(e)` (`src/state/events.ts`), which awards XP and advances
+game store through `game().recordEvent(e)` (`src/template/state/events.ts`), which awards XP and advances
 daily quests and badges.
 
 ### 10.4 Fair play and honesty
@@ -535,7 +535,7 @@ bots that explain their proofs; ghost replays; any gate on a boss; analytics.
 
 ## 13. Reading and reuse (v4)
 
-- **Chapter explainers.** Each world has a blog-style article (`ChapterExplainer`, src/content/chapters/<world>.ts,
+- **Chapter explainers.** Each world has a blog-style article (`ChapterExplainer`, src/games/inhabit/content/chapters/<world>.ts,
   900–1500 words, 4–7 sections, checked Lean blocks with the end-of-world inventory). It goes deeper than the primer
   (which stays the short story on the world page) and never lists the levels; the page adds the contents itself.
   Route `#/chapter/<world>`.
@@ -553,8 +553,8 @@ bots that explain their proofs; ghost replays; any gate on a boss; analytics.
   biggest cliffs (first tactic, `const` before `swapArgs`, first formalize, image vs preimage). `mustUse` makes a level
   insist on the tactic it teaches (eq-08 `calc`, logic-12 `by_cases`). Each kind of screen gets a one-time inline tip,
   skipped for players who have already finished a level of that kind. After a boss, the next chapter is the main action.
-- **Gallery (v4.6).** `#/gallery`: interactive exhibits (src/gallery/registry.ts; components in src/ui/gallery/exhibits,
-  each its own lazy chunk; pure logic in src/gallery/<id>.ts with tests). Rule: anything presented as Lean (statements,
+- **Gallery (v4.6).** `#/gallery`: interactive exhibits (src/games/inhabit/gallery/registry.ts; components in src/games/inhabit/gallery-ui/exhibits,
+  each its own lazy chunk; pure logic in src/games/inhabit/gallery/<id>.ts with tests). Rule: anything presented as Lean (statements,
   goals, terms, proofs) comes from the engine or the arena prover and is checked; pure visuals (Venn regions, arrows,
   truth tables) may be computed in TS. Exhibits earn nothing and cost nothing. Chapter and world pages link to theirs;
   Home shows a strip for new visitors and one exhibit a day on the dashboard.
