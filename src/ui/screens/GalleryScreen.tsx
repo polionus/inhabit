@@ -1,5 +1,6 @@
 /** The Gallery: a grid of interactive exhibits, and one exhibit at a time at `#/gallery/<id>`. */
-import { lazy, Suspense, useMemo } from 'react';
+import { lazy, Suspense, useEffect, useMemo } from 'react';
+import { game } from '../game.ts';
 import { exhibits, exhibitById, type ExhibitId } from '../../gallery/registry.ts';
 import { exhibitLoaders } from '../gallery/loaders.ts';
 import { data } from '../data.ts';
@@ -32,6 +33,9 @@ const worldTitle = (w: string): string => data.worlds.find((x) => x.id === w)?.t
 function ExhibitPage({ id }: { id: string }) {
   const meta = exhibitById(id);
   const Exhibit = useMemo(() => (meta ? lazy(exhibitLoaders[meta.id as ExhibitId]) : null), [meta]);
+  useEffect(() => {
+    if (meta) game().markSeen(`gallery:${meta.id}`);
+  }, [meta]);
   if (!meta || !Exhibit) {
     return (
       <div className="page">

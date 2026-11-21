@@ -9,6 +9,7 @@ import { hintRevealsSolution } from '../lean/hints.ts';
 import { Inventory } from '../components/Inventory.tsx';
 import { Lean, Markdown } from '../components/Markdown.tsx';
 import { Success, type Reward } from '../components/Success.tsx';
+import { AfterHint } from './AfterHint.tsx';
 import { ShareButton } from '../arena/ShareButton.tsx';
 import { Icon, Modal, Pill, Stars } from '../components/kit.tsx';
 import { WorldToken, worldStatus } from '../components/world.tsx';
@@ -281,6 +282,9 @@ export function LevelPlayer(props: LevelPlayerProps) {
               </>
             }
           />
+        )}
+        {outcome && mode === 'play' && (
+          <AfterHint levelId={levelId} hints={helpUsed} studied={outcome.studied} />
         )}
         {!outcome && mode === 'review' && showSolution && (
           <div className="actions"><button className="btn primary" onClick={props.onNext}>{props.nextLabel ?? 'Continue'} <KbdHint /></button></div>

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { chapterFor } from '../../content/chapters/full.ts';
 import { data } from '../data.ts';
 import { lazyData, getArticle } from '../lazyData.ts';
-import { useGame } from '../game.ts';
+import { game, useGame } from '../game.ts';
 import { worldUnlocked } from '../../state/progress.ts';
 import { Markdown } from '../components/Markdown.tsx';
 import { LevelRows, readMinutes } from '../components/ChapterLevels.tsx';
@@ -27,6 +27,7 @@ export function ChapterScreen({ id }: { id: string }) {
   );
   useEffect(() => {
     window.scrollTo(0, 0);
+    if (chapterFor(id)) game().markSeen(`chapter:${id}`);
   }, [id]);
   useEffect(() => {
     const hs = body.current?.querySelectorAll('h2');

@@ -153,6 +153,8 @@ pre.raw { font-size: .84rem; white-space: pre-wrap; margin: .3rem 0; overflow-wr
 .term pre.code { white-space: pre-wrap; overflow-wrap: anywhere; overflow-x: hidden; max-height: 14rem; overflow-y: auto; }
 .term pre.code code { white-space: pre-wrap; overflow-wrap: anywhere; }
 .already { display: flex; align-items: center; gap: .5rem; font-size: .85rem; color: var(--muted); margin-top: .8rem; }
+.after-hint { display: flex; align-items: flex-start; gap: .5rem; font-size: .9rem; margin: .9rem 0 0; padding: .6rem .8rem; border-radius: 10px; background: var(--surface-2); }
+.after-hint > svg { color: var(--accent); flex: none; margin-top: .15rem; }
 
 /* success */
 .success {

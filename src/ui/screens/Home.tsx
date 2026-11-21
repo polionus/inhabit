@@ -15,6 +15,8 @@ import { WorldToken, worldStatus } from '../components/world.tsx';
 import { usePlayer, useQuests } from '../usePlayer.ts';
 import { useArenaSummary } from '../../arena/state/summary.ts';
 import type { Blurb } from '../../content/types.ts';
+import { useRecommendations, dismissRec } from '../useRecommend.ts';
+import type { Rec, RecKind } from '../../state/recommend.ts';
 
 const BLURB_ICONS: IconName[] = ['turnstile', 'sparkle', 'target', 'graduate'];
 
@@ -153,16 +155,85 @@ function StreakCard() {
   );
 }
 
+const REC_META: Record<RecKind, { label: string; icon: IconName; verb: string }> = {
+  continue: { label: 'Up next', icon: 'play', verb: 'Continue' },
+  review: { label: 'Review', icon: 'review', verb: 'Start the review' },
+  redo: { label: 'Solve it yourself', icon: 'book', verb: 'Try it again' },
+  practice: { label: 'Practice', icon: 'target', verb: 'Practice' },
+  boss: { label: 'Test out', icon: 'crown', verb: 'Face the boss' },
+  daily: { label: 'Daily Proof', icon: 'calendar', verb: 'Play today’s set' },
+  chapter: { label: 'Read', icon: 'guide', verb: 'Read the chapter' },
+  gallery: { label: 'Gallery', icon: 'sparkle', verb: 'Open the exhibit' },
+  workshop: { label: 'Workshop', icon: 'workshop', verb: 'Open the Workshop' },
+};
+
+/** The top suggestion, why, and two different alternatives (src/state/recommend.ts). */
+function NextForYou({ start, recs }: { start: ReturnType<typeof useStartTarget>; recs: Rec[] }) {
+  const save = useGame((s) => s.save);
+  const top = recs[0];
+  if (!top) {
+    return (
+      <Card tone="primary" as="section" className="dash-continue" aria-labelledby="cont-h">
+        <div className="dc-text">
+          <span className="eyebrow">Next for you</span>
+          <h2 id="cont-h">Prove something of your own</h2>
+          <p className="muted">The Workshop takes a statement from English to a proved Lean theorem.</p>
+          <a className="btn primary huge" href={start.href}><Icon name="workshop" size={20} /> Open the Workshop</a>
+        </div>
+      </Card>
+    );
+  }
+  const m = REC_META[top.kind];
+  const w = top.worldId ? data.worlds.find((x) => x.id === top.worldId) : undefined;
+  const st = w ? worldStatus(w, save) : null;
+  return (
+    <Card tone="primary" as="section" className="dash-continue dash-next" aria-labelledby="cont-h">
+      {w && st && <WorldToken world={w} size={104} state={st.state} progress={st.frac} />}
+      <div className="dc-text">
+        <span className="eyebrow">Next for you · {m.label}</span>
+        <h2 id="cont-h">{top.title}</h2>
+        <p className="dc-why">{top.reason}</p>
+        {w && st && (top.kind === 'continue' || top.kind === 'boss') && (
+          <div className="dc-progress">
+            <ProgressBar value={st.frac} size="sm" label={`${w.title}: ${st.done} of ${st.total} levels`} />
+            <span className="tnum">{st.done}/{st.total}</span>
+            <Pill tone="gold" icon="star">{st.stars.earned}/{st.stars.total}</Pill>
+          </div>
+        )}
+        <div className="dc-actions">
+          <a className="btn primary huge" href={top.href}><Icon name={m.icon} size={20} /> {m.verb}</a>
+          <span className="muted small tnum">About {top.minutes} min</span>
+          <button type="button" className="btn ghost small" onClick={() => dismissRec(top)} aria-label={`Not now: hide “${top.title}” until tomorrow`}>Not now</button>
+        </div>
+        {recs.length > 1 && (
+          <div className="dc-alts">
+            <span className="eyebrow">Or</span>
+            <ul>
+              {recs.slice(1).map((r) => (
+                <li key={r.key}>
+                  <a href={r.href}>
+                    <Icon name={REC_META[r.kind].icon} size={16} />
+                    <span><strong>{r.title}</strong><span className="muted small">{r.reason}</span></span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
 function Dashboard() {
   const start = useStartTarget();
   const save = useGame((s) => s.save);
   const p = usePlayer();
   const quests = useQuests();
-  const cont = start.kind === 'continue' ? data.findLevel(start.href.replace('#/level/', '')) : undefined;
-  const st = cont ? worldStatus(cont.world, save) : null;
   const unread = guideMeta.find((a) => !save.seen[`guide:${a.id}`]);
   const studiedIds = data.worlds.flatMap((w) => w.levels).filter((l) => save.levels[l.id]?.status === 'studied').map((l) => l.id);
   const qDone = quests.filter((q) => q.done).length;
+  const recs = useRecommendations(3);
   return (
     <div className="page wide dash">
       <header className="dash-head">
@@ -172,30 +243,7 @@ function Dashboard() {
         </div>
       </header>
       <div className="dash-grid">
-        <Card tone="primary" as="section" className="dash-continue" aria-labelledby="cont-h">
-          {cont && st ? (
-            <>
-              <WorldToken world={cont.world} size={104} state={st.state} progress={st.frac} />
-              <div className="dc-text">
-                <span className="eyebrow">Up next · {cont.world.title}</span>
-                <h2 id="cont-h">{cont.level.title}</h2>
-                <div className="dc-progress">
-                  <ProgressBar value={st.frac} size="sm" label={`${cont.world.title}: ${st.done} of ${st.total} levels`} />
-                  <span className="tnum">{st.done}/{st.total}</span>
-                  <Pill tone="gold" icon="star">{st.stars.earned}/{st.stars.total}</Pill>
-                </div>
-                <a className="btn primary huge" href={start.href}><Icon name="play" size={20} /> Continue</a>
-              </div>
-            </>
-          ) : (
-            <div className="dc-text">
-              <span className="eyebrow">Every world is done</span>
-              <h2 id="cont-h">Prove something of your own</h2>
-              <p className="muted">The Workshop takes a statement from English to a proved Lean theorem.</p>
-              <a className="btn primary huge" href={start.href}><Icon name="workshop" size={20} /> Open the Workshop</a>
-            </div>
-          )}
-        </Card>
+        <NextForYou start={start} recs={recs} />
 
         <Card as="section" className="dash-quests" aria-labelledby="q-h">
           <div className="card-head">
@@ -215,7 +263,7 @@ function Dashboard() {
           <a className={`btn block ${p.ready ? '' : 'outline'}`} href="#/review">{p.ready ? 'Start today’s session' : 'Open Review'}</a>
         </Card>
 
-        {studiedIds.length > 0 && (
+        {studiedIds.length > 0 && !recs.some((r) => r.kind === 'redo') && (
           <Card as="a" href={href.level(studiedIds[0])} className="dash-studied" aria-label={`${studiedIds.length} ${studiedIds.length === 1 ? 'level' : 'levels'} to solve on your own. Start with ${data.findLevel(studiedIds[0])?.level.title ?? 'the first'}.`}>
             <div className="card-head"><h2><Icon name="book" size={18} /> {studiedIds.length} {studiedIds.length === 1 ? 'level' : 'levels'} to solve on your own</h2></div>
             <p className="muted small">You have seen how {studiedIds.length === 1 ? 'it goes' : 'they go'}. Solving {studiedIds.length === 1 ? 'it' : 'them'} yourself counts in full. Start with {data.findLevel(studiedIds[0])?.level.title}.</p>
