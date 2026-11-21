@@ -8,3 +8,4 @@ lean-verify/Game/Generated
 coverage
 test-results
 playwright-report
+tsconfig.tsbuildinfo
