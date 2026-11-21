@@ -3,6 +3,7 @@ import { CodeBlock as Lean } from '../../../template/components/Markdown.tsx';
 import type { LevelKindDef, LevelRenderProps } from '../../../template/types.ts';
 import { getLeanRuntime } from '../context.ts';
 import type { LeanChoiceLevel, FormalizeLevel, LeanLevel, ParsonsLevel, PredictLevel, ProofLevel } from '../types.ts';
+import type { LiveState, Run } from './run.ts';
 
 // The views (and CodeMirror behind ProofLevel) load with the first level, not with the app shell.
 const ProofLevelView = lazy(() => import('./ProofLevel.tsx').then((m) => ({ default: m.ProofLevelView })));
@@ -11,7 +12,6 @@ const ChoiceLevelView = lazy(() => import('./ChoiceLevel.tsx').then((m) => ({ de
 const PredictLevelView = lazy(() => import('./ChoiceLevel.tsx').then((m) => ({ default: m.PredictLevelView })));
 const FormalizeLevelView = lazy(() => import('./FormalizeLevel.tsx').then((m) => ({ default: m.FormalizeLevelView })));
 const loading = <div className="level-loading" aria-busy="true" />;
-import type { LiveState, Run } from './run.ts';
 
 function useLeanRun(props: LevelRenderProps): Run {
   const { sessionFor } = getLeanRuntime();

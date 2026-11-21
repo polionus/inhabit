@@ -25,7 +25,6 @@
 .map-side { position: sticky; top: 1.5rem; display: grid; gap: 1rem; }
 .map-summary { display: grid; gap: .8rem; padding: 1.3rem; }
 .map-summary > .btn { max-width: 100%; min-width: 0; }
-.map-summary > .btn .btn-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .ms-ring { display: flex; align-items: center; gap: 1rem; margin-bottom: .3rem; }
 .ms-ring-in { display: grid; justify-items: center; gap: .1rem; }
 .ms-stars { font: 900 1.6rem/1 var(--font-ui); }
@@ -34,7 +33,7 @@
 .ms-facts > div { display: grid; }
 .ms-num { font: 900 1.4rem/1 var(--font-ui); }
 .ms-lab { font-size: .8rem; color: var(--muted); font-weight: 600; }
-.btn-sub { font-weight: 600; opacity: .8; font-size: .85em; margin-left: .2rem; padding-left: .6rem; border-left: 1px solid color-mix(in srgb, currentColor 35%, transparent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btn-sub { min-width: 0; font-weight: 600; opacity: .8; font-size: .85em; margin-left: .2rem; padding-left: .6rem; border-left: 1px solid color-mix(in srgb, currentColor 35%, transparent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .map-legend ul { list-style: none; margin: .5rem 0 0; padding: 0; display: grid; gap: .45rem; }
 .map-legend li { display: flex; align-items: center; gap: .6rem; font-size: .88rem; color: var(--ink-2); }
 .map-legend h2 { margin: 0; }

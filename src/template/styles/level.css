@@ -1,6 +1,7 @@
 /* Level screen: task, editor and goal state visible together on a laptop. */
 .level { display: grid; grid-template-columns: minmax(330px, .85fr) minmax(0, 1.15fr); height: 100dvh; position: relative; }
 .level > * { min-width: 0; }
+.level-loading { min-height: 320px; }
 .task { overflow-y: auto; overflow-x: hidden; padding: 1.1rem 1.5rem 3rem; background: var(--bg); box-shadow: inset -1px 0 0 var(--line); scrollbar-width: thin; }
 .task-crumb { display: flex; align-items: center; gap: .55rem; margin: 0 0 .9rem; font: 700 .85rem/1.2 var(--font-ui); color: var(--muted); min-width: 0; }
 .task-crumb a { color: var(--muted); text-decoration: none; display: inline-flex; align-items: center; gap: .5rem; min-width: 0; }
