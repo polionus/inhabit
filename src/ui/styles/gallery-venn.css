@@ -51,6 +51,12 @@
 @media (max-width: 760px) {
   .venn-main { grid-template-columns: 1fr; }
   .venn-inputs { grid-template-columns: 1fr; }
+  /* On phones show the picture first: diagram, then the inputs that drive it, then presets. */
+  .venn { display: flex; flex-direction: column; }
+  .venn-intro { order: 0; }
+  .venn-main { order: 1; }
+  .venn-inputs { order: 2; }
+  .venn-presets { order: 3; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .venn-left, .venn-sel { transition: fill-opacity .2s; }

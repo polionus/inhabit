@@ -553,3 +553,8 @@ bots that explain their proofs; ghost replays; any gate on a boss; analytics.
   biggest cliffs (first tactic, `const` before `swapArgs`, first formalize, image vs preimage). `mustUse` makes a level
   insist on the tactic it teaches (eq-08 `calc`, logic-12 `by_cases`). Each kind of screen gets a one-time inline tip,
   skipped for players who have already finished a level of that kind. After a boss, the next chapter is the main action.
+- **Gallery (v4.6).** `#/gallery`: interactive exhibits (src/gallery/registry.ts; components in src/ui/gallery/exhibits,
+  each its own lazy chunk; pure logic in src/gallery/<id>.ts with tests). Rule: anything presented as Lean (statements,
+  goals, terms, proofs) comes from the engine or the arena prover and is checked; pure visuals (Venn regions, arrows,
+  truth tables) may be computed in TS. Exhibits earn nothing and cost nothing. Chapter and world pages link to theirs;
+  Home shows a strip for new visitors and one exhibit a day on the dashboard.

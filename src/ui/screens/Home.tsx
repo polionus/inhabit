@@ -1,3 +1,4 @@
+import { exhibits } from '../../gallery/registry.ts';
 import { data } from '../data.ts';
 import { guideMeta } from '../../content/guideMeta.ts';
 import { useGame } from '../game.ts';
@@ -64,6 +65,15 @@ function Explainer() {
       <section className="band" aria-labelledby="out-h">
         <h2 id="out-h">{home.outcomes.heading}</h2>
         <Blurbs items={home.outcomes.items} />
+      </section>
+      <section className="band" aria-labelledby="gal-h">
+        <h2 id="gal-h">See the ideas move</h2>
+        <p className="measure">Before you prove anything, play with the ideas. Replay a proof and watch its term grow, shade sets, draw functions, or play a quantifier against the computer.</p>
+        <ul className="gallery-strip" role="list">
+          {exhibits.map((e) => (
+            <li key={e.id}><a href={href.gallery(e.id)}><span className="gallery-glyph" aria-hidden="true">{e.glyph}</span><span>{e.title}</span></a></li>
+          ))}
+        </ul>
       </section>
       <section className="band" aria-labelledby="jr-h">
         <h2 id="jr-h">{home.journey.heading}</h2>
@@ -221,6 +231,11 @@ function Dashboard() {
             <p className="muted small">{unread.summary}</p>
           </Card>
         )}
+        <Card as="a" href={href.gallery(todaysExhibit.id)} className="dash-guide" aria-label={`Gallery: ${todaysExhibit.title}. ${todaysExhibit.tagline}`}>
+          <div className="card-head"><h2><Icon name="sparkle" size={18} /> From the Gallery</h2></div>
+          <h3>{todaysExhibit.title}</h3>
+          <p className="muted small">{todaysExhibit.tagline}</p>
+        </Card>
       </div>
 
       <details className="dash-about">
@@ -293,3 +308,6 @@ export function HomeScreen() {
   const start = useStartTarget();
   return start.returning ? <Dashboard /> : <FirstVisit />;
 }
+
+/** One exhibit a day on the dashboard, rotating by calendar day. */
+const todaysExhibit = exhibits[Math.floor(Date.now() / 86_400_000) % exhibits.length];

@@ -14,3 +14,7 @@
 .exhibit-foot { margin-top: 2rem; border-top: 1px solid var(--line); padding-top: 1rem; }
 .exhibit-nav { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 @media (max-width: 600px) { .gallery-glyph { width: 40px; height: 40px; font-size: 1.1rem; } }
+.gallery-strip { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.gallery-strip a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--ink); text-decoration: none; font-weight: 600; }
+.gallery-strip a:hover, .gallery-strip a:focus-visible { border-color: var(--accent); }
+.gallery-strip .gallery-glyph { width: 36px; height: 36px; font-size: 1rem; flex: none; }
