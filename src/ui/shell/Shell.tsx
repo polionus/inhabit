@@ -16,6 +16,7 @@ export const NAV: NavItem[] = [
   { name: 'map', label: 'Map', to: href.map(), icon: 'map' },
   { name: 'arena', label: 'Arena', to: href.arena(), icon: 'arena' },
   { name: 'review', label: 'Review', to: '#/review', icon: 'review' },
+  { name: 'gallery', label: 'Gallery', to: href.gallery(), icon: 'sparkle' },
   { name: 'guide', label: 'Guide', to: href.guide(), icon: 'guide' },
   { name: 'codex', label: 'Codex', to: href.codex(), icon: 'codex' },
   { name: 'sandbox', label: 'Sandbox', to: '#/sandbox', icon: 'sandbox' },
@@ -24,7 +25,7 @@ export const NAV: NavItem[] = [
   { name: 'about', label: 'About', to: href.about(), icon: 'about' },
 ];
 const NAV_GROUPS: { label: string; names: string[] }[] = [
-  { label: 'Learn', names: ['home', 'map', 'review'] },
+  { label: 'Learn', names: ['home', 'map', 'gallery', 'review'] },
   { label: 'Play and build', names: ['arena', 'workshop', 'sandbox'] },
   { label: 'Reference', names: ['guide', 'codex', 'graduate', 'about'] },
 ];

@@ -1,3 +1,4 @@
+import { exhibitById } from '../gallery/registry.ts';
 import { lazy, Suspense, useEffect } from 'react';
 import { useRoute, href, type Route } from './router.ts';
 import { ErrorBoundary } from './hooks.tsx';
@@ -23,6 +24,7 @@ const loaders = {
   profile: () => import('./screens/ProfileScreen.tsx').then((m) => ({ default: m.ProfileScreen })),
   about: () => import('./screens/About.tsx').then((m) => ({ default: m.AboutScreen })),
   guide: () => import('./screens/GuideScreen.tsx').then((m) => ({ default: m.GuideScreen })),
+  gallery: () => import('./screens/GalleryScreen.tsx').then((m) => ({ default: m.GalleryScreen })),
   arena: () => import('./arena/ArenaScreen.tsx').then((m) => ({ default: m.ArenaScreen })),
   share: () => import('./arena/ShareScreen.tsx').then((m) => ({ default: m.ShareScreen })),
   practice: () => import('./practice/PracticeScreen.tsx').then((m) => ({ default: m.PracticeScreen })),
@@ -39,6 +41,7 @@ const GraduateScreen = lazy(loaders.graduate);
 const ProfileScreen = lazy(loaders.profile);
 const AboutScreen = lazy(loaders.about);
 const GuideScreen = lazy(loaders.guide);
+const GalleryScreen = lazy(loaders.gallery);
 const ArenaScreen = lazy(loaders.arena);
 const ShareScreen = lazy(loaders.share);
 const PracticeScreen = lazy(loaders.practice);
@@ -69,6 +72,7 @@ function titleFor(route: Route): string {
     case 'level': return `${data.findLevel(route.id)?.level.title ?? 'Level'} · ${SITE}`;
     case 'world': return `${data.worlds.find((w) => w.id === route.id)?.title ?? 'Region'} · ${SITE}`;
     case 'chapter': return `${chapterFor(route.id)?.title ?? data.worlds.find((w) => w.id === route.id)?.title ?? 'Chapter'} · ${SITE}`;
+    case 'gallery': return `${route.id ? (exhibitById(route.id)?.title ?? 'Gallery') : 'Gallery'} · ${SITE}`;
     case 'guide': return `${route.id ? (guideMeta.find((a) => a.id === route.id)?.title ?? 'Guide') : 'Guide'} · ${SITE}`;
     case 'codex': return `${route.id ? (getCodex(route.id)?.name ?? 'Codex') : 'Codex'} · ${SITE}`;
     case 'notfound': return `Not found · ${SITE}`;
@@ -119,6 +123,7 @@ export function App() {
       case 'graduate': screen = <GraduateScreen />; break;
       case 'profile': screen = <ProfileScreen />; break;
       case 'guide': screen = <GuideScreen id={route.id} />; break;
+      case 'gallery': screen = <GalleryScreen id={route.id} />; break;
       case 'share': screen = <ShareScreen code={route.code} />; break;
       case 'practice': screen = <PracticeScreen id={route.id} />; break;
       case 'arena': screen = <ArenaScreen sub={route.sub} arg={route.arg} />; break;

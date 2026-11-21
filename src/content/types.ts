@@ -428,7 +428,7 @@ export interface GuideArticle {
 }
 
 export type ScreenId =
-  | 'map' | 'review' | 'codex' | 'sandbox' | 'workshop' | 'graduate' | 'profile' | 'guide'
+  | 'map' | 'review' | 'codex' | 'sandbox' | 'workshop' | 'graduate' | 'profile' | 'guide' | 'gallery'
   | 'arena' | 'arena-daily' | 'arena-puzzles' | 'arena-rush' | 'arena-duel';
 
 /** The explanatory header of a screen: what this place is and how to use it. */

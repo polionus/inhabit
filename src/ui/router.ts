@@ -14,6 +14,7 @@ export type Route =
   | { name: 'graduate' }
   | { name: 'profile' }
   | { name: 'guide'; id?: string }
+  | { name: 'gallery'; id?: string }
   | { name: 'arena'; sub?: string; arg?: string }
   | { name: 'share'; code: string }
   | { name: 'practice'; id: string }
@@ -45,6 +46,8 @@ export function parseHash(hash: string): Route {
       return { name: 'codex', id: b };
     case 'guide':
       return { name: 'guide', id: b };
+    case 'gallery':
+      return { name: 'gallery', id: b };
     case 'practice':
       return b ? { name: 'practice', id: b } : { name: 'map' };
     case 'share':
@@ -65,6 +68,7 @@ export const href = {
   level: (id: string) => `#/level/${encodeURIComponent(id)}`,
   codex: (id?: string) => (id ? `#/codex/${encodeURIComponent(id)}` : '#/codex'),
   guide: (id?: string) => (id ? `#/guide/${encodeURIComponent(id)}` : '#/guide'),
+  gallery: (id?: string) => (id ? `#/gallery/${encodeURIComponent(id)}` : '#/gallery'),
   arena: (sub?: string, arg?: string) => '#/arena' + (sub ? `/${encodeURIComponent(sub)}` : '') + (sub && arg ? `/${encodeURIComponent(arg)}` : ''),
   practice: (levelId: string) => `#/practice/${encodeURIComponent(levelId)}`,
   share: (code: string) => `#/share/${encodeURIComponent(code)}`,

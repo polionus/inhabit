@@ -106,6 +106,15 @@ This guide covers what's new outside the game: how to try real Lean with zero in
     ],
   },
 
+  gallery: {
+    title: 'Gallery',
+    lede: 'Interactive exhibits that make the ideas visible: proofs replayed step by step, sets you can shade, functions you can draw, and games played with quantifiers.',
+    about: `Each exhibit runs on the same checker as the levels, so what you see is what Lean does. Play with them before a chapter to get a feel for the idea, or after it to see what you built.`,
+    tips: [
+      'Each chapter page links to the exhibits for its ideas.',
+      'Nothing here earns stars or costs hints. Play freely.',
+    ],
+  },
   guide: {
     title: 'Guide',
     lede: 'Sixteen short articles on Lean itself: what it can do, the type theory underneath, how to plan proofs, and the ecosystem around it.',
