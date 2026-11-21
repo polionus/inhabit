@@ -4,8 +4,8 @@
  *   node scripts/dev-save.ts eq 4 > /tmp/save.json   # ...plus the first 4 levels of the next world
  * Use with: node scripts/shot.ts --save /tmp/save.json …
  */
-import { worlds } from '../src/content/index.ts';
-import { defaultSave } from '../src/state/game.ts';
+import { worlds } from '../src/games/inhabit/content/index.ts';
+import { defaultSave } from '../src/template/state/game.ts';
 
 const upTo = process.argv[2] ?? 'logic';
 const extra = Number(process.argv[3] ?? 0);

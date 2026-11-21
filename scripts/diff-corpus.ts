@@ -15,9 +15,9 @@ import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { engine } from '../src/engine/index.ts';
-import { corpus } from '../src/engine/test/corpus.ts';
-import { NAT_LEMMAS } from '../src/engine/test/lemmas.ts';
+import { engine } from '../src/domains/lean/engine/index.ts';
+import { corpus } from '../src/domains/lean/engine/test/corpus.ts';
+import { NAT_LEMMAS } from '../src/domains/lean/engine/test/lemmas.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const leanDir = join(root, 'lean-verify');

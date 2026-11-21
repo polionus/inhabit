@@ -1,0 +1,8 @@
+.xk-lean {
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--ok);
+}
+.xk-lean > .xk-zone-head .xk-zone-label {
+  color: var(--ok-text);
+}

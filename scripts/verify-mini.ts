@@ -17,15 +17,15 @@
  * unique level ids, unlock references and tactic names.
  * Exits non-zero on any failure.
  */
-import { engine } from '../src/engine/index.ts';
-import type { CheckResult, Diagnostic, Env } from '../src/engine/types.ts';
-import { allLemmas, levelContext, worlds } from '../src/content/index.ts';
-import type { Level, World } from '../src/content/types.ts';
-import { ideas } from '../src/content/ideas.ts';
-import { assemble, checkBody, envWithLemmas, fullEnv, levelSession } from '../src/game/env.ts';
-import { worldLessons } from '../src/content/lessons/index.ts';
-import { guide } from '../src/content/guide.ts';
-import { chapterFor } from '../src/content/chapters/full.ts';
+import { engine } from '../src/domains/lean/engine/index.ts';
+import type { CheckResult, Diagnostic, Env } from '../src/domains/lean/engine/types.ts';
+import { allLemmas, levelContext, worlds } from '../src/games/inhabit/content/index.ts';
+import type { Level, World } from '../src/games/inhabit/content/types.ts';
+import { ideas } from '../src/games/inhabit/content/ideas.ts';
+import { assemble, checkBody, envWithLemmas, fullEnv, levelSession } from '../src/games/inhabit/env.ts';
+import { worldLessons } from '../src/games/inhabit/content/lessons/index.ts';
+import { guide } from '../src/games/inhabit/content/guide.ts';
+import { chapterFor } from '../src/games/inhabit/content/chapters/full.ts';
 import { KNOWN_LANGS, guideBlocks, lessonBlocks, nsOf, words, worldProseBlocks, type ProseBlock } from './prose-blocks.ts';
 
 const args = process.argv.slice(2);
