@@ -13,11 +13,11 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { worlds, prerequisiteWorlds } from '../src/content/index.ts';
-import type { World } from '../src/content/types.ts';
-import { ideas } from '../src/content/ideas.ts';
-import { worldLessons } from '../src/content/lessons/index.ts';
-import { guide } from '../src/content/guide.ts';
+import { worlds, prerequisiteWorlds } from '../src/games/inhabit/content/index.ts';
+import type { World } from '../src/games/inhabit/content/types.ts';
+import { ideas } from '../src/games/inhabit/content/ideas.ts';
+import { worldLessons } from '../src/games/inhabit/content/lessons/index.ts';
+import { guide } from '../src/games/inhabit/content/guide.ts';
 import { guideBlocks, lessonBlocks, nsOf, worldProseBlocks } from './prose-blocks.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');

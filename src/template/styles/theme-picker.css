@@ -1,0 +1,56 @@
+/* Visual palette swatch picker (Profile -> Settings). */
+.palette-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(136px, 1fr));
+  gap: .55rem;
+}
+.palette-swatch {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+  padding: .5rem .65rem;
+  border-radius: var(--r-sm);
+  border: 0;
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font: 750 .84rem/1.15 var(--font-ui);
+  cursor: pointer;
+  text-align: left;
+  box-shadow: inset 0 0 0 1.5px var(--line);
+  transition: background-color .14s, box-shadow .14s, color .14s;
+}
+.palette-swatch:hover {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+.palette-swatch.on {
+  background: var(--surface-1);
+  color: var(--ink);
+  box-shadow: var(--shadow-1), inset 0 0 0 2px var(--primary);
+}
+.palette-dots {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+}
+.palette-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--surface-1);
+}
+.palette-dot + .palette-dot {
+  margin-left: -4px;
+}
+.palette-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.palette-badge {
+  margin-left: auto;
+  font-size: .68rem;
+  color: var(--muted);
+  font-weight: 650;
+}

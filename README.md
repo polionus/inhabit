@@ -28,13 +28,13 @@ By the end, you can take a mathematical statement of your own, formalize it in L
 
 ## How it works
 
-Lean code is checked in the browser by a purpose-built "mini-Lean" engine in TypeScript (`src/engine`): a parser for a subset of Lean 4 syntax, a small dependent-type-theory kernel, an elaborator, and about 40 tactics. Tactics build real proof terms, which the kernel re-checks, and the game can show you the term they built.
+Lean code is checked in the browser by a purpose-built "mini-Lean" engine in TypeScript (`src/domains/lean/engine`): a parser for a subset of Lean 4 syntax, a small dependent-type-theory kernel, an elaborator, and about 40 tactics. Tactics build real proof terms, which the kernel re-checks, and the game can show you the term they built.
 
 The engine is a faithful subset, not real Lean. It has no type classes and no automation such as `simp` or `omega`, and it handles natural numbers only. Names and statements mirror Lean core and Mathlib so that what you learn transfers.
 
 Fidelity is tested against the real thing. Every reference solution is compiled by Lean 4 (v4.25.1) in CI, using `lean-verify/`, a small Lean project that mirrors the game's library. A differential corpus checks that the engine and real Lean agree on which snippets are accepted, and a soundness suite of adversarial inputs guards the kernel.
 
-The Arena's puzzles come from a generator in `src/arena/gen`. It is seeded and deterministic: the same seed and family give the same puzzle in every browser. An intuitionistic propositional prover produces the reference proofs. Every generated puzzle is checked by the engine when it is made, so a puzzle that the engine cannot solve is never offered. `npm run verify:arena` compiles a sample of each family in real Lean, and CI runs it too.
+The Arena's puzzles come from a generator in `src/games/inhabit/arena/gen`. It is seeded and deterministic: the same seed and family give the same puzzle in every browser. An intuitionistic propositional prover produces the reference proofs. Every generated puzzle is checked by the engine when it is made, so a puzzle that the engine cannot solve is never offered. `npm run verify:arena` compiles a sample of each family in real Lean, and CI runs it too.
 
 ## How the teaching is designed
 
@@ -52,28 +52,28 @@ Requires Node 24 or newer. Lean 4 via elan is optional and needed only for `npm 
 
 ```sh
 npm install
-npm run dev          # local dev server
+npm run dev          # local dev server (Inhabit)
+npm run dev:starter  # local dev server for the non-Lean starter disc (Patterncraft)
 npm test             # unit tests
 npm run verify:mini  # reference solutions, in-browser engine
 npm run verify:lean  # reference solutions, real Lean 4
 npm run verify:arena # sample of generated Arena puzzles, real Lean 4
-npm run build        # typecheck and build into dist/
+npm run build        # typecheck and build into dist/ (or VITE_GAME=starter npm run build:starter)
 ```
 
-Layout:
+Layout (reusable template vs. pluggable discs):
 
-- `src/engine`: the mini-Lean engine
-- `src/content`: worlds, levels, codex and lemma bank, as plain data
-- `src/content/lessons` and `src/content/guide.ts`: lessons, primers, recaps and the Guide (prose)
-- `src/arena`: the generator, Arena modes, ratings and the duel transport
-- `src/game`, `src/ui`, `src/state`: game glue and the React app
-- `src/ui/arena`: the Arena screens
+- `src/template`: subject-agnostic game engine/shell, state/persistence, spaced review, quests, theme system, and built-in level kinds (`choice`, `order`, `text`)
+- `src/domains/lean`: optional Lean domain pack (mini-Lean engine, CodeMirror editor, coach, Lean level kinds)
+- `src/games/inhabit`: the Inhabit disc (worlds, lessons, Arena, Gallery, Practice)
+- `src/games/starter`: Patterncraft — a small non-Lean regex learning disc proving reusability and custom theming (`TERRACOTTA_PRESET`)
+- `src/games/registry.ts`: build-time disc selection via `VITE_GAME`
 - `scripts`, `lean-verify`: verification, the screenshot helper (`scripts/shot.ts`, for visual checks), and the real-Lean mirror
-- `docs/SPEC.md`: architecture, the Lean subset, and pedagogy rules
+- `docs/SPEC.md` & `docs/TEMPLATE.md`: architecture, the Lean subset, pedagogy rules, and how to author new game discs & custom themes
 
-Fenced code in prose follows a convention documented in `src/content/types.ts`. Code marked `lean` is a complete declaration and is compiled by both engines. Other blocks are not compiled. The verify scripts check the convention.
+Fenced code in prose follows a convention documented in `src/games/inhabit/content/types.ts`. Code marked `lean` is a complete declaration and is compiled by both engines. Other blocks are not compiled. The verify scripts check the convention.
 
-To add or change a level, edit the world file in `src/content/worlds/`, then run both verify commands. Every solution must pass both engines.
+To add or change an Inhabit level, edit the world file in `src/games/inhabit/content/worlds/`, then run both verify commands. Every solution must pass both engines.
 
 ## Limitations
 

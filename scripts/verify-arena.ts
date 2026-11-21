@@ -18,11 +18,11 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { generateDetailed, generator } from '../src/arena/gen/index.ts';
-import { ARITH_LEMMAS } from '../src/arena/gen/arith.ts';
-import { hasPractice, practiceSet, smallerVersion } from '../src/arena/practice.ts';
-import { worlds } from '../src/content/index.ts';
-import type { ProofFamily, ProofPuzzle, PuzzleFamily } from '../src/arena/types.ts';
+import { generateDetailed, generator } from '../src/games/inhabit/arena/gen/index.ts';
+import { ARITH_LEMMAS } from '../src/games/inhabit/arena/gen/arith.ts';
+import { hasPractice, practiceSet, smallerVersion } from '../src/games/inhabit/arena/practice.ts';
+import { worlds } from '../src/games/inhabit/content/index.ts';
+import type { ProofFamily, ProofPuzzle, PuzzleFamily } from '../src/games/inhabit/arena/types.ts';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const leanDir = join(root, 'lean-verify');
