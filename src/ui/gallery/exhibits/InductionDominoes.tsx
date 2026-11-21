@@ -6,6 +6,7 @@ import type { DominoPreset } from '../../../gallery/induction-dominoes.ts';
 import { checkPreset } from '../../../gallery/induction-dominoes-lean.ts';
 import { href } from '../../router.ts';
 import type { ExhibitProps } from '../types.ts';
+import { ExhibitIntro, TryThis, Zone, Verdict, TaughtIn } from '../kit.tsx';
 import '../../styles/gallery-induction-dominoes.css';
 
 const W = 30;
@@ -48,19 +49,15 @@ export default function InductionDominoes(_props: ExhibitProps) {
   const baseHyps = checked.goals.base;
   return (
     <div className="dom">
-      <p className="dom-intro">
-        Induction proves a statement <code>P n</code> for every natural number with two finite proofs. The base case knocks over domino 0. The step shows that any domino that falls knocks over the next one. In the step, <code>ih</code> is the domino you lean on. Pick a statement and see which proof breaks, if any.
-      </p>
-      <div className="dom-presets">
-        <span className="dom-try">Try this</span>
-        {presets.map((q) => (
-          <button key={q.id} type="button" className={'btn btn-sm' + (q.id === pid ? ' on' : '')} aria-pressed={q.id === pid} onClick={() => load(q)}>
-            <code>{q.label}</code>
-          </button>
-        ))}
-      </div>
+      <ExhibitIntro lead="Pick a statement, prove the base case and the step, then push domino 0.">
+        <p>
+          Induction proves a statement <code>P n</code> for every natural number with two finite proofs. The base case knocks over domino 0. The step shows that any domino that falls knocks over the next one. In the step, <code>ih</code> is the domino you lean on. Pick a statement and see which proof breaks, if any.
+        </p>
+      </ExhibitIntro>
+      <TryThis presets={presets.map((q) => ({ label: q.label, active: q.id === pid, onPick: () => load(q) }))} />
       <p className="dom-note"><strong>P n :</strong> <code>{p.stmt}</code>. {p.note}</p>
 
+      <Zone kind="play">
       <div className="dom-scroll" role="group" aria-label="Row of dominoes P 0 to P 9">
         <svg className="dom-svg" viewBox={`0 0 ${X0 * 2 + GAP * (DOMINO_COUNT - 1) + W + 40} 160`} role="img" aria-label={status}>
           <line className="dom-floor" x1="6" y1={FLOOR} x2={X0 * 2 + GAP * (DOMINO_COUNT - 1) + W + 34} y2={FLOOR} />
@@ -92,12 +89,12 @@ export default function InductionDominoes(_props: ExhibitProps) {
         <button type="button" className={'btn btn-sm' + (showStep ? ' on' : '')} onClick={proveStep}>Prove the step</button>
         <button type="button" className="btn btn-sm dom-push" disabled={!ready} onClick={push}>{pushed > 0 ? 'Push again' : 'Push domino 0'}</button>
       </div>
-      <p className="dom-status" aria-live="polite">{status}</p>
+      <Verdict tone={pushed > 0 ? (run.fates.every((f) => f === 'falls') ? 'ok' : 'no') : 'info'}>{status}</Verdict>
+      </Zone>
 
       <div className="dom-cases">
         {showBase && (
-          <section className="dom-card" aria-label="Base case">
-            <h3>Base case <code>P 0</code></h3>
+          <Zone kind="lean" label="Base case: P 0">
             <p className="dom-small">The goal the engine shows for <code>zero</code>:</p>
             <GoalView goal={baseHyps} />
             {p.base ? (
@@ -110,11 +107,10 @@ export default function InductionDominoes(_props: ExhibitProps) {
                 No proof exists. At 0 the statement reads <code>{instance(p, 0)}</code>, so domino 0 can't fall. It wobbles.
               </p>
             )}
-          </section>
+          </Zone>
         )}
         {showStep && (
-          <section className="dom-card" aria-label="Induction step">
-            <h3>Step <code>P k → P (k+1)</code></h3>
+          <Zone kind="lean" label="Step: P k → P (k+1)">
             <p className="dom-small">The goal for <code>succ</code>, with <code>ih</code> as the domino you lean on:</p>
             <GoalView goal={checked.goals.step} />
             {p.step ? (
@@ -127,23 +123,25 @@ export default function InductionDominoes(_props: ExhibitProps) {
                 The engine can't close this goal, and it shouldn't be able to. Take <code>k = {broken}</code>: <code>ih</code> holds ({instance(p, broken ?? 0)}) but the goal does not ({instance(p, (broken ?? 0) + 1)}).
               </p>
             )}
-          </section>
+          </Zone>
         )}
       </div>
 
       {ready && p.base && p.step && (
-        <section className="dom-card" aria-label="The whole proof">
-          <h3>Together {checked.complete ? <span className="dom-ok">engine: complete</span> : null}</h3>
+        <Zone kind="lean" label="Together" aside={checked.complete ? <span className="dom-ok">engine: complete</span> : undefined}>
           <pre className="dom-code">{`theorem P_all (n : Nat) : ${p.stmt} := by\n${bodyOf(p.stmt, p.base, p.step)}`}</pre>
-        </section>
+        </Zone>
       )}
       {ready && !baseHolds(p) && p.step && (
         <p className="dom-small">A provable step isn't enough. Without the base case, the proof of <code>{p.stmt}</code> never starts.</p>
       )}
 
-      <p className="dom-small dom-links">
-        Try it for real: <a href={href.level('nat-05')}>Induction: two goals</a>, <a href={href.level('nat-06')}>zero_add</a>, <a href={href.level('nat-12')}>zero_mul</a>, or read the <a href={href.chapter('nat')}>natural numbers chapter</a>.
-      </p>
+      <TaughtIn links={[
+        { href: href.level('nat-05'), title: 'Induction: two goals' },
+        { href: href.level('nat-06'), title: 'zero_add' },
+        { href: href.level('nat-12'), title: 'zero_mul' },
+        { href: href.chapter('nat'), title: 'The natural numbers chapter' },
+      ]} />
     </div>
   );
 }

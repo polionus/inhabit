@@ -1,14 +1,15 @@
-.qg { display: grid; gap: 14px; }
-.qg-frame { margin: 0; max-width: var(--measure); color: var(--ink-2); }
-.qg-presets, .qg-sides { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.qg { display: block; }
 .qg-label { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; margin-right: 4px; }
-.qg .card { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-1); padding: 14px 16px; display: grid; gap: 10px; }
+.qg-sides { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.qg-play { display: grid; gap: 10px; margin-top: 14px; }
+.qg-result p { margin: 0 0 8px; }
+.qg-label { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; margin-right: 4px; }
 .qg-lean { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; font-size: 1.25rem; }
 .qg-lean code { font-size: 1.25rem; }
 .qg-checked { font-size: .78rem; color: var(--ok-text); font-family: var(--font-ui); }
 .qg-hint { font-size: .85rem; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; margin-left: auto; }
 .qg-board { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 18px; align-items: start; }
-.qg-graph { width: 100%; max-width: 340px; height: auto; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-1); }
+.qg-graph { width: 100%; max-width: 340px; height: auto; border-radius: var(--r-md); background: var(--surface-2); }
 .qg-axis { fill: var(--muted); font-size: 11px; font-style: italic; }
 .qg-edge { stroke: var(--line-strong); stroke-width: 2; transition: stroke .2s, stroke-width .2s; }
 .qg-edge.on { stroke: var(--primary-text); stroke-width: 3.5; }
@@ -40,8 +41,5 @@
 .qg-strat { border-collapse: collapse; justify-self: start; min-width: 14rem; }
 .qg-strat caption { text-align: left; font-weight: 600; padding-bottom: 6px; }
 .qg-strat th, .qg-strat td { text-align: left; padding: 4px 14px 4px 0; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: .9rem; }
-.qg-result p { margin: 0; }
-.qg-swap { margin: 0; max-width: var(--measure); }
-.qg-links { margin: 0; }
 @media (max-width: 700px) { .qg-board { grid-template-columns: minmax(0, 1fr); } .qg-hint { margin-left: 0; } .qg-tile { width: 2.7rem; height: 2.7rem; } .qg-cell { width: 2.2rem; height: 2.2rem; } }
 @media (prefers-reduced-motion: reduce) { .qg * { transition: none !important; } }

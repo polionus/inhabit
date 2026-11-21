@@ -6,6 +6,7 @@ import { href } from '../../router.ts';
 import { hasRegion, memberPhrase, parseSet, regionsOf, verdict } from '../../../gallery/venn.ts';
 import type { ParseResult, Relation } from '../../../gallery/venn.ts';
 import { leanInfo } from '../../../gallery/venn-lean.ts';
+import { ExhibitIntro, TryThis, Zone, Verdict, TaughtIn } from '../kit.tsx';
 import '../../styles/gallery-venn.css';
 
 const W = 400;
@@ -38,6 +39,7 @@ export default function Venn(_props: ExhibitProps) {
   const [right, setRight] = useState(PRESETS[0].right);
   const [rel, setRel] = useState<Relation>('eq');
   const [sel, setSel] = useState<number | null>(null);
+  const [preset, setPreset] = useState<string | null>(PRESETS[0].label);
   const focused = useRef<'left' | 'right'>('left');
   const refs = { left: useRef<HTMLInputElement>(null), right: useRef<HTMLInputElement>(null) };
 
@@ -45,6 +47,7 @@ export default function Venn(_props: ExhibitProps) {
   const pr: ParseResult = useMemo(() => parseSet(right), [right]);
   const ok = pl.ok && pr.ok;
   const lm = pl.ok ? regionsOf(pl.e) : 0;
+  const shaded = (m: number) => { let n = 0; for (let x = m; x; x &= x - 1) n++; return n; };
   const rm = pr.ok ? regionsOf(pr.e) : 0;
   const v = ok ? verdict(lm, rm, rel) : null;
   const lean = useMemo(() => (pl.ok && pr.ok && v ? leanInfo(pl.e, pr.e, rel, v.holds) : null), [pl, pr, rel, v?.holds]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -57,6 +60,7 @@ export default function Venn(_props: ExhibitProps) {
     const a = el?.selectionStart ?? cur.length;
     const b = el?.selectionEnd ?? cur.length;
     set(cur.slice(0, a) + s + cur.slice(b));
+    setPreset(null);
     requestAnimationFrame(() => {
       el?.focus();
       el?.setSelectionRange(a + s.length, a + s.length);
@@ -68,6 +72,7 @@ export default function Venn(_props: ExhibitProps) {
     setRight(p.right);
     setRel(p.rel);
     setSel(null);
+    setPreset(p.label);
   };
 
   const wrap = (r: number, inner: React.ReactNode) => {
@@ -84,24 +89,18 @@ export default function Venn(_props: ExhibitProps) {
     }
   };
 
-  const summary = v
-    ? `${v.text}. Left shades ${popcount(lm)} of 8 regions; right shades ${popcount(rm)}.`
-    : 'One of the expressions does not parse.';
-  
   return (
     <div className="venn">
-      <p className="venn-intro">
-        Three sets sit inside a universe, which cuts it into eight regions. Type an expression on each side and its regions
-        get shaded, so you can see at a glance whether two expressions describe the same set. Click a region to ask what
-        it means for an element to live there.
-      </p>
-      <div className="venn-presets" role="group" aria-label="Try this">
-        <span className="venn-try">Try this</span>
-        {PRESETS.map((p) => (
-          <button key={p.label} type="button" className="btn btn-sm" onClick={() => load(p)}>{p.label}</button>
-        ))}
-      </div>
+      <ExhibitIntro lead="Pick a preset and see whether the two shaded pictures match.">
+        <p>
+          Three sets sit inside a universe, which cuts it into eight regions. Type an expression on each side and its regions
+          get shaded, so you can see at a glance whether two expressions describe the same set. Click a region to ask what
+          it means for an element to live there.
+        </p>
+      </ExhibitIntro>
+      <TryThis presets={PRESETS.map((p) => ({ label: p.label, active: preset === p.label, onPick: () => load(p) }))} />
 
+      <Zone kind="play" label="Your expressions" className="venn-inputzone">
       <div className="venn-inputs">
         {(['left', 'right'] as const).map((side) => {
           const p = side === 'left' ? pl : pr;
@@ -117,7 +116,7 @@ export default function Venn(_props: ExhibitProps) {
                 autoComplete="off"
                 aria-invalid={!p.ok}
                 onFocus={() => (focused.current = side)}
-                onChange={(e) => (side === 'left' ? setLeft : setRight)(e.target.value)}
+                onChange={(e) => { (side === 'left' ? setLeft : setRight)(e.target.value); setPreset(null); }}
               />
               {!p.ok && <span className="venn-err" role="alert">{p.error}</span>}
             </label>
@@ -129,13 +128,15 @@ export default function Venn(_props: ExhibitProps) {
           ))}
           <button type="button" className="btn btn-sm" onMouseDown={(e) => e.preventDefault()} onClick={() => insert('Set.univ')}>Set.univ</button>
           <span className="venn-rel" role="group" aria-label="Relation">
-            <button type="button" className={'btn btn-sm' + (rel === 'eq' ? ' on' : '')} aria-pressed={rel === 'eq'} onClick={() => setRel('eq')}>=</button>
-            <button type="button" className={'btn btn-sm' + (rel === 'subset' ? ' on' : '')} aria-pressed={rel === 'subset'} onClick={() => setRel('subset')}>⊆</button>
+            <button type="button" className={'btn btn-sm' + (rel === 'eq' ? ' on' : '')} aria-pressed={rel === 'eq'} onClick={() => { setRel('eq'); setPreset(null); }}>=</button>
+            <button type="button" className={'btn btn-sm' + (rel === 'subset' ? ' on' : '')} aria-pressed={rel === 'subset'} onClick={() => { setRel('subset'); setPreset(null); }}>⊆</button>
           </span>
         </div>
       </div>
+      </Zone>
 
       <div className="venn-main">
+        <Zone kind="play" label="Diagram" className="venn-diagram">
         <svg className="venn-svg" viewBox={`0 0 ${W} ${H}`} role="group" aria-label="Venn diagram of A, B and C inside a universe">
           <defs>
             <pattern id="venn-hatch" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
@@ -189,12 +190,16 @@ export default function Venn(_props: ExhibitProps) {
           <text x="200" y="312" textAnchor="middle" className="venn-name">C</text>
           <text x="20" y="30" className="venn-name venn-uni">universe</text>
         </svg>
+        <p className="venn-legend small muted">
+          <span className="sw sw-left" /> left <span className="sw sw-right" /> right <span className="sw sw-sel" /> selected
+          {' '}<span className="venn-ne">≠</span> region where they differ. Notation: <code>∩</code> and <code>\</code> bind tighter than <code>∪</code>; <code>ᶜ</code> is the complement.
+        </p>
+        </Zone>
 
         <div className="venn-side">
-          <p className="sr-only" aria-live="polite">{summary}</p>
-          <div className={'venn-verdict ' + (v ? (v.holds ? 'yes' : 'no') : 'idle')}>{v ? v.text : 'Fix the expression to compare.'}</div>
+          <Verdict tone={v ? (v.holds ? 'ok' : 'no') : 'info'}>{v ? v.text : 'Fix the expression to compare.'}{v && <span className="sr-only"> Left shades {shaded(lm)} of 8 regions; right shades {shaded(rm)}.</span>}</Verdict>
 
-          <div className="venn-card">
+          <Zone kind="explain" label="Region" className="venn-card">
             {sel === null ? (
               <p className="muted small">Click a region of the diagram to see which expressions contain it.</p>
             ) : (
@@ -206,12 +211,11 @@ export default function Venn(_props: ExhibitProps) {
                 </p>
               </>
             )}
-          </div>
+          </Zone>
 
           {lean && (
-            <div className="venn-card">
-              <p className="venn-lean-h">In Lean</p>
-              <pre className="venn-code">{lean.elaborates ? `${lean.statement}` : lean.statement}</pre>
+            <Zone kind="lean" label="In Lean" className="venn-card">
+              <pre className="venn-code">{lean.statement}</pre>
               <p className="small muted">
                 {!lean.elaborates
                   ? 'The game’s engine could not read this statement.'
@@ -228,23 +232,16 @@ export default function Venn(_props: ExhibitProps) {
                 </details>
               )}
               {lean.noProof && v?.holds && <p className="small muted">The automatic prover found no constructive proof here (this one may need classical reasoning), so none is shown.</p>}
-            </div>
+            </Zone>
           )}
         </div>
       </div>
 
-      <p className="venn-legend small muted">
-        <span className="sw sw-left" /> left <span className="sw sw-right" /> right <span className="sw sw-sel" /> selected
-        {' '}<span className="venn-ne">≠</span> region where they differ. Notation: <code>∩</code> and <code>\</code> bind tighter than <code>∪</code>; <code>ᶜ</code> is the complement.
-      </p>
-      <p className="venn-links small">
-        Prove these in the game:{' '}
-        <a href={href.level('sets-04')}>Intersection is “and”</a>,{' '}
-        <a href={href.level('sets-10')}>De Morgan for sets</a>,{' '}
-        <a href={href.level('sets-13')}>Distributivity</a>.
-      </p>
+      <TaughtIn links={[
+        { href: href.level('sets-04'), title: 'Intersection is “and”' },
+        { href: href.level('sets-10'), title: 'De Morgan for sets' },
+        { href: href.level('sets-13'), title: 'Distributivity' },
+      ]} />
     </div>
   );
 }
-
-const popcount = (m: number) => [0, 1, 2, 3, 4, 5, 6, 7].filter((r) => hasRegion(m, r)).length;

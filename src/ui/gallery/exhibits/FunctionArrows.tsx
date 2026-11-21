@@ -8,6 +8,7 @@ import {
 } from '../../../gallery/function-arrows.ts';
 import type { Fn } from '../../../gallery/function-arrows.ts';
 import { checkFn, definitionsAgree } from '../../../gallery/function-arrows-lean.ts';
+import { ExhibitIntro, TryThis, Zone, Verdict, TaughtIn } from '../kit.tsx';
 import '../../styles/gallery-function-arrows.css';
 
 type Mode = 'draw' | 'image' | 'preimage';
@@ -32,6 +33,7 @@ export default function FunctionArrows(_props: ExhibitProps) {
   const [selA, setSelA] = useState<Set<number>>(new Set([0, 1]));
   const [selB, setSelB] = useState<Set<number>>(new Set());
   const [note, setNote] = useState(PRESETS[0].note);
+  const [preset, setPreset] = useState<string | null>(PRESETS[0].id);
 
   const an = useMemo(() => analyze(fn), [fn]);
   const lean = useMemo(() => checkFn(fn), [fn]);
@@ -54,7 +56,7 @@ export default function FunctionArrows(_props: ExhibitProps) {
   };
   const clickB = (j: number) => {
     if (mode === 'draw') {
-      if (active !== null) setFn(setArrow(fn, active, j));
+      if (active !== null) { setFn(setArrow(fn, active, j)); setPreset(null); }
       else setNote('Pick a dot on the left first, then the dot it should point to.');
     } else if (mode === 'preimage') setSelB(toggle(selB, j));
   };
@@ -67,6 +69,7 @@ export default function FunctionArrows(_props: ExhibitProps) {
       const d = e.key === 'ArrowUp' ? -1 : 1;
       setActive(i);
       setFn(setArrow(fn, i, (fn.map[i] + d + fn.nB) % fn.nB));
+      setPreset(null);
     }
   };
   const keyB = (e: KeyboardEvent, j: number) => {
@@ -79,6 +82,7 @@ export default function FunctionArrows(_props: ExhibitProps) {
   const size = (nA: number, nB: number) => {
     const g = resize(fn, nA, nB);
     setFn(g);
+    setPreset(null);
     setSelA(new Set([...selA].filter((i) => i < g.nA)));
     setSelB(new Set([...selB].filter((j) => j < g.nB)));
     setActive((a) => (a !== null && a < g.nA ? a : 0));
@@ -88,6 +92,7 @@ export default function FunctionArrows(_props: ExhibitProps) {
   const load = (id: string) => {
     const p = PRESETS.find((x) => x.id === id)!;
     setFn(p.fn);
+    setPreset(id);
     setMode(p.mode);
     setActive(0);
     setSelA(new Set(p.mode === 'image' ? (p.select ?? []) : [0, 1].filter((i) => i < p.fn.nA)));
@@ -109,25 +114,23 @@ export default function FunctionArrows(_props: ExhibitProps) {
   const subsetA = (i: number) => mode === 'image' && selA.has(i);
   const subsetB = (j: number) => mode === 'preimage' && selB.has(j);
 
-  const summary = `Injective: ${an.injective ? 'yes' : 'no'}, ${an.injReason}. Surjective: ${an.surjective ? 'yes' : 'no'}, ${an.surjReason}.`;
+  const summary = an.bijective ? 'Bijective: every target is hit exactly once.'
+    : `${an.injective ? 'Injective' : an.surjective ? 'Surjective' : 'Neither injective nor surjective'}${an.injective || an.surjective ? `, but not ${an.injective ? 'surjective' : 'injective'}` : ''}.`;
   const imageText = mode === 'image' ? `f(${showDom(selA)}) = ${showCod(img)}` : mode === 'preimage' ? `f⁻¹(${showCod(selB)}) = ${showDom(pre)}` : '';
 
   return (
     <div className="fa">
-      <p className="fa-intro">
-        A function sends every dot on the left to exactly one dot on the right. Draw one, and the badges show whether it is
-        injective (no two arrows share a target) or surjective (every target is hit). When one fails, you get the exact
-        instance of the definition that breaks.
-      </p>
-      <div className="fa-presets" role="group" aria-label="Try this">
-        <span className="fa-try">Try this</span>
-        {PRESETS.map((p) => (
-          <button key={p.id} type="button" className="btn btn-sm" onClick={() => load(p.id)}>{p.label}</button>
-        ))}
-      </div>
+      <ExhibitIntro lead="Click a dot on the left, then a dot on the right, to redirect its arrow.">
+        <p>
+          A function sends every dot on the left to exactly one dot on the right. Draw one, and the badges show whether it is
+          injective (no two arrows share a target) or surjective (every target is hit). When one fails, you get the exact
+          instance of the definition that breaks.
+        </p>
+      </ExhibitIntro>
+      <TryThis presets={PRESETS.map((p) => ({ label: p.label, active: preset === p.id, onPick: () => load(p.id) }))} />
 
       <div className="fa-main">
-        <div className="fa-stage">
+        <Zone kind="play" className="fa-stage">
           <div className="fa-controls">
             <div className="fa-modes" role="group" aria-label="Mode">
               {MODES.map((m) => (
@@ -196,17 +199,16 @@ export default function FunctionArrows(_props: ExhibitProps) {
             ))}
           </svg>
           <p className="fa-caption" aria-live="polite">{imageText || note || ' '}</p>
-          <p className="sr-only" aria-live="polite">{summary}</p>
-        </div>
+        </Zone>
 
         <div className="fa-side">
+          <Verdict tone={an.bijective ? 'ok' : 'info'}>{summary}</Verdict>
           <Badge title="Injective" on={an.injective} reason={an.injReason} />
           <Badge title="Surjective" on={an.surjective} reason={an.surjReason} />
           <Badge title="Bijective" on={an.bijective} reason={an.bijective ? 'injective and surjective' : !an.injective && !an.surjective ? 'neither property holds' : `not ${an.injective ? 'surjective' : 'injective'}`} />
           {an.pigeon && <p className="fa-pigeon small">{an.pigeon}</p>}
 
-          <section className="fa-card" aria-label="Injective in Lean">
-            <h3><code>Function.Injective f</code></h3>
+          <Zone kind="lean" label="Function.Injective f" className="fa-card">
             {defs.injective && <p className="small">is <code>∀ a b, f a = f b → a = b</code>.</p>}
             {col ? (
               <p className="small">
@@ -216,9 +218,8 @@ export default function FunctionArrows(_props: ExhibitProps) {
               <p className="small">Holds: whenever <code>f a = f b</code>, no two dots share a target, so <code>f a = f b</code> can only happen when <code>a</code> and <code>b</code> are the same dot.</p>
             )}
             <Checked c={lean.injective} declsOk={lean.declsOk} />
-          </section>
-          <section className="fa-card" aria-label="Surjective in Lean">
-            <h3><code>Function.Surjective f</code></h3>
+          </Zone>
+          <Zone kind="lean" label="Function.Surjective f" className="fa-card">
             {defs.surjective && <p className="small">is <code>∀ b, ∃ a, f a = b</code>.</p>}
             {miss !== null ? (
               <p className="small">
@@ -228,19 +229,22 @@ export default function FunctionArrows(_props: ExhibitProps) {
               <p className="small">Holds: for every <code>b</code> there is a witness <code>a</code>: {Array.from({ length: fn.nB }, (_, j) => `${bName(j)} = f ${aName(fn.map.indexOf(j))}`).join(', ')}.</p>
             )}
             <Checked c={lean.surjective} declsOk={lean.declsOk} />
-          </section>
-          <details className="fa-card">
-            <summary>The function as Lean code</summary>
-            <pre className="fa-code">{lean.decls}</pre>
-          </details>
+          </Zone>
+          <Zone kind="lean" label="The function as Lean code" className="fa-card">
+            <details>
+              <summary className="small">Show the code</summary>
+              <pre className="fa-code">{lean.decls}</pre>
+            </details>
+          </Zone>
         </div>
       </div>
 
-      <p className="fa-links small">
-        Prove these in the game: <a href={href.level('fun-02')}>Injective, unwrapped</a>,{' '}
-        <a href={href.level('fun-05')}>Surjective composes</a>, <a href={href.level('fun-09')}>Image and preimage</a>,{' '}
-        <a href={href.level('fun-08b')}>Which set is which?</a>.
-      </p>
+      <TaughtIn links={[
+        { href: href.level('fun-02'), title: 'Injective, unwrapped' },
+        { href: href.level('fun-05'), title: 'Surjective composes' },
+        { href: href.level('fun-09'), title: 'Image and preimage' },
+        { href: href.level('fun-08b'), title: 'Which set is which?' },
+      ]} />
     </div>
   );
 }

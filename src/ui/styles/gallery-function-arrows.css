@@ -1,9 +1,8 @@
 .fa { display: grid; gap: 14px; }
-.fa-intro { margin: 0; max-width: 70ch; color: var(--ink-2); }
-.fa-presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.fa-try { font-weight: 700; font-size: .85rem; color: var(--muted); margin-right: 4px; }
 .fa-main { display: grid; grid-template-columns: minmax(300px, 520px) 1fr; gap: 20px; align-items: start; }
-.fa-stage { display: grid; gap: 8px; min-width: 0; }
+.fa > .xk-zone, .fa > .xk-try, .fa-side > .xk-zone, .fa-main > .xk-zone { margin-top: 0; }
+.fa-stage { display: grid; gap: 8px; min-width: 0; align-content: start; }
+.fa-stage > .xk-zone-head { margin: 0; }
 .fa-controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; }
 .fa-modes { display: flex; flex-wrap: wrap; gap: 6px; }
 .fa-modes .on { background: var(--primary-soft); color: var(--primary-text); border-color: var(--primary); }
@@ -11,7 +10,7 @@
 .fa-step { display: inline-flex; align-items: center; gap: 6px; }
 .fa-step output { min-width: 1.2em; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
 .fa-help { margin: 0; min-height: 2.6em; }
-.fa-svg { width: 100%; height: auto; display: block; background: var(--surface-1); border: 1px solid var(--line); border-radius: var(--r-md); }
+.fa-svg { width: 100%; height: auto; display: block; background: var(--surface-2); border-radius: var(--r-md); }
 .fa-col { fill: var(--muted); font: 600 12px var(--font-ui); text-transform: uppercase; letter-spacing: .06em; }
 .fa-arrow { stroke: var(--muted); stroke-width: 2.5; stroke-linecap: round; }
 .fa-arrow.hot { stroke: var(--primary-text); stroke-width: 4; }
@@ -33,17 +32,14 @@
 .fa-side { display: grid; gap: 10px; min-width: 0; }
 .fa-badge { display: grid; gap: 2px; padding: 9px 13px; border-radius: var(--r-md); border: 1px solid var(--line); }
 .fa-badge.yes { background: var(--ok-soft); color: var(--ok-text); border-color: var(--ok); }
-.fa-badge.no { background: var(--surface-1); color: var(--muted); }
+.fa-badge.no { background: var(--surface); color: var(--muted); }
 .fa-badge-t { font-weight: 700; }
 .fa-badge-r { font-size: .9rem; }
 .fa-pigeon { margin: 0; padding: 8px 12px; border-left: 3px solid var(--warn); background: var(--warn-soft); color: var(--warn-text); border-radius: var(--r-xs); }
-.fa-card { padding: 11px 14px; border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-1); }
-.fa-card h3 { margin: 0 0 4px; font-size: .98rem; }
 .fa-card p { margin: 0 0 6px; }
-.fa-card summary { cursor: pointer; font-weight: 600; }
+.fa-side .xk-zone details summary { cursor: pointer; font-weight: 600; }
 .fa-ok { color: var(--ok-text); }
 .fa-code { margin: 8px 0 0; padding: 9px 11px; border-radius: var(--r-sm); background: var(--surface-2); font-family: var(--mono); font-size: .88rem; overflow-x: auto; white-space: pre; max-width: 100%; }
-.fa-links { margin: 0; }
 @media (max-width: 760px) { .fa-main { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: no-preference) {
   .fa-arrow { transition: stroke .15s, stroke-width .15s; }

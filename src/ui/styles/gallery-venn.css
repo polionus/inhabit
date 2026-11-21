@@ -1,7 +1,7 @@
 .venn { display: grid; gap: 14px; }
-.venn-intro { margin: 0; max-width: 70ch; color: var(--ink-2); }
-.venn-presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.venn-try { font-weight: 700; font-size: .85rem; color: var(--muted); margin-right: 4px; }
+.venn > .xk-zone, .venn > .xk-try { margin-top: 0; margin-bottom: 0; }
+.venn-diagram, .venn-side > .xk-zone { margin-top: 0; }
+.venn-legend { margin: 8px 0 0; }
 .venn-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; align-items: start; }
 .venn-field { display: grid; gap: 4px; }
 .venn-key { font-size: .8rem; font-weight: 700; color: var(--muted); }
@@ -17,7 +17,7 @@
 .venn-rel .on { background: var(--primary-soft); color: var(--primary-text); border-color: var(--primary); }
 .venn-main { display: grid; grid-template-columns: minmax(280px, 520px) 1fr; gap: 18px; align-items: start; }
 .venn-svg { width: 100%; height: auto; display: block; }
-.venn-universe { fill: var(--surface-1); stroke: var(--line-strong); stroke-width: 2; }
+.venn-universe { fill: var(--surface); stroke: var(--line-strong); stroke-width: 2; }
 .venn-hit { fill: transparent; }
 .venn-left { fill: var(--primary); fill-opacity: .5; }
 .venn-hatch-line { stroke: var(--flame); stroke-width: 3; stroke-opacity: .85; }
@@ -32,14 +32,8 @@
 .venn-witness circle { fill: var(--err); }
 .venn-witness text { fill: #fff; font: 700 15px var(--font-ui); }
 .venn-side { display: grid; gap: 12px; min-width: 0; }
-.venn-verdict { padding: 12px 14px; border-radius: var(--r-md); font-weight: 700; border: 1px solid var(--line); }
-.venn-verdict.yes { background: var(--ok-soft); color: var(--ok-text); border-color: var(--ok); }
-.venn-verdict.no { background: var(--err-soft); color: var(--err-text); border-color: var(--err); }
-.venn-verdict.idle { color: var(--muted); }
-.venn-card { padding: 12px 14px; border-radius: var(--r-md); border: 1px solid var(--line); background: var(--surface-1); }
 .venn-card p { margin: 0 0 6px; }
 .venn-card p:last-child { margin-bottom: 0; }
-.venn-lean-h { font-weight: 700; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
 .venn-code { margin: 0 0 8px; padding: 9px 11px; border-radius: var(--r-sm); background: var(--surface-2); font-family: var(--mono); font-size: .92rem; overflow-x: auto; white-space: pre; max-width: 100%; }
 .venn-card details summary { cursor: pointer; font-weight: 600; margin-bottom: 8px; }
 .venn-legend .sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin: 0 4px 0 8px; border: 1px solid var(--line-strong); }
@@ -47,16 +41,16 @@
 .venn-legend .sw-right { background: repeating-linear-gradient(45deg, var(--flame) 0 2px, transparent 2px 5px); }
 .venn-legend .sw-sel { background: var(--gold); opacity: .6; }
 .venn-ne { display: inline-block; background: var(--err); color: #fff; border-radius: 50%; width: 16px; height: 16px; text-align: center; font-size: 11px; line-height: 16px; font-weight: 700; margin-left: 8px; }
-.venn-legend, .venn-links { margin: 0; }
 @media (max-width: 760px) {
   .venn-main { grid-template-columns: 1fr; }
   .venn-inputs { grid-template-columns: 1fr; }
-  /* On phones show the picture first: diagram, then the inputs that drive it, then presets. */
+  /* On phones: presets (one scrolling row), then the picture, then the inputs that drive it. */
   .venn { display: flex; flex-direction: column; }
-  .venn-intro { order: 0; }
-  .venn-main { order: 1; }
-  .venn-inputs { order: 2; }
-  .venn-presets { order: 3; }
+  .venn .xk-try { order: 1; }
+  .venn-main { order: 2; }
+  .venn-inputzone { order: 3; }
+  .venn .xk-taught { order: 4; }
+  .venn .xk-intro { order: 0; }
 }
 @media (prefers-reduced-motion: no-preference) {
   .venn-left, .venn-sel { transition: fill-opacity .2s; }

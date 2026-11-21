@@ -8,6 +8,7 @@ import {
   MAX_ATOMS, PRESETS, classifyTable, leanProof, parseFormula, truthTable, verdict,
 } from '../../../gallery/truth-table.ts';
 import type { LeanProof } from '../../../gallery/truth-table.ts';
+import { ExhibitIntro, TryThis, Zone, Verdict, TaughtIn } from '../kit.tsx';
 import '../../styles/gallery-truth-table.css';
 
 const SYMBOLS = ['¬', '∧', '∨', '→', '↔', '(', ')', 'True', 'False'];
@@ -63,21 +64,18 @@ export default function TruthTable(_props: ExhibitProps) {
 
   return (
     <div className="tt">
-      <p className="tt-frame">
-        Type a formula in P, Q, R (up to {MAX_ATOMS} letters) and see every row of its truth table. Then ask the harder question: a formula can be
-        true in every row and still need an extra axiom to prove in Lean. Try the first and third presets side by side.
-      </p>
+      <ExhibitIntro lead="Pick a formula below, or type your own, and read off its truth table.">
+        <p>
+          Type a formula in P, Q, R (up to {MAX_ATOMS} letters) and see every row of its truth table. Then ask the harder question: a formula can be
+          true in every row and still need an extra axiom to prove in Lean. Try the first and third presets side by side.
+        </p>
+      </ExhibitIntro>
 
-      <div className="tt-presets" role="group" aria-label="Try this">
-        <span className="tt-label">Try this</span>
-        {PRESETS.map((p) => (
-          <button key={p.formula} className={`btn small${src.trim() === p.formula ? ' primary' : ''}`} aria-pressed={src.trim() === p.formula} onClick={() => setSrc(p.formula)}>
-            <span className="tt-preset-f">{p.formula}</span>
-          </button>
-        ))}
-      </div>
+      <TryThis presets={PRESETS.map((p) => ({ label: p.formula, active: src.trim() === p.formula, onPick: () => setSrc(p.formula) }))} />
 
-      <div className="tt-input card">
+      <div className="tt-layout">
+      <Zone kind="play" className="tt-playzone">
+      <div className="tt-input">
         <label htmlFor="tt-formula" className="tt-label">Formula</label>
         <input
           id="tt-formula"
@@ -103,10 +101,8 @@ export default function TruthTable(_props: ExhibitProps) {
           {parsed.ok ? note ?? 'Reading it as ' + analysis!.table.columns[analysis!.table.columns.length - 1].text + '.' : parsed.error}
         </p>
       </div>
-
       {analysis && t && (
-        <div className="tt-main">
-          <section className="tt-tablewrap" aria-label="Truth table">
+          <div className="tt-tablewrap">
             <div className="tt-tools">
               <label className="small"><input type="checkbox" checked={steps} onChange={(e) => setSteps(e.target.checked)} /> Show every subformula</label>
             </div>
@@ -130,15 +126,20 @@ export default function TruthTable(_props: ExhibitProps) {
                 </tbody>
               </table>
             </div>
-          </section>
+          </div>
+      )}
+      </Zone>
 
-          <section className="tt-verdict" aria-label="Verdict">
-            <div className="tt-badges" aria-live="polite">
+      {analysis && t && (
+        <div className="tt-side">
+          <Verdict tone={analysis.v === 'constructive' ? 'ok' : analysis.v === 'classical' ? 'info' : 'no'}>{summary}</Verdict>
+          <Zone kind="lean" label="Can Lean prove it?" className="tt-verdict">
+            <div className="tt-badges">
               <span className={`tt-badge ${analysis.cls.kind}`}>{KIND_TEXT[analysis.cls.kind]}</span>
               <span className={`tt-badge ${analysis.cls.satisfiable ? 'yes' : 'no'}`}>{analysis.cls.satisfiable ? 'Satisfiable' : 'Unsatisfiable'}</span>
               <span className="tt-count">true in {analysis.cls.trueRows} of {analysis.cls.total} rows</span>
             </div>
-            <h3>Can Lean prove it without classical logic?</h3>
+            <h3>Without classical logic?</h3>
             {analysis.v === 'invalid' && (
               <p>
                 No, and no proof exists at all: it is false in some row
@@ -167,15 +168,16 @@ export default function TruthTable(_props: ExhibitProps) {
                 {analysis.classical?.ok ? <Lean code={analysis.classical.proof.source} /> : <p className="muted">I could not produce a script for it, but it needs classical logic (excluded middle).</p>}
               </>
             )}
-          </section>
+          </Zone>
         </div>
       )}
+      </div>
 
-      <p className="sr-only" aria-live="polite">{summary}</p>
-      <p className="small muted tt-links">
-        Taught in <a href={href.level('logic-08')}>From falsehood, anything</a>, <a href={href.level('logic-12')}>Either it is, or it is not</a> and{' '}
-        <a href={href.level('logic-13')}>Proof by contradiction</a>.
-      </p>
+      <TaughtIn links={[
+        { href: href.level('logic-08'), title: 'From falsehood, anything' },
+        { href: href.level('logic-12'), title: 'Either it is, or it is not' },
+        { href: href.level('logic-13'), title: 'Proof by contradiction' },
+      ]} />
     </div>
   );
 }

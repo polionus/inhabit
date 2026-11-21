@@ -1,9 +1,10 @@
 .can { display: grid; gap: 14px; }
-.can-intro { margin: 0; max-width: 70ch; color: var(--ink-2); }
 .can code, .can-code { font-family: var(--mono); }
+.can > .xk-zone, .can > .xk-try { margin-top: 0; }
+.can-play > .can-bar { margin-top: 10px; }
+.can-play > .xk-verdict { margin-top: 10px; }
 .can-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.can-try { font-weight: 700; font-size: .85rem; color: var(--muted); margin-right: 4px; }
-.can-size { margin-left: auto; display: inline-flex; gap: 8px; align-items: center; font-size: .9rem; color: var(--muted); }
+.can-size { display: inline-flex; gap: 8px; align-items: center; font-size: .9rem; color: var(--muted); }
 .can-scroll { overflow-x: auto; }
 .can-grid { display: grid; gap: 4px; align-items: center; width: max-content; max-width: 100%; }
 .can-col { text-align: center; font: 600 .85rem var(--mono); color: var(--muted); }
@@ -18,9 +19,6 @@
 .can-dcell.hidden { color: var(--muted); opacity: .6; box-shadow: none; }
 .can-dcell.flip { animation: can-flip .45s ease-out; }
 @keyframes can-flip { from { transform: rotateX(90deg); } to { transform: rotateX(0); } }
-.can-status { margin: 0; font-weight: 600; }
-.can-card { border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface-1); padding: 12px 14px; min-width: 0; }
-.can-card h3 { margin: 0 0 6px; font-size: 1rem; }
 .can-small { margin: 6px 0; font-size: .92rem; color: var(--ink-2); max-width: 75ch; }
 .can-checks { margin: 0; padding-left: 1.1rem; display: grid; gap: 4px; font-size: .9rem; color: var(--ink-2); }
 .can-pick { display: flex; flex-wrap: wrap; gap: 6px; }

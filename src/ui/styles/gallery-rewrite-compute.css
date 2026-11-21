@@ -1,22 +1,18 @@
 /* Gallery exhibit: rewrite and compute. Goal cards and marks (gx-*) come from gallery-proof-replay.css. */
 .rc { display: grid; gap: 14px; min-width: 0; }
-.rc-frame { margin: 0; max-width: var(--measure); color: var(--ink-2); }
-.rc .card { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-1); padding: 14px 16px; min-width: 0; }
 .rc-mono { font-family: var(--mono); }
-.rc-label { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; margin-right: 4px; }
 .rc-tabs { display: inline-flex; gap: 4px; padding: 4px; background: var(--surface-2); border-radius: var(--r-pill); justify-self: start; }
 .rc-tab { font: 700 .92rem var(--font-ui); border: 0; background: transparent; color: var(--ink-2); padding: .45rem 1.1rem; border-radius: var(--r-pill); cursor: pointer; transition: background-color .15s, color .15s; }
 .rc-tab.on { background: var(--surface-1); color: var(--ink); box-shadow: var(--shadow-1); }
 .rc-tab:focus-visible { outline: 3px solid var(--glow); }
 .rc-panel { display: grid; gap: 14px; min-width: 0; }
-.rc-presets, .rc-rule-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .rc-note { margin: -4px 0 0; color: var(--ink-2); max-width: var(--measure); }
 .rc-rules { display: grid; gap: 10px; }
 .rc-own { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .rc-own-field { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; flex: 1 1 260px; min-width: 0; }
 .rc-own-field input { flex: 1 1 140px; min-width: 0; font: .95rem var(--mono); padding: .4rem .6rem; border: 2px solid var(--line-strong); border-radius: var(--r-sm); background: var(--surface-2); color: var(--ink); }
 .rc-own-field input:focus-visible { outline: 3px solid var(--glow); border-color: var(--primary-text); }
-.rc-ruletype { margin: 0; overflow-wrap: anywhere; }
+.rc-ruletype { margin: 0 0 10px; overflow-wrap: anywhere; }
 .rc-flow { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 12px; align-items: center; }
 .rc-side { min-width: 0; }
 .rc-side > .label { margin-top: 0; }
@@ -24,21 +20,26 @@
 .rc-arrow { display: grid; justify-items: center; gap: 2px; color: var(--primary-text); font-size: .78rem; max-width: 9rem; text-align: center; overflow-wrap: anywhere; }
 .rc-err { margin: 0; }
 .rc-err p { margin: 0; }
-.rc-explain { display: grid; gap: 6px; }
 .rc-explain p { margin: 0; }
 .rc-actions { display: inline-flex; flex-wrap: wrap; gap: 6px; }
-.rc-links { margin: 0; color: var(--muted); }
 .rc-compute { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 16px; align-items: start; }
+.rc-rule-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.rc-left { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.rc-left > .xk-zone, .rc-guess form { margin: 0; }
+.rc-guess form { display: grid; gap: 8px; }
+.rc-guess .err-card { margin: 0; }
+.rc-steps > .xk-verdict { margin-top: 10px; }
+.rc-explain p { margin: 0 0 6px; }
+.rc-panel > .xk-zone, .rc-panel > .xk-try, .rc-panel > .rc-note { margin-top: 0; margin-bottom: 0; }
 .rc-def { display: grid; gap: 8px; }
-.rc-def .label { margin-top: 0; }
 .rc-def p { margin: 0; }
 .rc-def .gx-code { margin: 0; white-space: pre; overflow-x: auto; }
-.rc-knobs { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding-top: 4px; border-top: 1px solid var(--line); }
+.rc-knobs { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.rc-knobs > .xk-zone-head { flex: 0 0 100%; }
 .rc-stepper { display: inline-flex; gap: 6px; align-items: center; }
 .rc-stepper-v { min-width: 1.6rem; text-align: center; font-size: 1.05rem; font-weight: 700; }
-.rc-steps { display: grid; gap: 8px; }
-.rc-steps-head { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; }
-.rc-steps-head .label { margin: 0; }
+.rc-steps { display: grid; gap: 8px; align-content: start; }
+.rc-steps > .xk-zone-head { margin: 0; }
 .rc-steplist { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .rc-step { display: grid; grid-template-columns: 1.2rem minmax(0, 1fr) auto; column-gap: 8px; align-items: baseline; padding: .3rem .4rem; border-radius: var(--r-xs); animation: gx-in .3s var(--ease-out); }
 .rc-step.latest { background: var(--surface-2); }
@@ -49,11 +50,7 @@
 .rc-ok.yes { background: var(--ok-soft); color: var(--ok-text); }
 .rc-ok.no { background: var(--err-soft); color: var(--err-text); }
 .rc-why { grid-column: 2 / -1; color: var(--muted); }
-.rc-verdict { margin: 0; padding: .55rem .8rem; border-radius: var(--r-sm); overflow-wrap: anywhere; }
-.rc-verdict.yes { background: var(--ok-soft); color: var(--ok-text); }
-.rc-verdict.no { background: var(--err-soft); color: var(--err-text); }
 .rc-guess { display: grid; gap: 8px; }
-.rc-guess .err-card { margin: 0; }
 @media (prefers-reduced-motion: reduce) { .rc-step { animation: none; } .rc-tab { transition: none; } }
 :root[data-motion='reduce'] .rc-step { animation: none; }
 @media (max-width: 760px) {

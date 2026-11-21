@@ -13,6 +13,7 @@ import {
   COMPUTE_PRESETS, DOUBLE_DEF, RW_PRESETS, checkSteps, reduce, rflCheck, runRewrite,
 } from '../../../gallery/rewrite-compute.ts';
 import { GoalCard, LeanMarked } from '../proof-replay/LeanMarked.tsx';
+import { ExhibitIntro, TryThis, Zone, Verdict, TaughtIn } from '../kit.tsx';
 import '../../styles/gallery-proof-replay.css';
 import '../../styles/gallery-rewrite-compute.css';
 
@@ -23,11 +24,13 @@ export default function RewriteCompute(_props: ExhibitProps) {
   const [tab, setTab] = useState<'rw' | 'compute'>('rw');
   return (
     <div className="rc">
-      <p className="rc-frame">
-        Two ways an equation gets used. <strong>Rewrite</strong> finds the left side of an equation in your goal and swaps in the right side.{' '}
-        <strong>Compute</strong> unfolds definitions until only a value is left, which is why <code className="inline">rfl</code> can prove{' '}
-        <code className="inline">double 3 = 6</code>. Pick a goal and a rule, or an expression, and watch what changes.
-      </p>
+      <ExhibitIntro lead="Pick a goal and a rule, or an expression, and watch what changes.">
+        <p>
+          Two ways an equation gets used. <strong>Rewrite</strong> finds the left side of an equation in your goal and swaps in the right side.{' '}
+          <strong>Compute</strong> unfolds definitions until only a value is left, which is why <code className="inline">rfl</code> can prove{' '}
+          <code className="inline">double 3 = 6</code>.
+        </p>
+      </ExhibitIntro>
       <div className="rc-tabs" role="tablist" aria-label="Panel">
         <button role="tab" id="rc-tab-rw" aria-controls="rc-panel-rw" aria-selected={tab === 'rw'} className={`rc-tab${tab === 'rw' ? ' on' : ''}`} onClick={() => setTab('rw')}>Rewrite</button>
         <button role="tab" id="rc-tab-c" aria-controls="rc-panel-c" aria-selected={tab === 'compute'} className={`rc-tab${tab === 'compute' ? ' on' : ''}`} onClick={() => setTab('compute')}>Compute</button>
@@ -79,19 +82,15 @@ function RewritePanel() {
 
   return (
     <section className="rc-panel" id="rc-panel-rw" role="tabpanel" aria-labelledby="rc-tab-rw">
-      <div className="rc-presets" role="group" aria-label="Try this goal">
-        <span className="rc-label">Try this</span>
-        {RW_PRESETS.map((p) => (
-          <button key={p.id} className={`btn small${p.id === presetId ? ' primary' : ''}`} aria-pressed={p.id === presetId} onClick={() => pick(p.id)}>
-            <span className="rc-mono">{p.label}</span>
-          </button>
-        ))}
-      </div>
+      <TryThis
+        label="Try this goal"
+        presets={RW_PRESETS.map((p) => ({ label: p.label, active: p.id === presetId, onPick: () => pick(p.id) }))}
+      />
       {preset.note && <p className="rc-note small">{preset.note}</p>}
 
-      <div className="rc-rules card">
+      <Zone kind="play" label="Choose the rule">
+        <div className="rc-rules">
         <div className="rc-rule-row" role="group" aria-label="Rewrite rules">
-          <span className="rc-label">Rule</span>
           {preset.rules.map((r) => (
             <button key={r} className={`btn small${r === rule ? ' primary' : ' outline'}`} aria-pressed={r === rule} onClick={() => apply(r)}>
               <span className="rc-mono">{r}</span>
@@ -108,14 +107,22 @@ function RewritePanel() {
           <button className="btn small" type="button" onClick={() => setDraft(draft.trim().startsWith('←') ? draft.replace(/^←\s*/, '') : '← ' + draft.trim())} aria-label="Flip the direction (←)">←</button>
           <button className="btn small primary" type="submit">Rewrite</button>
         </form>
+        {run.ok && (
+          <div className="rc-actions">
+            <button className="btn small" onClick={carryOn}>Continue from the result</button>
+            {history.length > 0 && <button className="btn small ghost" onClick={restart}>Start over</button>}
+          </div>
+        )}
+        </div>
+      </Zone>
+
+      <Zone kind="lean" label="What Lean says">
         {run.ruleType && (
           <p className="rc-ruletype small">
             <span className="rc-mono">{ruleName}</span> : <LeanInline code={run.ruleType} />
             {rule.startsWith('←') && <span className="muted"> (used right to left)</span>}
           </p>
         )}
-      </div>
-
       <div className="rc-flow">
         <div className="rc-side">
           <div className="label">Goal{history.length ? ` (after ${history.map((h) => `rw [${h}]`).join(', ')})` : ''}</div>
@@ -146,8 +153,10 @@ function RewritePanel() {
         </div>
       </div>
 
+      </Zone>
+
       {run.ok && (
-        <div className="rc-explain">
+        <Zone kind="explain" label="What matched" className="rc-explain">
           {m?.confirmed ? (
             <p className="small">
               Matched <LeanMarked code={m.instance} marks={[{ from: 0, to: m.instance.length }]} markClass="gx-mark-old" />
@@ -158,17 +167,11 @@ function RewritePanel() {
             <p className="small muted">The highlight shows the text that changed: this match needed Lean to unfold a definition, which the exhibit doesn’t trace.</p>
           )}
           {run.closedByRfl && <p className="small">Plain <code className="inline">rw</code> would also try <code className="inline">rfl</code> afterwards and close this goal outright.</p>}
-          <div className="rc-actions">
-            <button className="btn small" onClick={carryOn}>Continue from the result</button>
-            {history.length > 0 && <button className="btn small ghost" onClick={restart}>Start over</button>}
-          </div>
-        </div>
+        </Zone>
       )}
 
       <p className="sr-only" aria-live="polite">{summary}</p>
-      <p className="rc-links small">
-        Where this is taught: <LevelLink id="eq-04" /> · <LevelLink id="eq-06" />{preset.level !== 'eq-04' && preset.level !== 'eq-06' && <> · <LevelLink id={preset.level} /></>}
-      </p>
+      <TaughtIn links={[...new Set(['eq-04', 'eq-06', preset.level])].map((id) => ({ href: href.level(id), title: levelTitle(id) }))} />
     </section>
   );
 }
@@ -234,52 +237,49 @@ function ComputePanel() {
 
   return (
     <section className="rc-panel" id="rc-panel-c" role="tabpanel" aria-labelledby="rc-tab-c">
-      <div className="rc-presets" role="group" aria-label="Try this expression">
-        <span className="rc-label">Try this</span>
-        {COMPUTE_PRESETS.map((p) => (
-          <button key={p.id} className={`btn small${p.id === presetId ? ' primary' : ''}`} aria-pressed={p.id === presetId} onClick={() => pick(p.id)}>
-            <span className="rc-mono">{p.label}</span>
-          </button>
-        ))}
-      </div>
+      <TryThis
+        label="Try this expression"
+        presets={COMPUTE_PRESETS.map((p) => ({ label: p.label, active: p.id === presetId, onPick: () => pick(p.id) }))}
+      />
 
       <div className="rc-compute">
-        <div className="card rc-def">
+        <div className="rc-left">
+        <Zone
+          kind={preset.id === 'beta' ? 'explain' : 'lean'}
+          label={preset.id === 'double' ? 'The definition' : preset.id === 'add' ? 'Addition recurses on its second argument' : 'Applying a function'}
+          aside={preset.id === 'double' ? <>from <LevelLink id="nat-02" /></> : undefined}
+          className="rc-def"
+        >
           {preset.id === 'double' && (
             <>
-              <div className="label">The definition (from <LevelLink id="nat-02" />)</div>
               <LeanMarked code={def} block />
               {!defOk && <p className="tt-error small">The engine did not accept this definition.</p>}
             </>
           )}
           {preset.id === 'add' && (
             <>
-              <div className="label">Addition recurses on its second argument</div>
               {addRules.map((r) => <p key={r.n} className="rc-ruletype small"><span className="rc-mono">{r.n}</span> : <LeanInline code={r.t!} /></p>)}
               <p className="small muted">Both hold by <code className="inline">rfl</code>: they are the two cases of <code className="inline">Nat.add</code>. A numeral like 3 is <code className="inline">Nat.succ 2</code> underneath.</p>
             </>
           )}
           {preset.id === 'beta' && (
             <>
-              <div className="label">Applying a function</div>
               <p className="small">A <code className="inline">fun</code> applied to an argument reduces by putting the argument in for the variable (β-reduction). Then the arithmetic computes.</p>
             </>
           )}
-          <div className="rc-knobs">
-            <span className="small muted">Change the numbers:</span>
-            <Stepper value={a} range={preset.a} onChange={setA} label={preset.id === 'beta' ? 'argument' : 'first number'} />
-            {preset.b && <Stepper value={b} range={preset.b} onChange={setB} label="second number" />}
-          </div>
+        </Zone>
+        <Zone kind="play" label="Change the numbers" className="rc-knobs">
+          <Stepper value={a} range={preset.a} onChange={setA} label={preset.id === 'beta' ? 'argument' : 'first number'} />
+          {preset.b && <Stepper value={b} range={preset.b} onChange={setB} label="second number" />}
+        </Zone>
         </div>
 
-        <div className="card rc-steps">
-          <div className="rc-steps-head">
-            <span className="label">Step by step</span>
-            <span className="rc-actions">
-              <button className="btn small" onClick={replay} disabled={playing}>Replay</button>
-              <button className="btn small ghost" onClick={() => { setPlaying(false); setShown(Math.min(shown + 1, steps.length)); }} disabled={shown >= steps.length}>Next step</button>
-            </span>
-          </div>
+        <Zone kind="lean" label="Step by step" className="rc-steps" aside={
+          <span className="rc-actions">
+            <button className="btn small" onClick={replay} disabled={playing}>Replay</button>
+            <button className="btn small ghost" onClick={() => { setPlaying(false); setShown(Math.min(shown + 1, steps.length)); }} disabled={shown >= steps.length}>Next step</button>
+          </span>
+        }>
           <ol className="rc-steplist" aria-label={`Reduction of ${start}`}>
             {steps.slice(0, shown).map((s, i) => (
               <li key={`${start}-${i}`} className={`rc-step${i === shown - 1 ? ' latest' : ''}`}>
@@ -301,18 +301,19 @@ function ComputePanel() {
             ))}
           </ol>
           {shown >= steps.length && (
-            <p className={`rc-verdict ${all ? 'yes' : 'no'}`}>
+            <Verdict tone={all ? 'ok' : 'no'}>
               {all ? (
                 <>The engine checks <code className="inline">example : {start} = {value} := rfl</code>, and <code className="inline">#reduce {start}</code> prints <code className="inline">{check.reduced}</code>.</>
               ) : (
                 <>Some step did not check. That shouldn’t happen; please report it.</>
               )}
-            </p>
+            </Verdict>
           )}
-        </div>
+        </Zone>
       </div>
 
-      <form className="card rc-guess" onSubmit={doGuess}>
+      <Zone kind="play" label="Your turn" className="rc-guess">
+      <form onSubmit={doGuess}>
         <label htmlFor="rc-guess-input" className="small">Your turn: what is <code className="inline">{start}</code> equal to by <code className="inline">rfl</code>? Any expression works, not only the value.</label>
         <span className="rc-own-field">
           <span className="rc-mono muted" aria-hidden="true">{start} =</span>
@@ -320,20 +321,17 @@ function ComputePanel() {
           <button className="btn small primary" type="submit">Check with rfl</button>
         </span>
         {guessResult && (
-          <div aria-live="polite">
-            {guessResult.ok ? (
-              <p className="rc-verdict yes">Yes: <code className="inline">rfl</code> proves <code className="inline">{start} = {guessResult.for}</code>. Both sides compute to the same value.</p>
-            ) : (
-              <div className="err-card sev-error"><div className="err-title">Lean reports a problem</div><pre className="raw">{guessResult.message}</pre></div>
-            )}
-          </div>
+          guessResult.ok ? (
+            <Verdict tone="ok">Yes: <code className="inline">rfl</code> proves <code className="inline">{start} = {guessResult.for}</code>. Both sides compute to the same value.</Verdict>
+          ) : (
+            <div className="err-card sev-error" role="status"><div className="err-title">Lean reports a problem</div><pre className="raw">{guessResult.message}</pre></div>
+          )
         )}
       </form>
+      </Zone>
 
       <p className="sr-only" aria-live="polite">{`${start} reduces to ${value} in ${steps.length - 1} steps. ${all ? 'Every step checked with rfl.' : ''}`}</p>
-      <p className="rc-links small">
-        Where this is taught: <LevelLink id="nat-02" /> · <LevelLink id="eq-01" />
-      </p>
+      <TaughtIn links={['nat-02', 'eq-01'].map((id) => ({ href: href.level(id), title: levelTitle(id) }))} />
     </section>
   );
 }

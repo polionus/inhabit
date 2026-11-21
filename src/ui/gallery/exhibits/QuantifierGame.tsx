@@ -8,6 +8,7 @@ import {
   N, PRESETS, RELATIONS, SWAP_PROOF, advance, leanOf, matrixOf, narrate, outcome, ownerOf, relationText, solve, strategy, goodMoves,
 } from '../../../gallery/quantifier-game.ts';
 import type { Binder, Matrix, Side } from '../../../gallery/quantifier-game.ts';
+import { ExhibitIntro, TryThis, Zone, Verdict, TaughtIn } from '../kit.tsx';
 import '../../styles/gallery-quantifier-game.css';
 
 const DOM = Array.from({ length: N }, (_, i) => i);
@@ -80,22 +81,17 @@ export default function QuantifierGame(_props: ExhibitProps) {
 
   return (
     <div className="qg">
-      <p className="qg-frame">
-        A statement with ∀ and ∃ is a game. Pick a side: claim it is true and you choose the numbers for every ∃; claim it is false and you
-        choose them for every ∀. The computer plays the other quantifiers as well as it can. Try the swapped pair of presets, then click the
-        grid to change the relation.
-      </p>
+      <ExhibitIntro lead="Pick a side, then click the numbers that make your claim come true.">
+        <p>
+          A statement with ∀ and ∃ is a game. Claim it is true and you choose the numbers for every ∃; claim it is false and you
+          choose them for every ∀. The computer plays the other quantifiers as well as it can. Try the swapped pair of presets, then click the
+          grid to change the relation.
+        </p>
+      </ExhibitIntro>
 
-      <div className="qg-presets" role="group" aria-label="Try this">
-        <span className="qg-label">Try this</span>
-        {PRESETS.map((p) => (
-          <button key={p.id} className={`btn small${p.id === presetId ? ' primary' : ''}`} aria-pressed={p.id === presetId} onClick={() => loadPreset(p.id)}>
-            {p.label}
-          </button>
-        ))}
-      </div>
+      <TryThis presets={PRESETS.map((p) => ({ label: p.label, active: p.id === presetId, onPick: () => loadPreset(p.id) }))} />
 
-      <section className="qg-stmt card" aria-label="The statement">
+      <Zone kind="lean" label="The statement" className="qg-stmt">
         <div className="qg-lean" data-testid="qg-lean">
           {elab.ok ? <LeanInline code={elab.pretty ?? lean} /> : <LeanInline code={lean} />}
           <span className="qg-checked">{elab.ok ? 'Lean accepts this statement, with R : ℕ → ℕ → Prop' : 'Lean could not read this'}</span>
@@ -103,18 +99,20 @@ export default function QuantifierGame(_props: ExhibitProps) {
         <p className="muted small">
           Here R x y means <strong>{relName}</strong> on the numbers 0 to {N - 1}.{preset ? ' ' + preset.blurb : ''}
         </p>
-        <div className="qg-sides" role="radiogroup" aria-label="Your side">
-          <button role="radio" aria-checked={side === 'true'} className={`btn small${side === 'true' ? ' primary' : ''}`} onClick={() => chooseSide('true')}>
-            I claim it is true
-          </button>
-          <button role="radio" aria-checked={side === 'false'} className={`btn small${side === 'false' ? ' primary' : ''}`} onClick={() => chooseSide('false')}>
-            I claim it is false
-          </button>
-          <label className="qg-hint">
-            <input type="checkbox" checked={hints} onChange={(e) => setHints(e.target.checked)} /> Show winning moves
-          </label>
-        </div>
-      </section>
+      </Zone>
+
+      <Zone kind="play" className="qg-playzone">
+      <div className="qg-sides" role="radiogroup" aria-label="Your side">
+        <button role="radio" aria-checked={side === 'true'} className={`btn small${side === 'true' ? ' primary' : ''}`} onClick={() => chooseSide('true')}>
+          I claim it is true
+        </button>
+        <button role="radio" aria-checked={side === 'false'} className={`btn small${side === 'false' ? ' primary' : ''}`} onClick={() => chooseSide('false')}>
+          I claim it is false
+        </button>
+        <label className="qg-hint">
+          <input type="checkbox" checked={hints} onChange={(e) => setHints(e.target.checked)} /> Show winning moves
+        </label>
+      </div>
 
       <div className="qg-board">
         <svg className="qg-graph" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`The relation R as arrows from x to y. ${DOM.map((x) => `x = ${x} relates to ${DOM.filter((y) => M[x][y]).join(', ') || 'nothing'}`).join('; ')}.`}>
@@ -184,8 +182,8 @@ export default function QuantifierGame(_props: ExhibitProps) {
         </div>
       </div>
 
-      <section className="qg-play card" aria-label="The game">
-        <p className="qg-turn" aria-live="polite">{summary}</p>
+      <div className="qg-play">
+        {done ? <Verdict tone={out!.playerWon ? 'ok' : 'no'}>{summary}</Verdict> : <p className="qg-turn" aria-live="polite">{summary}</p>}
         {!done && (
           <div className="qg-tiles" role="group" aria-label={`Choose ${next!.v}`}>
             <span className="qg-label">
@@ -212,10 +210,11 @@ export default function QuantifierGame(_props: ExhibitProps) {
         {done && (
           <button className="btn small" onClick={() => restart(binders, M, side)}>Play again</button>
         )}
-      </section>
+      </div>
+      </Zone>
 
       {done && strat && (
-        <section className="qg-result card" aria-label="Why">
+        <Zone kind="explain" label="Why" className="qg-result">
           <p>
             Brute force over all {N * N} pairs: the statement is <strong>{truth ? 'true' : 'false'}</strong>. So the {truth ? '∃' : '∀'} player has a winning strategy,
             {(truth ? 'true' : 'false') === side ? ' and that was you.' : ' and that was the computer.'}
@@ -239,22 +238,25 @@ export default function QuantifierGame(_props: ExhibitProps) {
               </tbody>
             </table>
           ))}
-        </section>
+        </Zone>
       )}
 
       {isSwapPair && (
-        <p className="qg-swap small">
-          Order matters. With the same relation, <LeanInline code="∀ x, ∃ y, R x y" /> is {solve(PRESETS[2].binders, M) ? 'true' : 'false'} and{' '}
-          <LeanInline code="∃ y, ∀ x, R x y" /> is {solve(PRESETS[3].binders, M) ? 'true' : 'false'}. Lean proves one direction for any R
-          {swapCheck.complete ? ' (the engine checked this proof):' : '.'}
-        </p>
+        <Zone kind="lean" label="Order matters" className="qg-swap">
+          <p className="small">
+            With the same relation, <LeanInline code="∀ x, ∃ y, R x y" /> is {solve(PRESETS[2].binders, M) ? 'true' : 'false'} and{' '}
+            <LeanInline code="∃ y, ∀ x, R x y" /> is {solve(PRESETS[3].binders, M) ? 'true' : 'false'}. Lean proves one direction for any R
+            {swapCheck.complete ? ' (the engine checked this proof):' : '.'}
+          </p>
+          {swapCheck.complete && <Lean code={SWAP_PROOF} />}
+        </Zone>
       )}
-      {isSwapPair && swapCheck.complete && <Lean code={SWAP_PROOF} />}
 
-      <p className="small muted qg-links">
-        Taught in <a href={href.level('quant-09')}>Order matters</a>, <a href={href.level('quant-11')}>Say it: everyone has a friend</a> and{' '}
-        <a href={href.level('quant-08')}>Not-exists is for-all-not</a>.
-      </p>
+      <TaughtIn links={[
+        { href: href.level('quant-09'), title: 'Order matters' },
+        { href: href.level('quant-11'), title: 'Say it: everyone has a friend' },
+        { href: href.level('quant-08'), title: 'Not-exists is for-all-not' },
+      ]} />
     </div>
   );
 }

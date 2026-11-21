@@ -1,9 +1,6 @@
-.tt { display: grid; gap: 14px; }
-.tt-frame { margin: 0; max-width: var(--measure); color: var(--ink-2); }
-.tt-presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.tt { display: grid; gap: 0; }
 .tt-preset-f { font-family: var(--mono); }
 .tt-label { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .04em; margin-right: 4px; }
-.tt .card { border: 1px solid var(--line); border-radius: var(--r-md); background: var(--surface-1); padding: 14px 16px; display: grid; gap: 8px; }
 .tt-field { font: 1.3rem var(--mono); padding: .5rem .7rem; border: 2px solid var(--line-strong); border-radius: var(--r-sm); background: var(--surface-2); color: var(--ink); width: 100%; box-sizing: border-box; }
 .tt-field:focus-visible { outline: 3px solid var(--glow); border-color: var(--primary-text); }
 .tt-field[aria-invalid='true'] { border-color: var(--err); }
@@ -12,7 +9,12 @@
 .tt-syms .sym:hover { background: var(--surface-3); }
 .tt-input p { margin: 0; }
 .tt-error { color: var(--err-text); }
-.tt-main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 20px; align-items: start; }
+.tt-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 14px; align-items: start; }
+.tt-layout > .xk-zone + .xk-zone, .tt-side > .xk-zone { margin-top: 0; }
+.tt-playzone { display: grid; gap: 12px; }
+.tt-input { display: grid; gap: 8px; }
+.tt-side { display: grid; gap: 14px; min-width: 0; }
+.tt-verdict h3 { margin: 10px 0 4px; font-size: 1rem; }
 .tt-tools { margin-bottom: 6px; }
 .tt-scroll { overflow-x: auto; }
 .tt-table { border-collapse: collapse; font-family: var(--mono); font-size: .95rem; }
@@ -29,7 +31,5 @@
 .tt-badge.tautology, .tt-badge.yes { background: var(--ok-soft); color: var(--ok-text); }
 .tt-badge.contradiction, .tt-badge.no { background: var(--err-soft); color: var(--err-text); }
 .tt-count { color: var(--muted); font-size: .85rem; }
-.tt-verdict h3 { margin: 14px 0 6px; font-size: 1.05rem; }
 .tt-verdict p { margin: 6px 0; }
-.tt-links { margin: 0; }
-@media (max-width: 800px) { .tt-main { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 800px) { .tt-layout { grid-template-columns: minmax(0, 1fr); } }

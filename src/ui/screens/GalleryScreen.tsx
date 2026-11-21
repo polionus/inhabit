@@ -101,7 +101,7 @@ function ExhibitPage({ id }: { id: string }) {
           <p className="lede">{meta.tagline}</p>
           <p className="exhibit-meta">
             <span><Icon name="clock" size={14} /> About {meta.minutes} min</span>
-            <span><Icon name="check-circle" size={14} /> Lean shown here is checked by the game's engine</span>
+            <span><Icon name="check-circle" size={14} /> Lean here is engine-checked</span>
             <span>Exhibit {i + 1} of {exhibits.length}</span>
           </p>
         </div>

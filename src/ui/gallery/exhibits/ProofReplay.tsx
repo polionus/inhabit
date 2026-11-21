@@ -11,6 +11,7 @@ import { LeanInline } from '../../components/Markdown.tsx';
 import { PROOF_PRESETS, buildReplay, diffGoals, diffSpan, referenceBody, removedHyps } from '../../../gallery/proof-replay.ts';
 import type { Goal } from '../../../engine/types.ts';
 import { GoalCard, LeanMarked } from '../proof-replay/LeanMarked.tsx';
+import { ExhibitIntro, TryThis, Zone, TaughtIn } from '../kit.tsx';
 import '../../styles/gallery-proof-replay.css';
 
 const SPEEDS = [
@@ -105,26 +106,25 @@ export default function ProofReplay(_props: ExhibitProps) {
 
   return (
     <div className="pr">
-      <p className="pr-frame">
-        A tactic proof is a list of instructions for building a term, and the proposition is that term's type. Step through a proof
-        below to see the goal before and after each line, and under it the term the lines have built so far, with <code className="inline">?_</code> marking
-        each hole still to fill. Press Play, or click any line to jump there.
-      </p>
+      <ExhibitIntro lead="Press Play and watch the goal on the right shrink, one line at a time.">
+        <p>
+          A tactic proof is a list of instructions for building a term, and the proposition is that term's type. Step through a proof
+          to see the goal before and after each line, and under it the term the lines have built so far, with <code className="inline">?_</code> marking
+          each hole still to fill. Click any line to jump there.
+        </p>
+      </ExhibitIntro>
 
-      <div className="pr-presets" role="group" aria-label="Try this">
-        <span className="pr-label">Try this</span>
-        {PROOF_PRESETS.map((p) => (
-          <button key={p.level} className={`btn small${!own && presetId === p.level ? ' primary' : ''}`} aria-pressed={!own && presetId === p.level} onClick={() => choose(p.level)}>
-            {p.label}
+      <TryThis
+        presets={PROOF_PRESETS.map((p) => ({ label: p.label, active: !own && presetId === p.level, onPick: () => choose(p.level) }))}
+        extra={
+          <button type="button" className={`xk-chip${own ? ' on' : ''}`} aria-pressed={!!own} onClick={() => { setPlaying(false); setOwn({ ...src, body: src.body }); }}>
+            Edit this proof
           </button>
-        ))}
-        <button className={`btn small${own ? ' primary' : ' outline'}`} aria-pressed={!!own} onClick={() => { setPlaying(false); setOwn({ ...src, body: src.body }); }}>
-          Edit this proof
-        </button>
-      </div>
+        }
+      />
 
       <div className="pr-main">
-        <section className="card pr-proof" aria-label="The proof">
+        <Zone kind="play" label="The proof" className="pr-proof">
           <div className="pr-header"><LeanInline code={src.header} /></div>
           {own ? (
             <label className="pr-edit">
@@ -180,9 +180,9 @@ export default function ProofReplay(_props: ExhibitProps) {
             </label>
           </div>
           {watch && <p className="pr-watch small">{watch}</p>}
-        </section>
+        </Zone>
 
-        <section className="pr-state" aria-label="Proof state">
+        <Zone kind="lean" label="Proof state" className="pr-state">
           <div className="pr-goalpair">
             <div className="pr-col">
               <div className="label">{line ? 'Before this line' : 'The goal'}</div>
@@ -200,7 +200,7 @@ export default function ProofReplay(_props: ExhibitProps) {
             )}
           </div>
 
-          <div className="card pr-term" aria-label="Proof term so far">
+          <div className="pr-term" aria-label="Proof term so far">
             <div className="pr-term-head">
               <span className="label">The term so far</span>
               {term && <span className="muted small">{holes === 0 ? 'no holes: a complete proof term' : `${holes} hole${holes > 1 ? 's' : ''}, one per open goal`}</span>}
@@ -216,17 +216,12 @@ export default function ProofReplay(_props: ExhibitProps) {
                 : 'The highlight is what this line added. Lean’s kernel never sees the tactics, only this term.'}
             </p>
           </div>
-        </section>
+        </Zone>
       </div>
 
       <p className="sr-only" aria-live="polite">{summary}</p>
 
-      <p className="pr-links small">
-        Where this is taught:{' '}
-        {links.map((id, i) => (
-          <span key={id}>{i > 0 && ' · '}<a href={href.level(id)}>{levelTitle(id)}</a></span>
-        ))}
-      </p>
+      <TaughtIn links={links.map((id) => ({ href: href.level(id), title: levelTitle(id) }))} />
     </div>
   );
 }
