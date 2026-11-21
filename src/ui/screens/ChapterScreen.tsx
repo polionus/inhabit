@@ -1,4 +1,5 @@
 /** Chapter explainer: a blog-style article for one world at `#/chapter/<worldId>`. */
+import { exhibitsForWorld } from '../../gallery/registry.ts';
 import { useEffect, useMemo, useRef } from 'react';
 import { chapterFor } from '../../content/chapters/full.ts';
 import { data } from '../data.ts';
@@ -110,6 +111,19 @@ export function ChapterScreen({ id }: { id: string }) {
             {guide.map((a) => (
               <li key={a.id}>
                 <a className="ch-rn" href={href.guide(a.id)}><strong>{a.title}</strong><span className="muted">{a.summary}</span></a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {exhibitsForWorld(id).length > 0 && (
+        <section className="ch-readnext" aria-labelledby="ch-gal-h">
+          <h2 id="ch-gal-h" className="section-title"><Icon name="sparkle" size={20} /> See it in the Gallery</h2>
+          <ul>
+            {exhibitsForWorld(id).map((e) => (
+              <li key={e.id}>
+                <a className="ch-rn" href={href.gallery(e.id)}><strong>{e.title}</strong><span className="muted">{e.tagline}</span></a>
               </li>
             ))}
           </ul>

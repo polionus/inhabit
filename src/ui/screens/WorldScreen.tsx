@@ -1,3 +1,4 @@
+import { exhibitsForWorld } from '../../gallery/registry.ts';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Level } from '../../content/types.ts';
 import { data } from '../data.ts';
@@ -190,6 +191,12 @@ export function WorldScreen({ id }: { id: string }) {
 
       {chapterFor(w.id) && (
         <p className="world-explainer"><Icon name="book" size={16} /> <a href={href.chapter(w.id)}>Read the chapter explainer</a> <span className="muted">a longer article on this world's big idea</span></p>
+      )}
+
+      {exhibitsForWorld(w.id).length > 0 && (
+        <p className="world-explainer"><Icon name="sparkle" size={16} /> See it in the Gallery:{' '}
+          {exhibitsForWorld(w.id).map((e, k) => (<span key={e.id}>{k > 0 && ', '}<a href={href.gallery(e.id)}>{e.title}</a></span>))}
+        </p>
       )}
 
       {prose?.primer && <Primer worldId={w.id} primer={prose.primer} />}
