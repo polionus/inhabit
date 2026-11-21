@@ -1,6 +1,143 @@
-/** Gallery exhibit 'cantor-diagonal'. Stub: replace with the real exhibit. Props are the shared ExhibitProps. */
+/** Gallery exhibit 'cantor-diagonal': a finite illustration of Cantor's theorem. */
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { MAX_N, MIN_N, clash, diagonalSet, inRange, randomRel, relPresets, resize, showSet, toggle } from '../../../gallery/cantor-diagonal.ts';
+import type { Rel } from '../../../gallery/cantor-diagonal.ts';
+import { cantorReport } from '../../../gallery/cantor-diagonal-lean.ts';
+import { href } from '../../router.ts';
 import type { ExhibitProps } from '../types.ts';
+import '../../styles/gallery-cantor-diagonal.css';
+
+const yn = (b: boolean) => (b ? 'yes' : 'no');
 
 export default function CantorDiagonal(_props: ExhibitProps) {
-  return <p className="muted">This exhibit is being built.</p>;
+  const [n, setN] = useState(4);
+  const [f, setF] = useState<Rel>(() => relPresets[3].make(4));
+  const [built, setBuilt] = useState(4);
+  const [a, setA] = useState(0);
+  const timer = useRef<number | undefined>(undefined);
+  const report = useMemo(() => cantorReport(), []);
+  const d = diagonalSet(f);
+
+  useEffect(() => () => window.clearInterval(timer.current), []);
+
+  const replay = () => {
+    window.clearInterval(timer.current);
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setBuilt(n); return; }
+    setBuilt(0);
+    let k = 0;
+    timer.current = window.setInterval(() => {
+      k += 1;
+      setBuilt(k);
+      if (k >= n) window.clearInterval(timer.current);
+    }, 450);
+  };
+
+  const changeN = (m: number) => {
+    if (m < MIN_N || m > MAX_N) return;
+    window.clearInterval(timer.current);
+    setN(m); setF((g) => resize(g, m)); setBuilt(m); setA((x) => Math.min(x, m - 1));
+  };
+  const load = (make: (n: number) => Rel) => { setF(make(n)); setBuilt(n); };
+  const aa = Math.min(a, n - 1);
+  const c = clash(f, aa);
+  const missed = !inRange(f, d);
+
+  return (
+    <div className="can">
+      <p className="can-intro">
+        Row <code>x</code> is the subset <code>f x</code> of {'{0, …, ' + (n - 1) + '}'}. Click cells to change <code>f</code>. The outlined diagonal cells ask whether <code>x ∈ f x</code>. The bottom row flips them: <code>D = {'{x | x ∉ f x}'}</code>. However you set <code>f</code>, no row can be equal to <code>D</code>.
+      </p>
+      <div className="can-bar">
+        <span className="can-try">Try this</span>
+        {relPresets.map((p) => <button key={p.id} type="button" className="btn btn-sm" onClick={() => load(p.make)}><code>{p.label}</code></button>)}
+        <button type="button" className="btn btn-sm" onClick={() => load((m) => randomRel(m))}>Random f</button>
+        <span className="can-size">
+          Size
+          <button type="button" className="btn btn-sm" aria-label="Fewer elements" disabled={n <= MIN_N} onClick={() => changeN(n - 1)}>−</button>
+          <strong aria-live="polite">{n}</strong>
+          <button type="button" className="btn btn-sm" aria-label="More elements" disabled={n >= MAX_N} onClick={() => changeN(n + 1)}>+</button>
+        </span>
+      </div>
+
+      <div className="can-scroll">
+        <div className="can-grid" style={{ gridTemplateColumns: `4.2rem repeat(${n}, minmax(2.4rem, 3.4rem))` }} role="group" aria-label={`The function f as a grid: row x lists the elements of f x`}>
+          <span className="can-corner" />
+          {Array.from({ length: n }, (_, y) => <span key={y} className="can-col">{y}</span>)}
+          {f.map((row, x) => (
+            <Row key={x} x={x}>
+              {row.map((v, y) => (
+                <button
+                  key={y} type="button"
+                  className={'can-cell' + (v ? ' on' : '') + (x === y ? ' diag' : '')}
+                  aria-pressed={v}
+                  aria-label={`${y} in f ${x}: ${yn(v)}${x === y ? ' (diagonal)' : ''}`}
+                  onClick={() => setF((g) => toggle(g, x, y))}
+                >{v ? '✓' : ''}</button>
+              ))}
+            </Row>
+          ))}
+          <span className="can-sep" style={{ gridColumn: `1 / span ${n + 1}` }} />
+          <span className="can-rowlabel can-d">D</span>
+          {d.map((v, y) => (
+            <span
+              key={`${y}-${v}-${y < built}`}
+              className={'can-cell can-dcell' + (y < built ? (v ? ' on flip' : ' flip') : ' hidden')}
+              aria-label={y < built ? `${y} in D: ${yn(v)}` : `${y} in D: not built yet`}
+            >{y < built ? (v ? '✓' : '') : '?'}</span>
+          ))}
+        </div>
+      </div>
+      <div className="can-bar">
+        <button type="button" className="btn btn-sm" onClick={replay}>Build D cell by cell</button>
+      </div>
+      <p className="can-status" aria-live="polite">
+        D = {built >= n ? showSet(d) : '(still building)'}. {missed ? 'D is not in the range of f: f is not onto.' : 'Something is wrong: D is a row of f.'}
+      </p>
+
+      <section className="can-card" aria-label="D differs from every row">
+        <h3>D is not any row</h3>
+        <ul className="can-checks">
+          {f.slice(0, built).map((row, x) => (
+            <li key={x}>
+              <code>f {x} = {showSet(row)}</code> and <code>D = {showSet(d)}</code> differ at position {x}: <code>{x} ∈ f {x}</code> is {yn(row[x])}, <code>{x} ∈ D</code> is {yn(d[x])}. ✓
+            </li>
+          ))}
+        </ul>
+        <p className="can-small"><strong>So f misses D.</strong> {n} rows can't produce all {2 ** n} subsets anyway, but the diagonal shows the miss for <em>every</em> f, and the same argument works when α is infinite.</p>
+      </section>
+
+      <section className="can-card" aria-label="The key step">
+        <h3>The key step</h3>
+        <p className="can-small">Suppose <code>D = f a</code> for some <code>a</code>. Pick one:</p>
+        <div className="can-pick">
+          {Array.from({ length: n }, (_, i) => (
+            <button key={i} type="button" className={'btn btn-sm' + (i === aa ? ' on' : '')} aria-pressed={i === aa} onClick={() => setA(i)}>a = {i}</button>
+          ))}
+        </div>
+        <p className="can-small">
+          If <code>D = f {aa}</code>, then <code>{aa} ∈ D ↔ {aa} ∈ f {aa}</code>. But <code>{aa} ∈ D</code> means <code>{aa} ∉ f {aa}</code>. Here <code>{aa} ∈ f {aa}</code> is <strong>{yn(c.inFa)}</strong> and <code>{aa} ∈ D</code> is <strong>{yn(c.inD)}</strong>, so the two sides of the ↔ never agree. That's <code>P ↔ ¬P</code> for <code>P := a ∈ f a</code>, which <code>iff_not_self</code> rules out.
+        </p>
+      </section>
+
+      <section className="can-card" aria-label="In Lean">
+        <h3>In Lean</h3>
+        <p className="can-small">The statement, as the engine reads it: <code>{report.pretty}</code>. The lemma it leans on: <code>iff_not_self : {report.iffNotSelf}</code>.</p>
+        <pre className="can-code">{report.header}{'\n'}{report.proof}</pre>
+        <p className="can-small">{report.complete ? <span className="can-ok">The engine checks this proof, with no sorry.</span> : <span className="can-bad">The engine did not accept this proof.</span>} It's the game's own solution to the boss level.</p>
+      </section>
+
+      <p className="can-small">
+        Prove it yourself: <a href={href.level('fun-13')}>Nothing is its own opposite</a>, <a href={href.level('fun-14')}>The diagonal set</a>, <a href={href.level('fun-15')}>Cantor's theorem</a>, or read the <a href={href.chapter('fun')}>functions chapter</a>.
+      </p>
+    </div>
+  );
+}
+
+function Row({ x, children }: { x: number; children: React.ReactNode }) {
+  return (
+    <>
+      <span className="can-rowlabel">f {x}</span>
+      {children}
+    </>
+  );
 }

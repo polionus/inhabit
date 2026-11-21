@@ -1,0 +1,33 @@
+.dom { display: grid; gap: 14px; }
+.dom-intro { margin: 0; max-width: 70ch; color: var(--ink-2); }
+.dom-presets { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.dom-try { font-weight: 700; font-size: .85rem; color: var(--muted); margin-right: 4px; }
+.dom-presets .on { background: var(--primary-soft); color: var(--primary-text); border-color: var(--primary); }
+.dom-note { margin: 0; color: var(--ink-2); max-width: 70ch; }
+.dom code, .dom-goal, .dom-code { font-family: var(--mono); }
+.dom-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface-1); }
+.dom-svg { display: block; width: 100%; min-width: 560px; height: auto; }
+.dom-floor { stroke: var(--line-strong); stroke-width: 2; }
+.dom-tile { fill: var(--surface-2); stroke: var(--ink-2); stroke-width: 2; transition: transform .35s ease-in, fill .3s; }
+.dom-tile.falls { fill: var(--ok-soft); stroke: var(--ok); }
+.dom-tile.wobbles { stroke: var(--err); fill: var(--err-soft); animation: dom-wobble .6s ease-in-out 2; }
+.dom-tile.blocked { stroke: var(--err); stroke-width: 3; fill: var(--err-soft); }
+.dom-label { font: 600 14px var(--mono); fill: var(--muted); }
+.dom-label.yes { fill: var(--ok-text); }
+.dom-label.no { fill: var(--err-text); }
+.dom-x { font: 700 22px var(--font-ui); fill: var(--err); }
+@keyframes dom-wobble { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-7deg); } 75% { transform: rotate(7deg); } }
+.dom-controls { display: flex; flex-wrap: wrap; gap: 8px; }
+.dom-controls .on { background: var(--primary-soft); color: var(--primary-text); border-color: var(--primary); }
+.dom-status { margin: 0; font-weight: 600; min-height: 1.4em; }
+.dom-cases { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.dom-card { border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface-1); padding: 12px 14px; min-width: 0; }
+.dom-card h3 { margin: 0 0 6px; font-size: 1rem; }
+.dom-small { margin: 6px 0; font-size: .9rem; color: var(--ink-2); }
+.dom-goal, .dom-code { margin: 6px 0; padding: 9px 11px; background: var(--surface-2); border-radius: var(--r-sm); overflow-x: auto; font-size: .9rem; white-space: pre; }
+.dom-ok { color: var(--ok-text); font-weight: 700; }
+.dom-bad { color: var(--err-text); font-weight: 700; }
+.dom-bad-text { color: var(--err-text); margin: 6px 0 0; }
+@media (prefers-reduced-motion: reduce) {
+  .dom-tile { transition: none; transition-delay: 0s !important; animation: none !important; }
+}

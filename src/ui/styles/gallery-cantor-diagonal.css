@@ -1,0 +1,31 @@
+.can { display: grid; gap: 14px; }
+.can-intro { margin: 0; max-width: 70ch; color: var(--ink-2); }
+.can code, .can-code { font-family: var(--mono); }
+.can-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.can-try { font-weight: 700; font-size: .85rem; color: var(--muted); margin-right: 4px; }
+.can-size { margin-left: auto; display: inline-flex; gap: 8px; align-items: center; font-size: .9rem; color: var(--muted); }
+.can-scroll { overflow-x: auto; }
+.can-grid { display: grid; gap: 4px; align-items: center; width: max-content; max-width: 100%; }
+.can-col { text-align: center; font: 600 .85rem var(--mono); color: var(--muted); }
+.can-rowlabel { font: 600 .95rem var(--mono); color: var(--ink-2); }
+.can-d { color: var(--accent, var(--primary-text)); font-weight: 800; }
+.can-sep { height: 1px; background: var(--line-strong); margin: 4px 0; }
+.can-cell { height: 2.6rem; border-radius: 8px; border: 1px solid var(--line-strong); background: var(--surface-2); color: var(--ink); font-weight: 700; display: grid; place-items: center; padding: 0; cursor: pointer; }
+.can-cell.on { background: var(--primary-soft); color: var(--primary-text); border-color: var(--primary); }
+.can-cell.diag { box-shadow: 0 0 0 2px var(--warn); }
+.can-cell:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.can-dcell { cursor: default; box-shadow: 0 0 0 2px var(--warn); }
+.can-dcell.hidden { color: var(--muted); opacity: .6; box-shadow: none; }
+.can-dcell.flip { animation: can-flip .45s ease-out; }
+@keyframes can-flip { from { transform: rotateX(90deg); } to { transform: rotateX(0); } }
+.can-status { margin: 0; font-weight: 600; }
+.can-card { border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface-1); padding: 12px 14px; min-width: 0; }
+.can-card h3 { margin: 0 0 6px; font-size: 1rem; }
+.can-small { margin: 6px 0; font-size: .92rem; color: var(--ink-2); max-width: 75ch; }
+.can-checks { margin: 0; padding-left: 1.1rem; display: grid; gap: 4px; font-size: .9rem; color: var(--ink-2); }
+.can-pick { display: flex; flex-wrap: wrap; gap: 6px; }
+.can-pick .on { background: var(--primary-soft); color: var(--primary-text); border-color: var(--primary); }
+.can-code { margin: 6px 0; padding: 9px 11px; background: var(--surface-2); border-radius: var(--r-sm); overflow-x: auto; font-size: .9rem; white-space: pre; }
+.can-ok { color: var(--ok-text); font-weight: 700; }
+.can-bad { color: var(--err-text); font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .can-dcell.flip { animation: none; } }
